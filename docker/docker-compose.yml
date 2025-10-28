@@ -2,22 +2,25 @@
 #  NETWORKS & VOLUMES
 #############################
 networks:
-  app-network:
+  topoom-network:
     driver: bridge
+    name: topoom-network
 
 volumes:
   mysql-data:
+    name: topoom-mysql-data
   redis-data:
+    name: topoom-redis-data
 
 #############################
 #  SERVICES
 #############################
 services:
-  # MySQL 데이터베이스
+  # MySQL
   mysql:
     image: mysql:8.0
     container_name: topoom-mysql
-    restart: unless-stopped
+    restart: always
     environment:
       MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
       MYSQL_DATABASE: ${MYSQL_DATABASE}
@@ -31,18 +34,25 @@ services:
       - --character-set-server=utf8mb4
       - --collation-server=utf8mb4_unicode_ci
       - --default-time-zone=+09:00
-      - --default-authentication-plugin=mysql_native_password
+    ports:
+      - "3306:3306"
     networks:
-      - backend
+      - topoom-network
 
-  # Redis 캐시 및 세션 스토어
+  # Redis  
   redis:
     image: redis:7.2
     container_name: topoom-redis
-    restart: unless-stopped
+    restart: always
     environment:
       - TZ=Asia/Seoul
+      - REDIS_PASSWORD=${REDIS_PASSWORD}      
     volumes:
       - redis-data:/data
+      - ./redis/redis.conf:/usr/local/etc/redis/redis.conf:ro
+    command: >
+      sh -c "redis-server /usr/local/etc/redis/redis.conf --requirepass $${REDIS_PASSWORD}"
+    ports:
+      - "6379:6379"
     networks:
-      - backend
+      - topoom-network
