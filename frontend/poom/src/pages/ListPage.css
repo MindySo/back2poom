@@ -1,0 +1,134 @@
+/* ListPage layout (excluding topbar and cards) */
+
+.list-page {
+  background: #f7f7f8; /* subtle light background */
+  min-height: 100vh;
+  padding: 24px 0 48px; /* full-bleed hero, no side padding */
+}
+
+/* Hero banner containing the header and search */
+.list-hero {
+  position: relative;
+  background-size: cover;
+  background-position: center;
+  border-radius: 0; /* edge-to-edge */
+  overflow: hidden;
+  height: 180px;
+  margin: 0; /* stick to tabs below */
+}
+
+.list-hero__overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(47, 56, 70, 0.65); /* dark overlay */
+}
+
+.list-header {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column; /* title on top, search below (same column) */
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  max-width: 980px;
+  margin: 0 auto;
+  height: 100%;
+  padding: 0 24px;
+  color: #fff;
+  text-align: center;
+}
+
+.list-header h2 {
+  margin: 0;
+  font-size: 20px;
+  font-weight: 700;
+  color: #ffffff;
+}
+
+.search-bar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: #ffffff;
+  padding: 2px 8px;
+  border-radius: 28px;
+  border: 1px solid #e5e7eb;
+  width: 460px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+}
+.search-bar input {
+  flex: 1;
+  border: none;
+  outline: none;
+  font-size: 14px;
+  padding-left: 12px; /* 글자 시작 위치를 오른쪽으로 */
+}
+
+.search-bar button {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  border: none;
+  background: #f0f2f5;
+  cursor: pointer;
+}
+
+/* Tabs */
+.list-tabs {
+  display: flex;
+  justify-content: center;
+  gap: 50px;
+  background: #2f3846; /* dark strip behind tabs */
+  color: #cfd6df;
+  padding: 10px 0;
+  margin: 0 0 20px;
+}
+
+.list-tabs button {
+  position: relative;
+  background: transparent;
+  border: none;
+  color: inherit;
+  padding: 2px 4px;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+.list-tabs button.active {
+  color: #ffffff;
+}
+
+.list-tabs button.active::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  bottom: -10px;
+  width: 36px;
+  height: 3px;
+  background: #f39c4a; /* orange underline like screenshot */
+  border-radius: 2px;
+}
+
+/* Grid area (cards themselves are external) */
+.list-grid {
+  max-width: 1100px;
+  margin: 20px auto 0;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 28px 36px;
+}
+
+@media (max-width: 1024px) {
+  .list-header,
+  .list-grid { max-width: 900px; }
+  .list-grid { grid-template-columns: repeat(2, 1fr); }
+}
+
+@media (max-width: 640px) {
+  .list-page { padding: 16px; }
+  .list-header { flex-direction: column; align-items: stretch; gap: 12px; }
+  .search-bar { width: 100%; }
+  .list-grid { grid-template-columns: 1fr; }
+}
