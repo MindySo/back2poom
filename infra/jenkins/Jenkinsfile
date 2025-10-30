@@ -1,0 +1,125 @@
+/*
+ * Jenkins Declarative Pipeline for S13P31A706
+ *  ├─ Build & push Spring / FastAPI / Nginx images
+ *  └─ Pull + docker-compose up  (same EC2 host)
+ */
+pipeline {
+    agent any
+    tools   { git 'git-default' }
+
+    /* ────── 공통 환경변수 ────── */
+    environment {
+        DOCKER_ID    = 'mindyso'
+        COMPOSE_FILE = 'docker-compose.yml'
+        ENV_FILE     = '.env'
+        SPRING_RES   = 'backend/spring-business/topoom/src/main/resources'
+    }
+
+    options {
+        skipDefaultCheckout()
+        ansiColor('xterm')
+        timestamps()
+    }
+
+    stages {
+
+        /* -------------------------------------------------- */
+        stage('Checkout') {
+            steps {
+                checkout([
+                    $class: 'GitSCM',
+                    branches: [[name: '*/be-develop']],
+                    userRemoteConfigs: [[
+                        url: 'https://lab.ssafy.com/s13-final/S13P31A706',
+                        credentialsId: 'gitlab-jenkins-token'
+                    ]]
+                ])
+            }
+        }
+
+        /* -------------------------------------------------- */
+        stage('Prepare Secrets') {
+            steps {
+                withCredentials([
+                    file(credentialsId: 'env',  variable: 'ENV_TMP'),
+                ]) {
+                    sh '''
+                        # .env → docker/.env
+                        cp "$ENV_TMP" "docker/$ENV_FILE"
+                    '''
+                }
+            }
+        }
+
+        /* -------------------------------------------------- */
+        stage('Docker Login') {
+            steps {
+                withCredentials([usernamePassword(
+                        credentialsId: 'docker-hub-cred',
+                        usernameVariable: 'DOCKER_USER',
+                        passwordVariable: 'DOCKER_PASS')]) {
+
+                    sh 'echo "$DOCKER_PASS" | docker login -u "$DOCKER_USER" --password-stdin'
+                }
+            }
+        }
+
+        /* -------------------------------------------------- */
+        stage('Build & Push - Spring') {
+            steps {
+                sh '''
+                    cd backend/spring-business/topoom
+                    ./gradlew clean build -x test
+                    docker build -t $DOCKER_ID/topoom-spring:latest .
+                    docker push    $DOCKER_ID/topoom-spring:latest
+                '''
+            }
+        }
+
+        /* -------------------------------------------------- */
+        stage('Build & Push - FastAPI') {
+            steps {
+                sh '''
+                    cd backend/fastapi-ai
+                    docker build -t $DOCKER_ID/topoom-ai:latest .
+                    docker push    $DOCKER_ID/topoom-ai:latest
+                '''
+            }
+        }
+
+        /* -------------------------------------------------- */
+        stage('Build & Push - Nginx') {
+            steps {
+                sh '''
+                    cd docker/nginx
+                    docker build -t $DOCKER_ID/topoom-nginx:latest .
+                    docker push    $DOCKER_ID/topoom-nginx:latest
+                '''
+            }
+        }
+
+        /* -------------------------------------------------- */
+        stage('Deploy (docker-compose prod)') {
+            steps {
+                sh '''
+                    docker compose \
+                      --env-file docker/$ENV_FILE \
+                      -f docker/$COMPOSE_FILE      \
+                      pull
+
+                    docker compose \
+                      --env-file docker/$ENV_FILE \
+                      -f docker/$COMPOSE_FILE      \
+                      up -d
+                '''
+            }
+        }
+    }
+
+    /* ------------------------------------------------------ */
+    post {
+        success { echo '배포 성공' }
+        failure { echo '배포 실패 — 콘솔 로그 확인' }
+        always  { cleanWs(deleteDirs: true, disableDeferredWipeout: true) }
+    }
+}
