@@ -1,6 +1,10 @@
 import React from 'react';
 import type { MissingPerson } from '../../types/archive';
 import './ArchiveCard.css';
+import Badge from '../common/atoms/Badge';
+import Text from '../common/atoms/Text';
+import tempImg from '../../assets/TempImg.png';
+import Button from '../common/atoms/Button';
 
 export interface ArchiveCardProps {
   person: MissingPerson;
@@ -31,26 +35,38 @@ const ArchiveCard: React.FC<ArchiveCardProps> = ({ person }) => {
 
   return (
     <div className="archive-card">
-      <div className="archive-card__header">
-        <span className="archive-card__elapsed">{formatElapsed(occuredAt)}</span>
-        {classificationCode && (
-          <span className="archive-card__code">{classificationCode}</span>
-        )}
-      </div>
-
-      <div className="archive-card__body">
-        <div className="archive-card__row">
-          <span className="archive-card__name">{personName}</span>
-          <span className="archive-card__meta">{gender ?? '성별 미상'} · {ageAtTime}세</span>
+      <div className="archive-card__content">
+        <div className="archive-card__imageWrap">
+          <img src={tempImg} alt="임시 이미지" className="archive-card__image" />
         </div>
-        <div className="archive-card__info">
-          <div>
-            <div className="archive-card__label">발생일</div>
-            <div className="archive-card__value">{new Date(occuredAt).toISOString().slice(0, 10)}</div>
+        <div className="archive-card__right">
+          <div className="archive-card__main">
+            <div className="archive-card__header">
+              <Badge variant="time" size="small">{formatElapsed(occuredAt)}</Badge>
+              {classificationCode && (
+                <Badge variant="feature" size="small">{classificationCode}</Badge>
+              )}
+            </div>
+
+            <div className="archive-card__row">
+              <Text as="span" size="md" weight="bold" className="archive-card__name">{personName}</Text>
+              <Text as="span" size="sm" color="gray" className="archive-card__meta">{gender ?? '성별 미상'} · {ageAtTime}세</Text>
+            </div>
+            <div className="archive-card__info">
+              <div>
+                <Text as="div" size="xs" color="gray" className="archive-card__label">발생일</Text>
+                <Text as="div" size="sm" className="archive-card__value">{new Date(occuredAt).toISOString().slice(0, 10)}</Text>
+              </div>
+              <div>
+                <Text as="div" size="xs" color="gray" className="archive-card__label">발생장소</Text>
+                <Text as="div" size="sm" className="archive-card__value">{occuredLocation}</Text>
+              </div>
+            </div>
           </div>
-          <div>
-            <div className="archive-card__label">발생장소</div>
-            <div className="archive-card__value">{occuredLocation}</div>
+
+          <div className="archive-card__actions">
+            <Button variant="primary" size="medium" className="archive-card__primaryBtn">제보하기</Button>
+            <Button variant="secondary" size="medium" className="archive-card__iconBtn" aria-label="공유">↗</Button>
           </div>
         </div>
       </div>

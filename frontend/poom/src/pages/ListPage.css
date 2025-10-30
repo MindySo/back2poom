@@ -113,7 +113,7 @@
 
 /* Grid area (cards themselves are external) */
 .list-grid {
-  max-width: 1100px;
+  max-width: 1300px;
   margin: 20px auto 0;
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
