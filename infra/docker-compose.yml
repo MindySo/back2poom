@@ -73,6 +73,18 @@ services:
     networks:
       - topoom-network
 
+  # AI Service (FastAPI)
+  ai:
+    image: ${REGISTRY}/topoom-ai:latest
+    container_name: topoom-ai
+    restart: always
+    environment:
+      - TZ=Asia/Seoul
+    ports:
+      - "8000:8000"
+    networks:
+      - topoom-network
+
   # certbot
   certbot:
     image: certbot/certbot

@@ -4,10 +4,11 @@
 networks:
   topoom-network:
     driver: bridge
+    name: topoom-network  # docker-compose.yml과 동일한 이름으로 자동 공유
 
 volumes:
   jenkins-home:
-    name : topoom-jenkins-home
+    name: topoom-jenkins-home
 
 #############################
 #  SERVICES
