@@ -1,0 +1,30 @@
+version: '3.8'
+
+services:
+  ai-server:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile
+    container_name: dasibom-ai-server
+    ports:
+      - "8000:8000"
+    environment:
+      - DEBUG=true
+      - HOST=0.0.0.0
+      - PORT=8000
+      - GMS_API_KEY=S13P32A706-feaf4ab5-539f-44ff-b527-35baefde6711
+      # AWS S3 설정 (환경변수로 설정하거나 IAM 역할 사용)
+      # - AWS_ACCESS_KEY_ID=your_access_key
+      # - AWS_SECRET_ACCESS_KEY=your_secret_key
+      # - AWS_DEFAULT_REGION=us-west-1
+      # - S3_BUCKET_NAME=your-bucket-name
+    volumes:
+      - ../uploads:/app/uploads
+      - ../logs:/app/logs
+    restart: unless-stopped
+    networks:
+      - ai-network
+
+networks:
+  ai-network:
+    driver: bridge

@@ -1,0 +1,16 @@
+# FastAPI 서버 - 최소 의존성
+fastapi==0.104.1
+uvicorn[standard]==0.24.0
+python-multipart==0.0.6
+
+# HTTP 클라이언트 (GMS API용)
+aiohttp==3.8.6
+
+# AWS S3 (선택사항)
+boto3==1.34.0
+
+# 설정 관리
+pydantic[dotenv]==2.5.0
+
+# 이미지 처리
+Pillow==10.1.0
