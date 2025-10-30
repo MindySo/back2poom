@@ -1,0 +1,33 @@
+#############################
+#  NETWORKS & VOLUMES
+#############################
+networks:
+  topoom-network:
+    driver: bridge
+    name: topoom-network  # docker-compose.yml과 동일한 이름으로 자동 공유
+
+volumes:
+  jenkins-home:
+    name: topoom-jenkins-home
+
+#############################
+#  SERVICES
+#############################
+services:
+  jenkins:
+    build:
+      context: ./jenkins
+      dockerfile: Dockerfile
+    container_name: topoom-jenkins
+    user: root
+    ports:
+      - "9090:8080"
+    environment:
+      - TZ=Asia/Seoul
+    volumes:
+      - jenkins-home:/var/jenkins_home
+      - /var/run/docker.sock:/var/run/docker.sock
+      - /etc/letsencrypt:/etc/letsencrypt:ro  # EC2 호스트의 SSL 디렉토리를 Jenkins 컨테이너에 마운트
+    networks:
+      - topoom-network
+    restart: always

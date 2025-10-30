@@ -57,7 +57,35 @@ services:
     networks:
       - topoom-network
 
-# certbot
+  # Spring Boot
+  spring:
+    image: ${REGISTRY}/topoom-spring:latest
+    container_name: topoom-spring
+    restart: always
+    environment:
+      - TZ=Asia/Seoul
+      - SPRING_PROFILES_ACTIVE=${SPRING_PROFILES_ACTIVE:-prod}
+    depends_on:
+      - mysql
+      - redis
+    ports:
+      - "8080:8080"
+    networks:
+      - topoom-network
+
+  # AI Service (FastAPI)
+  ai:
+    image: ${REGISTRY}/topoom-ai:latest
+    container_name: topoom-ai
+    restart: always
+    environment:
+      - TZ=Asia/Seoul
+    ports:
+      - "8000:8000"
+    networks:
+      - topoom-network
+
+  # certbot
   certbot:
     image: certbot/certbot
     container_name: topoom-certbot
@@ -68,15 +96,15 @@ services:
     networks:
       - topoom-network
 
-# nginx
+  # nginx
   nginx:
     image: ${REGISTRY}/topoom-nginx:latest
     container_name: topoom-nginx
     restart: always
     environment:
       - TZ=Asia/Seoul
-    # depends_on:
-    #   - topoom-spring
+    depends_on:
+      - spring
     ports:
       - "80:80"
       - "443:443"

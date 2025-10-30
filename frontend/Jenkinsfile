@@ -1,0 +1,134 @@
+/*
+ * Jenkins Pipeline - Frontend (React/Vue/etc)
+ * Triggers: Changes in frontend/ directory on dev branch
+ */
+pipeline {
+    agent any
+
+    environment {
+        DOCKER_REGISTRY = 'mindyso'
+        IMAGE_NAME = 'topoom-nginx'
+        IMAGE_TAG = 'latest'
+        COMPOSE_DIR = 'infra'
+    }
+
+    options {
+        skipDefaultCheckout()
+        ansiColor('xterm')
+        timestamps()
+    }
+
+    stages {
+
+        /* -------------------------------------------------- */
+        stage('Checkout') {
+            steps {
+                checkout([
+                    $class: 'GitSCM',
+                    branches: [[name: '*/dev']],
+                    userRemoteConfigs: [[
+                        url: 'https://lab.ssafy.com/s13-final/S13P31A706',
+                        credentialsId: 'gitlab-jenkins-token'
+                    ]]
+                ])
+            }
+        }
+
+        /* -------------------------------------------------- */
+        stage('Check Changes') {
+            steps {
+                script {
+                    def changes = sh(
+                        script: 'git diff --name-only HEAD~1 HEAD || echo "frontend/"',
+                        returnStdout: true
+                    ).trim()
+
+                    if (!changes.contains('frontend/') && !changes.contains('infra/nginx/')) {
+                        currentBuild.result = 'NOT_BUILT'
+                        error('No changes in frontend/ or infra/nginx/ - skipping build')
+                    }
+                    echo "Frontend changes detected: proceeding with build"
+                }
+            }
+        }
+
+        /* -------------------------------------------------- */
+        stage('Docker Login') {
+            steps {
+                withCredentials([usernamePassword(
+                    credentialsId: 'docker-hub-cred',
+                    usernameVariable: 'DOCKER_USER',
+                    passwordVariable: 'DOCKER_PASS')]) {
+
+                    sh 'echo "$DOCKER_PASS" | docker login -u "$DOCKER_USER" --password-stdin'
+                }
+            }
+        }
+
+        /* -------------------------------------------------- */
+        stage('Build Frontend') {
+            when {
+                expression {
+                    // frontend 디렉토리에 실제 소스가 있을 때만 빌드
+                    fileExists('frontend/package.json')
+                }
+            }
+            steps {
+                dir('frontend') {
+                    sh '''
+                        # Node.js 빌드 (예시)
+                        # npm install
+                        # npm run build
+                        echo "Frontend build will be executed here"
+                    '''
+                }
+            }
+        }
+
+        /* -------------------------------------------------- */
+        stage('Build & Push Nginx Image') {
+            steps {
+                dir('infra/nginx') {
+                    sh """
+                        # 프론트엔드 빌드 결과물이 있다면 복사
+                        # cp -r ../../frontend/dist ./frontend 2>/dev/null || true
+
+                        docker build -t ${DOCKER_REGISTRY}/${IMAGE_NAME}:${IMAGE_TAG} .
+                        docker push ${DOCKER_REGISTRY}/${IMAGE_NAME}:${IMAGE_TAG}
+                    """
+                }
+            }
+        }
+
+        /* -------------------------------------------------- */
+        stage('Deploy Nginx Container') {
+            steps {
+                withCredentials([file(credentialsId: 'env', variable: 'ENV_FILE')]) {
+                    sh """
+                        cp "\$ENV_FILE" "${COMPOSE_DIR}/.env"
+
+                        cd ${COMPOSE_DIR}
+                        docker compose pull nginx
+                        docker compose up -d nginx
+                    """
+                }
+            }
+        }
+    }
+
+    /* ------------------------------------------------------ */
+    post {
+        success {
+            echo '✅ Frontend/Nginx 배포 성공'
+        }
+        failure {
+            echo '❌ Frontend/Nginx 배포 실패 — 콘솔 로그 확인'
+        }
+        not_built {
+            echo '⏭️  Frontend 변경사항 없음 - 빌드 스킵'
+        }
+        always {
+            cleanWs(deleteDirs: true, disableDeferredWipeout: true)
+        }
+    }
+}

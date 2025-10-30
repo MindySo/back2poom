@@ -1,0 +1,121 @@
+/*
+ * Jenkins Pipeline - Backend (Spring Boot)
+ * Triggers: Changes in backend/ directory on dev branch
+ */
+pipeline {
+    agent any
+
+    environment {
+        DOCKER_REGISTRY = 'mindyso'
+        IMAGE_NAME = 'topoom-spring'
+        IMAGE_TAG = 'latest'
+        COMPOSE_DIR = 'infra'
+        ENV_FILE     = '.env'
+    }
+
+    options {
+        skipDefaultCheckout()
+        ansiColor('xterm')
+        timestamps()
+    }
+
+    stages {
+
+        /* -------------------------------------------------- */
+        stage('Checkout') {
+            steps {
+                checkout([
+                    $class: 'GitSCM',
+                    branches: [[name: '*/dev']],
+                    userRemoteConfigs: [[
+                        url: 'https://lab.ssafy.com/s13-final/S13P31A706',
+                        credentialsId: 'gitlab-jenkins-token'
+                    ]]
+                ])
+            }
+        }
+
+        /* -------------------------------------------------- */
+        stage('Check Changes') {
+            steps {
+                script {
+                    def changes = sh(
+                        script: 'git diff --name-only HEAD~1 HEAD || echo "backend/"',
+                        returnStdout: true
+                    ).trim()
+
+                    if (!changes.contains('backend/')) {
+                        currentBuild.result = 'NOT_BUILT'
+                        error('No changes in backend/ - skipping build')
+                    }
+                    echo "Backend changes detected: proceeding with build"
+                }
+            }
+        }
+
+        /* -------------------------------------------------- */
+        stage('Docker Login') {
+            steps {
+                withCredentials([usernamePassword(
+                    credentialsId: 'docker-hub-cred',
+                    usernameVariable: 'DOCKER_USER',
+                    passwordVariable: 'DOCKER_PASS')]) {
+
+                    sh 'echo "$DOCKER_PASS" | docker login -u "$DOCKER_USER" --password-stdin'
+                }
+            }
+        }
+
+        /* -------------------------------------------------- */
+        stage('Build Spring') {
+            steps {
+                dir('backend') {
+                    sh './gradlew clean build -x test'
+                }
+            }
+        }
+
+        /* -------------------------------------------------- */
+        stage('Build & Push Docker Image') {
+            steps {
+                dir('backend') {
+                    sh """
+                        docker build -t ${DOCKER_REGISTRY}/${IMAGE_NAME}:${IMAGE_TAG} .
+                        docker push ${DOCKER_REGISTRY}/${IMAGE_NAME}:${IMAGE_TAG}
+                    """
+                }
+            }
+        }
+
+        /* -------------------------------------------------- */
+        stage('Deploy Spring Container') {
+            steps {
+                withCredentials([file(credentialsId: 'env', variable: 'ENV_FILE')]) {
+                    sh """
+                        cp "\$ENV_FILE" "${COMPOSE_DIR}/.env"
+
+                        cd ${COMPOSE_DIR}
+                        docker compose pull spring
+                        docker compose up -d spring
+                    """
+                }
+            }
+        }
+    }
+
+    /* ------------------------------------------------------ */
+    post {
+        success {
+            echo '✅ Backend 배포 성공'
+        }
+        failure {
+            echo '❌ Backend 배포 실패 — 콘솔 로그 확인'
+        }
+        not_built {
+            echo '⏭️  Backend 변경사항 없음 - 빌드 스킵'
+        }
+        always {
+            cleanWs(deleteDirs: true, disableDeferredWipeout: true)
+        }
+    }
+}
