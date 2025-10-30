@@ -4,11 +4,19 @@ build/
 !gradle/wrapper/gradle-wrapper.jar
 !**/src/main/**/build/
 !**/src/test/**/build/
+mysql-data/
+redis-data/
 .env
 .env*
 .env.*
 *.env
 application.yml
+
+### certbot ###
+infra/certbot/conf/*
+infra/certbot/www/*
+!infra/certbot/conf/.gitkeep
+!infra/certbot/www/.gitkeep
 
 ### STS ###
 .apt_generated
