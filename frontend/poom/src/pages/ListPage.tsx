@@ -1,6 +1,3 @@
-import React from 'react';
-import { Link } from 'react-router-dom';
-import TopBar from '../components/common/molecules/TopBar/TopBar';
 import { useState, useMemo } from "react";
 import { ArchiveCard } from "../components/archive/ArchiveCard";
 import { MArchiveCard } from "../components/archive/MArchiveCard";
@@ -242,7 +239,6 @@ const ListPage = () => {
 
   // 데스크톱 버전 렌더링 (1024px 초과)
   return (
-<<<<<<< frontend/poom/src/pages/ListPage.tsx
     <div className={`${styles['list-page']} ${styles['desktop']}`}>
       {/* 히어로 배너 (배경 이미지 + 검색영역) */}
       <div

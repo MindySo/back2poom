@@ -1,13 +1,14 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import TopBar from '../components/common/molecules/TopBar/TopBar';
 import SideBar from '../components/common/molecules/SideBar/SideBar';
+import { useIsMobile } from '../hooks/useMediaQuery';
 
 const MapPage: React.FC = () => {
+  const isMobile = useIsMobile(1024);
+
   return (
     <>
-      <TopBar />
-      <SideBar />
+      {!isMobile && <SideBar />}
       <div style={{ padding: '20px', textAlign: 'center' }}>
         <h1>지도페이지입니다</h1>
 

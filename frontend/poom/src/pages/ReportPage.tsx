@@ -1,12 +1,9 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import TopBar from '../components/common/molecules/TopBar/TopBar';
 
 const ReportPage: React.FC = () => {
   return (
-    <>
-      <TopBar />
-        <div style={{ padding: '20px', textAlign: 'center' }}>
+    <div style={{ padding: '20px', textAlign: 'center' }}>
           <h1>신고페이지입니다</h1>
           
           <div style={{ marginTop: '20px' }}>
@@ -15,7 +12,6 @@ const ReportPage: React.FC = () => {
             </Link>
           </div>
         </div>
-    </>
   );
 };
 
