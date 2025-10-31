@@ -3,7 +3,11 @@ import { ArchiveCard } from "../components/archive/ArchiveCard";
 import type { MissingPerson } from "../types/archive";
 import styles from "./ListPage.module.css";
 import bannerImg from "../assets/ListPageBanner.png";
+import { useIsMobile } from "../hooks/useMediaQuery";
+import { theme } from "../theme";
+
 const ListPage = () => {
+  const isMobile = useIsMobile(1024);
   // 임시 데이터: hoursSinceMissing 으로 24시간 기준 필터링
   const people: (MissingPerson & { hoursSinceMissing: number })[] = [
     {
@@ -51,8 +55,66 @@ const ListPage = () => {
     return people.filter((p) => p.hoursSinceMissing >= 24);
   }, [activeTab, people]);
 
+  // 모바일 버전 렌더링 (1024px 이하)
+  if (isMobile) {
+    return (
+      <div className={`${styles['list-page']} ${styles['mobile']}`}>
+        {/* 모바일 필터 탭 (상단) */}
+        <div className={`${styles['list-tabs']} ${styles['mobile-tabs']}`}>
+          <button
+            className={`${styles['mobile-tab']} ${activeTab === "all" ? styles['mobile-tab-active'] : ''}`}
+            onClick={() => setActiveTab("all")}
+            style={{
+              backgroundColor: activeTab === "all" ? theme.colors.darkMain : theme.colors.white,
+              color: activeTab === "all" ? theme.colors.white : theme.colors.gray,
+              fontSize: theme.typography.fontSize.sm,
+            }}
+          >
+            전체
+          </button>
+          <button
+            className={`${styles['mobile-tab']} ${activeTab === "within24" ? styles['mobile-tab-active'] : ''}`}
+            onClick={() => setActiveTab("within24")}
+            style={{
+              backgroundColor: activeTab === "within24" ? theme.colors.darkMain : theme.colors.white,
+              color: activeTab === "within24" ? theme.colors.white : theme.colors.gray,
+              fontSize: theme.typography.fontSize.sm,
+            }}
+          >
+            24시간 이내
+          </button>
+          <button
+            className={`${styles['mobile-tab']} ${activeTab === "over24" ? styles['mobile-tab-active'] : ''}`}
+            onClick={() => setActiveTab("over24")}
+            style={{
+              backgroundColor: activeTab === "over24" ? theme.colors.darkMain : theme.colors.white,
+              color: activeTab === "over24" ? theme.colors.white : theme.colors.gray,
+              fontSize: theme.typography.fontSize.sm,
+            }}
+          >
+            24시간 이상
+          </button>
+        </div>
+
+        {/* 모바일 검색바 (탭 바로 아래) */}
+        <div className={`${styles['search-bar']} ${styles['mobile-search']}`}>
+          <input placeholder="🔍 검색어 입력(저거 필터임→)" />
+          <button className={styles['mobile-menu-button']}>☰</button>
+        </div>
+
+        {/* 모바일 카드 리스트 영역 */}
+        <div className={`${styles['list-grid']} ${styles['mobile-grid']}`}>
+          {filteredPeople.map((p) => (
+            <ArchiveCard key={p.id} person={p} />
+          ))}
+        </div>
+      </div>
+    );
+  }
+
+  // 데스크톱 버전 렌더링 (1024px 초과)
   return (
-    <div className={styles['list-page']}>
+    <div className={`${styles['list-page']} ${styles['desktop']}`}>
       {/* 히어로 배너 (배경 이미지 + 검색영역) */}
       <div
         className={styles['list-hero']}
