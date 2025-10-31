@@ -1,5 +1,6 @@
 import { useState, useMemo } from "react";
 import { ArchiveCard } from "../components/archive/ArchiveCard";
+import { MArchiveCard } from "../components/archive/MArchiveCard";
 import type { MissingPerson } from "../types/archive";
 import styles from "./ListPage.module.css";
 import bannerImg from "../assets/ListPageBanner.png";
@@ -105,7 +106,7 @@ const ListPage = () => {
         {/* 모바일 카드 리스트 영역 */}
         <div className={`${styles['list-grid']} ${styles['mobile-grid']}`}>
           {filteredPeople.map((p) => (
-            <ArchiveCard key={p.id} person={p} />
+            <MArchiveCard key={p.id} person={p} />
           ))}
         </div>
       </div>
