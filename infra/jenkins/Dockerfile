@@ -13,6 +13,12 @@ RUN apt-get update && apt-get install -y \
 # 모든 디렉토리 허용
 RUN git config --system --add safe.directory '*'
 
+# EC2의 docker 그룹과 동일한 GID로 docker 그룹 생성/수정
+RUN groupadd -g 122 docker || groupmod -g 122 docker
+
+# jenkins 사용자를 docker 그룹에 추가
+RUN usermod -aG docker jenkins
+
 # Docker Compose 설치
 RUN mkdir -p /usr/local/lib/docker/cli-plugins && \
     curl -SL "https://github.com/docker/compose/releases/latest/download/docker-compose-linux-x86_64" \

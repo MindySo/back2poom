@@ -14,7 +14,6 @@ pipeline {
 
     options {
         skipDefaultCheckout()
-        ansiColor('xterm')
         timestamps()
     }
 
@@ -67,20 +66,26 @@ pipeline {
 
         /* -------------------------------------------------- */
         stage('Build Frontend') {
-            when {
-                expression {
-                    // frontend 디렉토리에 실제 소스가 있을 때만 빌드
-                    fileExists('frontend/package.json')
+            steps {
+                dir('frontend/poom') {
+                    sh '''
+                        npm ci
+                        npm run build
+                    '''
                 }
             }
+        }
+
+        stage('Build & Push Nginx Image') {
             steps {
-                dir('frontend') {
-                    sh '''
-                        # Node.js 빌드 (예시)
-                        # npm install
-                        # npm run build
-                        echo "Frontend build will be executed here"
-                    '''
+                dir('infra/nginx') {
+                    sh """
+                        # 빌드 결과물 복사
+                        cp -r ../../frontend/poom/dist/* ./frontend/
+
+                        docker build -t ${DOCKER_REGISTRY}/${IMAGE_NAME}:${IMAGE_TAG} .
+                        docker push ${DOCKER_REGISTRY}/${IMAGE_NAME}:${IMAGE_TAG}
+                    """
                 }
             }
         }
@@ -108,8 +113,30 @@ pipeline {
                         cp "\$ENV_FILE" "${COMPOSE_DIR}/.env"
 
                         cd ${COMPOSE_DIR}
+
+                        # Rolling Update
+                        echo "새 이미지 다운로드 중..."
                         docker compose pull nginx
-                        docker compose up -d nginx
+
+                        echo "Nginx 컨테이너 Rolling Update 시작..."
+                        docker compose up -d --no-deps nginx
+
+                        # 헬스체크 (최대 30초 대기)
+                        echo "헬스체크 시작..."
+                        for i in {1..15}; do
+                            if curl -f http://localhost:80 >/dev/null 2>&1; then
+                                echo "Nginx 서버 정상 실행 중"
+                                break
+                            fi
+                            echo "대기 중... (\$i/15)"
+                            sleep 2
+                        done
+
+                        # 최종 헬스체크
+                        curl -f http://localhost:80 || {
+                            echo "헬스체크 실패 - 배포 중단"
+                            exit 1
+                        }
                     """
                 }
             }
@@ -124,7 +151,7 @@ pipeline {
         failure {
             echo '❌ Frontend/Nginx 배포 실패 — 콘솔 로그 확인'
         }
-        not_built {
+        notBuilt {
             echo '⏭️  Frontend 변경사항 없음 - 빌드 스킵'
         }
         always {
