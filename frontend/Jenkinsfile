@@ -91,21 +91,6 @@ pipeline {
         }
 
         /* -------------------------------------------------- */
-        stage('Build & Push Nginx Image') {
-            steps {
-                dir('infra/nginx') {
-                    sh """
-                        # 프론트엔드 빌드 결과물이 있다면 복사
-                        # cp -r ../../frontend/dist ./frontend 2>/dev/null || true
-
-                        docker build -t ${DOCKER_REGISTRY}/${IMAGE_NAME}:${IMAGE_TAG} .
-                        docker push ${DOCKER_REGISTRY}/${IMAGE_NAME}:${IMAGE_TAG}
-                    """
-                }
-            }
-        }
-
-        /* -------------------------------------------------- */
         stage('Deploy Nginx Container') {
             steps {
                 withCredentials([file(credentialsId: 'env', variable: 'ENV_FILE')]) {
