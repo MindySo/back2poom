@@ -1,0 +1,58 @@
+.mobileTopBar {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 16px 0;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+/* 로고 섹션 */
+.logoSection {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 16px;
+}
+
+.logo {
+  height: 40px;
+  width: auto;
+  object-fit: contain;
+}
+
+/* 버튼 네비바 */
+.buttonNav {
+  display: flex;
+  gap: 8px;
+  justify-content: center;
+  padding: 0 16px;
+  box-sizing: border-box;
+}
+
+/* 네비게이션 버튼 */
+.navButton {
+  padding: 8px 16px;
+  border: none;
+  border-radius: 6px;
+  font-size: 16px;
+  font-weight: 400;
+  cursor: pointer;
+  outline: none;
+  transition: all 0.2s ease;
+  font-family: 'Pretendard, -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif';
+  background-color: transparent;
+  color: #767676;
+}
+
+.navButton:active {
+  transform: scale(0.95);
+}
+
+/* 활성 상태 */
+.navButton.active {
+  background-color: #2B3A55;
+  color: #FFFFFF;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(43, 58, 85, 0.2);
+}

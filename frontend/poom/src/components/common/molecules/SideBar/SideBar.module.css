@@ -1,0 +1,59 @@
+.sideBar {
+  position: fixed;
+  left: 0;
+  top: 90px;
+  width: 360px;
+  bottom: 0;
+  box-sizing: border-box;
+  z-index: 100;
+  display: flex;
+  flex-direction: column;
+}
+
+/* 최신 실종자 제목 */
+.recentMissingHeader {
+  padding: 24px 24px 0;
+  margin-bottom: 16px;
+  flex-shrink: 0;
+}
+
+/* 최신 실종자 목록 */
+.recentMissingList {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  padding: 0 16px 24px 16px;
+  overflow-y: auto;
+  flex: 1;
+}
+
+/* 스크롤바 스타일 */
+.recentMissingList::-webkit-scrollbar {
+  width: 8px;
+}
+
+.recentMissingList::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.recentMissingList::-webkit-scrollbar-thumb {
+  background: transparent;
+  border-radius: 4px;
+}
+
+.recentMissingList:hover::-webkit-scrollbar-thumb {
+  background: rgba(43, 58, 85, 0.3);
+}
+
+.recentMissingList::-webkit-scrollbar-thumb:hover {
+  background: rgba(43, 58, 85, 0.5);
+}
+
+/* Firefox 스크롤바 */
+.recentMissingList {
+  scrollbar-color: transparent transparent;
+}
+
+.recentMissingList:hover {
+  scrollbar-color: rgba(43, 58, 85, 0.3) transparent;
+}

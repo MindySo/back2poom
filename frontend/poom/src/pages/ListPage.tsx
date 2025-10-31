@@ -1,3 +1,6 @@
+import React from 'react';
+import { Link } from 'react-router-dom';
+import TopBar from '../components/common/molecules/TopBar/TopBar';
 import { useState, useMemo } from "react";
 import { ArchiveCard } from "../components/archive/ArchiveCard";
 import type { MissingPerson } from "../types/archive";
@@ -52,51 +55,8 @@ const ListPage = () => {
   }, [activeTab, people]);
 
   return (
-    <div className="list-page">
-      {/* 히어로 배너 (배경 이미지 + 검색영역) */}
-      <div
-        className="list-hero"
-        style={{ backgroundImage: `url(${bannerImg})` }}
-      >
-        <div className="list-hero__overlay" />
-        <header className="list-header">
-          <h2>실종자 목록</h2>
-          <div className="search-bar">
-            <input placeholder="실종자를 검색해보세요" />
-            <button>🔍</button>
-          </div>
-        </header>
-      </div>
-
-      {/* 필터 탭 */}
-      <div className="list-tabs">
-        <button
-          className={activeTab === "all" ? "active" : undefined}
-          onClick={() => setActiveTab("all")}
-        >
-          전체
-        </button>
-        <button
-          className={activeTab === "within24" ? "active" : undefined}
-          onClick={() => setActiveTab("within24")}
-        >
-          24시간 이내
-        </button>
-        <button
-          className={activeTab === "over24" ? "active" : undefined}
-          onClick={() => setActiveTab("over24")}
-        >
-          24시간 이상
-        </button>
-      </div>
-
-      {/* 카드 리스트 영역 */}
-      <div className="list-grid">
-        {filteredPeople.map((p) => (
-          <ArchiveCard key={p.id} person={p} />
-        ))}
-      </div>
-    </div>
+      <TopBar />
+        
   );
 };
 export default ListPage;

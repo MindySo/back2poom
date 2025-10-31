@@ -3,6 +3,8 @@ import { Link } from 'react-router-dom';
 import Button from '../components/common/atoms/Button';
 import Badge from '../components/common/atoms/Badge';
 import Text from '../components/common/atoms/Text';
+import TopBar from '../components/common/molecules/TopBar/TopBar';
+import MobileTopBar from '../components/common/molecules/MobileTopBar/MobileTopBar';
 import { theme } from '../theme';
 
 const DevPage: React.FC = () => {
@@ -105,6 +107,34 @@ const DevPage: React.FC = () => {
           현재 3개의 주요 페이지가 개발 중입니다.<br/>
           각 페이지를 클릭하여 개발 상황을 확인해보세요.
         </p>
+      </div>
+
+
+      {/* Molecules 컴포넌트 테스트 섹션 */}
+      <div style={{ maxWidth: '1200px', margin: '60px auto 0' }}>
+        <h2 style={{ color: '#333', marginBottom: '30px', textAlign: 'center' }}>
+          🧩 Molecules 컴포넌트 테스트
+        </h2>
+
+        {/* MobileTopBar 컴포넌트 */}
+        <div style={{
+          backgroundColor: 'white',
+          borderRadius: '10px',
+          marginBottom: '30px',
+          boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
+          overflow: 'hidden'
+        }}>
+          <h3 style={{ padding: '20px 30px 0 30px', color: '#333', marginBottom: '15px' }}>MobileTopBar</h3>
+          <div style={{
+            border: '1px solid #ddd',
+            borderRadius: '8px',
+            margin: '15px 30px 30px 30px',
+            overflow: 'hidden',
+            maxWidth: '400px'
+          }}>
+            <MobileTopBar />
+          </div>
+        </div>
       </div>
 
       {/* Atoms 컴포넌트 테스트 섹션 */}
