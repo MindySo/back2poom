@@ -67,13 +67,11 @@ pipeline {
         /* -------------------------------------------------- */
         stage('Build & Push Nginx Image') {
             steps {
-                dir('infra/nginx') {
-                    sh """
-                        # 멀티스테이지 Docker 빌드 (Node.js 빌드 포함)
-                        docker build -t ${DOCKER_REGISTRY}/${IMAGE_NAME}:${IMAGE_TAG} .
-                        docker push ${DOCKER_REGISTRY}/${IMAGE_NAME}:${IMAGE_TAG}
-                    """
-                }
+                sh """
+                    # 프로젝트 루트에서 빌드 (전체 컨텍스트 접근 가능)
+                    docker build -f infra/nginx/Dockerfile -t ${DOCKER_REGISTRY}/${IMAGE_NAME}:${IMAGE_TAG} .
+                    docker push ${DOCKER_REGISTRY}/${IMAGE_NAME}:${IMAGE_TAG}
+                """
             }
         }
 
