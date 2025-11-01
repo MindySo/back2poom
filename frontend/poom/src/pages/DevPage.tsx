@@ -241,9 +241,10 @@ const DevPage: React.FC = () => {
             <div>
               <p style={{ marginBottom: '10px', color: '#666', fontSize: '14px' }}>Sizes</p>
               <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap', alignItems: 'center' }}>
-                <Badge variant="time" size="small">Small</Badge>
-                <Badge variant="solved" size="medium">Medium</Badge>
-                <Badge variant="feature" size="large">Large</Badge>
+                <Badge variant="time" size="xs">Xsmall</Badge>
+                <Badge variant="solved" size="small">Small</Badge>
+                <Badge variant="feature" size="medium">Medium</Badge>
+                <Badge variant="alert" size="large">Large</Badge>
               </div>
             </div>
           </div>

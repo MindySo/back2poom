@@ -18,6 +18,7 @@ export const typography = {
 
   // 텍스트 크기 (피그마 이미지의 XL, LG, MD, SM 기준)
   fontSize: {
+    xxs: '10px',
     xs: '12px',
     sm: '14px', // SM: 14px
     md: '16px',
@@ -104,6 +105,7 @@ export const colors = {
 
 // 스페이싱 토큰
 export const spacing = {
+  xxs: '2px',
   xs: '4px',
   sm: '8px',
   md: '12px',

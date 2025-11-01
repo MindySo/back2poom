@@ -4,7 +4,7 @@ import { theme } from '../../../theme';
 export interface BadgeProps {
   children: React.ReactNode;
   variant?: 'time' | 'feature' | 'solved' | 'alert' | 'ai';
-  size?: 'small' | 'medium' | 'large';
+  size?: 'xs' | 'small' | 'medium' | 'large';
   className?: string;
   style?: React.CSSProperties;
 }
@@ -59,11 +59,17 @@ const Badge: React.FC<BadgeProps> = ({
 
   const getSizeStyles = () => {
     switch (size) {
+      case 'xs':
+        return {
+          padding: `${theme.spacing.xxs} ${theme.spacing.xs}`,
+          fontSize: theme.typography.fontSize.xxs,
+          borderRadius: theme.borderRadius.lg,
+      };
       case 'small':
         return {
           padding: `${theme.spacing.xs} ${theme.spacing.sm}`,
           fontSize: theme.typography.fontSize.xs,
-          borderRadius: theme.borderRadius.lg,
+          borderRadius: theme.borderRadius.xl,
         };
       case 'medium':
         return {
@@ -81,7 +87,7 @@ const Badge: React.FC<BadgeProps> = ({
         return {
           padding: `${theme.spacing.sm} ${theme.spacing.md}`,
           fontSize: theme.typography.fontSize.sm,
-          borderRadius: theme.borderRadius.lg,
+          borderRadius: theme.borderRadius.xxl,
         };
     }
   };
