@@ -6,19 +6,17 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
-import java.util.List;
 
 @Getter
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class CrawledData {
-
-    // 게시글 정보
-    private String sourceUrl;
-    private String sourceTitle;
+public class BlogPostInfo {
+    
+    private String title;
+    private String postUrl;
+    private String logNo;
+    private String timeAgo;
+    private String categoryNo;
     private LocalDateTime crawledAt;
-
-    // 크롤링한 이미지 URL 목록
-    private List<String> imageUrls;
 }
