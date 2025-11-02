@@ -2,9 +2,12 @@ package com.topoom.missingcase.controller;
 
 import com.topoom.common.ApiResponse;
 import com.topoom.external.openapi.Safe182Client;
-import com.topoom.missingcase.dto.MissingCaseDto;
+import com.topoom.missingcase.dto.MissingCaseDetailResponse;
+import com.topoom.missingcase.dto.MissingCaseListResponse;
+import com.topoom.missingcase.dto.MissingCaseStatsResponse;
 import com.topoom.missingcase.service.MissingCaseService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -18,14 +21,19 @@ public class MissingCaseController {
     private final MissingCaseService missingCaseService;
 
     @GetMapping
-    public ApiResponse<List<MissingCaseDto.Response>> getAllCases() {
-        List<MissingCaseDto.Response> cases = missingCaseService.getAllCases();
-        return ApiResponse.success(cases);
+    public ResponseEntity<List<MissingCaseListResponse>> getAllCases() {
+        List<MissingCaseListResponse> cases = missingCaseService.getAllCases();
+        return ResponseEntity.ok(cases);
     }
 
     @GetMapping("/{id}")
-    public ApiResponse<MissingCaseDto.DetailResponse> getCaseById(@PathVariable Long id) {
-        MissingCaseDto.DetailResponse caseDetail = missingCaseService.getCaseById(id);
-        return ApiResponse.success(caseDetail);
+    public ResponseEntity<MissingCaseDetailResponse> getCaseDetail(@PathVariable Long id) {
+        return ResponseEntity.ok(missingCaseService.getCaseDetail(id));
+    }
+
+    @GetMapping("/stats")
+    public ApiResponse<MissingCaseStatsResponse> getStats() {
+        MissingCaseStatsResponse stats = missingCaseService.getStats();
+        return ApiResponse.success(stats);
     }
 }

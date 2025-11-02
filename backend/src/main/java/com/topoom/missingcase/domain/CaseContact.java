@@ -2,42 +2,48 @@ package com.topoom.missingcase.domain;
 
 import com.topoom.common.BaseTimeEntity;
 import jakarta.persistence.*;
-import lombok.AccessLevel;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "case_contact")
+@Table(name = "case_contact",
+        uniqueConstraints = @UniqueConstraint(name = "uq_case_contact", columnNames = {"case_id", "phone_norm"}),
+        indexes = {
+                @Index(name = "ix_case_contact_case", columnList = "case_id"),
+                @Index(name = "ix_case_contact_phone_norm", columnList = "phone_norm")
+        })
 @Getter
-@NoArgsConstructor(access = AccessLevel.PROTECTED)
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
 public class CaseContact extends BaseTimeEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    // FK
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "case_id", nullable = false)
+    @JoinColumn(name = "case_id", foreignKey = @ForeignKey(name = "fk_case_contact_case"))
     private MissingCase missingCase;
 
-    @Column(length = 120)
     private String organization;
 
-    @Column(length = 30, nullable = false)
+    @Column(name = "phone_number", nullable = false)
     private String phoneNumber;
 
-    @Column(length = 20)
+    @Column(name = "phone_norm", length = 20)
     private String phoneNorm;
 
-    @Column(columnDefinition = "TEXT", nullable = false)
+    @Column(name = "source_url", columnDefinition = "TEXT", nullable = false)
     private String sourceUrl;
 
-    @Column(length = 300, nullable = false)
+    @Column(name = "source_title", length = 300, nullable = false)
     private String sourceTitle;
 
-    @Column(nullable = false)
+    @Column(name = "crawled_at", nullable = false)
     private LocalDateTime crawledAt;
 
     private LocalDateTime lastCheckedAt;

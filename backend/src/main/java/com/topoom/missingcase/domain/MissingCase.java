@@ -2,93 +2,107 @@ package com.topoom.missingcase.domain;
 
 import com.topoom.common.BaseTimeEntity;
 import jakarta.persistence.*;
-import lombok.AccessLevel;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
-import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Entity
 @Table(name = "missing_case")
 @Getter
 @Setter
 @NoArgsConstructor
+@AllArgsConstructor
+@Builder
 public class MissingCase extends BaseTimeEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(columnDefinition = "TEXT", nullable = false)
-    private String sourceUrl;
-
-    @Column(length = 500)
-    private String sourceTitle;
-
-    @Column(nullable = false)
-    private LocalDateTime crawledAt;
-
-    @Column(length = 20)
-    private String crawlStatus;
-
-    @Column(length = 100)
+    @Column(name = "person_name", nullable = false)
     private String personName;
 
-    @Column(length = 30)
+    @Column(name = "target_type", nullable = false)
     private String targetType;
 
+    @Column(name = "age_at_time", nullable = false)
     private Short ageAtTime;
 
+    @Column(name = "current_age", nullable = false)
     private Short currentAge;
 
-    @Column(length = 10)
+    @Column(nullable = false)
     private String gender;
 
-    @Column(length = 30)
+    @Column
     private String nationality;
 
+    @Column(name = "occurred_at", nullable = false)
     private LocalDateTime occurredAt;
 
-    @Column(columnDefinition = "TEXT", nullable = false)
+    @Column(name = "occurred_location", columnDefinition = "TEXT", nullable = false)
     private String occurredLocation;
 
-    @Column(precision = 9, scale = 6)
-    private BigDecimal latitude;
+    private Double latitude;
+    private Double longitude;
 
-    @Column(precision = 9, scale = 6)
-    private BigDecimal longitude;
-
+    @Column(name = "height_cm", nullable = false)
     private Short heightCm;
 
+    @Column(name = "weight_kg", nullable = false)
     private Short weightKg;
 
-    @Column(length = 30)
+    @Column(name = "body_type", nullable = false)
     private String bodyType;
 
-    @Column(length = 30)
+    @Column(name = "face_shape", nullable = false)
     private String faceShape;
 
-    @Column(length = 30)
+    @Column(name = "hair_color", nullable = false)
     private String hairColor;
 
-    @Column(length = 60)
+    @Column(name = "hair_style", nullable = false)
     private String hairStyle;
 
-    @Column(length = 200)
+    @Column(name = "clothing_desc")
     private String clothingDesc;
 
-    @Column(length = 20)
+    @Column(name = "progress_status")
     private String progressStatus;
 
-    @Column(columnDefinition = "JSON")
+    @Column(name = "etc_features", columnDefinition = "TEXT")
     private String etcFeatures;
 
-    @Column(nullable = false)
-    private Boolean isDeleted;
+    // OCR 관련
+    @Column(name = "ocr_text", columnDefinition = "TEXT")
+    private String ocrText;
 
-    @OneToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "main_file_id")
-    private CaseFile mainImage;
+    @Column(name = "ocr_result", columnDefinition = "JSON")
+    private String ocrResult;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "main_file_id", foreignKey = @ForeignKey(name = "fk_missing_case_main_file"))
+    private CaseFile mainFile;
+
+    @Column(name = "source_url", columnDefinition = "TEXT", nullable = false)
+    private String sourceUrl;
+
+    @Column(name = "source_title", length = 300, nullable = false)
+    private String sourceTitle;
+
+    @Column(name = "crawled_at", nullable = false)
+    private LocalDateTime crawledAt;
+
+    @Column(name = "is_deleted", nullable = false)
+    private boolean isDeleted = false;
+
+    @OneToMany(mappedBy = "missingCase", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<CaseFile> files;
+
+    @OneToMany(mappedBy = "missingCase", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<CaseContact> contacts;
+
+    @OneToOne(mappedBy = "missingCase", cascade = CascadeType.ALL, orphanRemoval = true)
+    private CaseAiSupport aiSupport;
 }

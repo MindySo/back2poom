@@ -2,64 +2,71 @@ package com.topoom.missingcase.domain;
 
 import com.topoom.common.BaseTimeEntity;
 import jakarta.persistence.*;
-import lombok.AccessLevel;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "case_file")
+@Table(name = "case_file",
+        indexes = {
+                @Index(name = "ix_case_file_case_seq", columnList = "case_id, source_seq"),
+                @Index(name = "ix_case_file_is_last", columnList = "case_id, is_last_image")
+        })
 @Getter
-@NoArgsConstructor(access = AccessLevel.PROTECTED)
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
 public class CaseFile extends BaseTimeEntity {
-
-    public enum IoRole { INPUT, OUTPUT }
-    public enum Purpose {
-        BEFORE, APPEARANCE, FACE, FULL_BODY, UNUSABLE, TEXT, ENHANCED, ANALYSIS
-    }
-    public enum ContentKind { IMAGE, JSON }
-
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    // FK
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "case_id", nullable = false)
+    @JoinColumn(name = "case_id", foreignKey = @ForeignKey(name = "fk_case_file_case"))
     private MissingCase missingCase;
 
     @Enumerated(EnumType.STRING)
-    @Column(length = 10, nullable = false)
+    @Column(name = "io_role", nullable = false)
     private IoRole ioRole;
 
     @Enumerated(EnumType.STRING)
-    @Column(length = 20, nullable = false)
-    private Purpose purpose;
+    @Column(nullable = false)
+    private FilePurpose purpose;
 
-    @Column(length = 20, nullable = false)
-    private String contentKind;
+    @Enumerated(EnumType.STRING)
+    @Column(name = "content_kind", nullable = false)
+    private ContentKind contentKind = ContentKind.IMAGE;
 
-    @Column(columnDefinition = "TEXT", nullable = false)
+    @Column(name = "s3_key", columnDefinition = "TEXT", nullable = false)
     private String s3Key;
 
-    @Column(length = 128)
+    @Column(name = "s3_bucket", length = 128)
     private String s3Bucket;
 
-    @Column(length = 64)
+    @Column(name = "content_type", length = 64)
     private String contentType;
 
+    @Column(name = "size_bytes")
     private Long sizeBytes;
 
-    private Integer widthPx;
-
-    private Integer heightPx;
-
-    @Column(length = 64)
-    private String checksumSha256;
-
-    @Column(columnDefinition = "TEXT")
+    @Column(name = "source_url", columnDefinition = "TEXT")
     private String sourceUrl;
 
+    @Column(name = "source_seq", nullable = false)
+    private Integer sourceSeq;
+
+    @Column(name = "is_last_image", nullable = false)
+    private boolean isLastImage = false;
+
     private LocalDateTime crawledAt;
+
+    public enum IoRole { INPUT, OUTPUT }
+    public enum FilePurpose {
+        BEFORE, APPEARANCE, FACE, FULL_BODY,
+        UNUSABLE, TEXT, ENHANCED, ANALYSIS
+    }
+    public enum ContentKind { IMAGE, JSON }
 }

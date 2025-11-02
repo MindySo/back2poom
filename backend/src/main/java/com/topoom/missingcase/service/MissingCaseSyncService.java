@@ -38,7 +38,7 @@ public class MissingCaseSyncService {
             missingCase.setOccurredLocation(item.getOccurredLocation());
             missingCase.setSourceUrl(item.getSourceUrl());
             missingCase.setCrawledAt(LocalDateTime.now());
-            missingCase.setIsDeleted(false);
+            missingCase.setDeleted(false);
 
             missingCaseRepository.save(missingCase);
         }
