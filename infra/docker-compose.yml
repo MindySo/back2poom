@@ -68,8 +68,8 @@ services:
     depends_on:
       - mysql
       - redis
-    ports:
-      - "8080:8080"
+    expose:
+      - "8080"
     networks:
       - topoom-network
 

@@ -19,8 +19,8 @@ services:
       context: ./jenkins
       dockerfile: Dockerfile
     container_name: topoom-jenkins
-    ports:
-      - "9090:8080"
+    expose:
+      - "8080"
     environment:
       - TZ=Asia/Seoul
     volumes:

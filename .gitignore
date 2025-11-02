@@ -10,7 +10,6 @@ redis-data/
 .env*
 .env.*
 *.env
-application.yml
 
 ### certbot ###
 infra/certbot/conf/*
