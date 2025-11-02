@@ -1,6 +1,6 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import type { MissingPerson } from '../../types/missing';
+import { useMissingDetail } from '../../hooks/useMissingDetail';
 import styles from './ArchiveDetailPopup.module.css';
 import Badge from '../common/atoms/Badge';
 import Text from '../common/atoms/Text';
@@ -8,7 +8,7 @@ import Button from '../common/atoms/Button';
 import tempImg from '../../assets/TempImg.png';
 
 export interface ArchiveDetailPopupProps {
-  person: MissingPerson;
+  personId: number;
   onClose: () => void;
 }
 
@@ -26,8 +26,34 @@ function formatElapsed(iso: string): string {
     : `실종 후 ${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
 }
 
-const ArchiveDetailPopup: React.FC<ArchiveDetailPopupProps> = ({ person, onClose }) => {
+const ArchiveDetailPopup: React.FC<ArchiveDetailPopupProps> = ({ personId, onClose }) => {
   const navigate = useNavigate();
+  const { data: person, isLoading, error } = useMissingDetail(personId);
+
+  // 로딩 상태
+  if (isLoading) {
+    return (
+      <div className={styles['popup-overlay']} onClick={onClose}>
+        <div className={styles['popup-content']} onClick={(e) => e.stopPropagation()}>
+          <div style={{ padding: '2rem', textAlign: 'center' }}>로딩 중...</div>
+        </div>
+      </div>
+    );
+  }
+
+  // 에러 상태
+  if (error || !person) {
+    return (
+      <div className={styles['popup-overlay']} onClick={onClose}>
+        <div className={styles['popup-content']} onClick={(e) => e.stopPropagation()}>
+          <div style={{ padding: '2rem', textAlign: 'center', color: 'red' }}>
+            데이터를 불러오는 중 오류가 발생했습니다.
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   const {
     personName,
     ageAtTime,
