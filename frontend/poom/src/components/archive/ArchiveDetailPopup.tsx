@@ -1,4 +1,5 @@
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
 import type { MissingPerson } from '../../types/archive';
 import styles from './ArchiveDetailPopup.module.css';
 import Badge from '../common/atoms/Badge';
@@ -26,6 +27,7 @@ function formatElapsed(iso: string): string {
 }
 
 const ArchiveDetailPopup: React.FC<ArchiveDetailPopupProps> = ({ person, onClose }) => {
+  const navigate = useNavigate();
   const {
     personName,
     ageAtTime,
@@ -205,7 +207,15 @@ const ArchiveDetailPopup: React.FC<ArchiveDetailPopupProps> = ({ person, onClose
 
         {/* 하단 버튼 */}
         <div className={styles['popup-footer']}>
-          <Button variant="primary" size="large" fullWidth onClick={() => {}}>
+          <Button 
+            variant="primary" 
+            size="large" 
+            fullWidth 
+            onClick={() => {
+              onClose();
+              navigate(`/report?name=${encodeURIComponent(personName)}`);
+            }}
+          >
             제보하기
           </Button>
         </div>

@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import type { MissingPerson } from '../../types/archive';
 import styles from './MArchiveCard.module.css';
 import Badge from '../common/atoms/Badge';
@@ -24,6 +25,7 @@ function formatElapsed(iso: string): string {
 }
 
 const MArchiveCard: React.FC<MArchiveCardProps> = ({ person }) => {
+  const navigate = useNavigate();
   const [isExpanded, setIsExpanded] = useState(false);
   
   const {
@@ -80,7 +82,14 @@ const MArchiveCard: React.FC<MArchiveCardProps> = ({ person }) => {
           </div>
 
           <div className={styles['m-archive-card__actions']}>
-            <Button variant="primary" size="small" className={styles['m-archive-card__primaryBtn']}>제보하기</Button>
+            <Button 
+              variant="primary" 
+              size="small" 
+              className={styles['m-archive-card__primaryBtn']}
+              onClick={() => navigate(`/report?name=${encodeURIComponent(personName)}`)}
+            >
+              제보하기
+            </Button>
             <Button variant="secondary" size="small" className={styles['m-archive-card__iconBtn']} aria-label="공유">↗</Button>
           </div>
         </div>

@@ -1,4 +1,5 @@
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
 import type { MissingPerson } from '../../types/archive';
 import styles from './ArchiveCard.module.css';
 import Badge from '../common/atoms/Badge';
@@ -25,6 +26,7 @@ function formatElapsed(iso: string): string {
 }
 
 const ArchiveCard: React.FC<ArchiveCardProps> = ({ person, onClick }) => {
+  const navigate = useNavigate();
   const {
     personName,
     ageAtTime,
@@ -74,8 +76,9 @@ const ArchiveCard: React.FC<ArchiveCardProps> = ({ person, onClick }) => {
               variant="primary" 
               size="medium" 
               className={styles['archive-card__primaryBtn']}
-              onClick={() => {
-                // 제보하기 로직
+              onClick={(e) => {
+                e.stopPropagation(); // 카드 클릭 이벤트와 충돌 방지
+                navigate(`/report?name=${encodeURIComponent(personName)}`);
               }}
             >
               제보하기

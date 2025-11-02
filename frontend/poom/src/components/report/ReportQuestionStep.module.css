@@ -1,0 +1,55 @@
+.context {
+  font-size: 16px;
+  line-height: 1.5;
+  margin-bottom: 4px;
+}
+
+.question {
+  font-size: 20px;
+  font-weight: 700;
+  line-height: 1.4;
+}
+
+.answerContainer {
+  display: flex;
+  gap: 12px;
+  margin-top: 24px;
+}
+
+.answerButton {
+  flex: 1;
+  padding: 16px 20px;
+  border: none;
+  border-radius: 12px;
+  font-size: 16px;
+  font-weight: 500;
+  font-family: 'Pretendard, -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif';
+  cursor: pointer;
+  transition: all 0.2s ease;
+  background-color: #EEF1F6;
+  color: #767676;
+}
+
+.answerButton:hover {
+  opacity: 0.8;
+}
+
+.answerButton.selected {
+  background-color: #2B3A55;
+  color: #FFFFFF;
+}
+
+@media (max-width: 375px) {
+  .context {
+    font-size: 14px;
+  }
+
+  .question {
+    font-size: 18px;
+  }
+
+  .answerButton {
+    font-size: 14px;
+    padding: 14px 16px;
+  }
+}
