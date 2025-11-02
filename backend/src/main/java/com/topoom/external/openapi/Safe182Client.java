@@ -1,5 +1,6 @@
 package com.topoom.external.openapi;
 
+import com.topoom.missingcase.dto.Safe182Response;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -27,25 +28,25 @@ public class Safe182Client {
     /**
      * 실종아동 목록 조회
      */
-    public String getMissing() {
+    public Safe182Response getMissingChildren(int rowSize, int page) {
         try {
+            log.info("Safe182 API 호출 시작, url={}", apiUrl);
+
             return webClient.post()
                     .uri(apiUrl)
                     .contentType(MediaType.APPLICATION_FORM_URLENCODED)
                     .body(BodyInserters
-                                    .fromFormData("esntlId", esntlId)
-                                    .with("authKey", authKey)
-
-                            // 추가 파라미터 예시
-                            // .with("rowSize", String.valueOf(rowSize))
-                            // .with("page", String.valueOf(page))
-                            // .with("sexdstnDscd", "1") // 남자
-                            // .with("writingTrgetDscds", "010") // 정상아동
+                            .fromFormData("esntlId", esntlId)
+                            .with("authKey", authKey)
+                            .with("rowSize", String.valueOf(rowSize))
+                            .with("page", String.valueOf(page))
                     )
                     .retrieve()
-                    .bodyToMono(String.class)
-                    .block(); // 동기식 호출
+                    .bodyToMono(Safe182Response.class)
+                    .block();
+
         } catch (Exception e) {
+            log.error("Safe182 API 호출 실패", e);
             throw new RuntimeException("Safe182 API 호출 실패: " + e.getMessage(), e);
         }
     }

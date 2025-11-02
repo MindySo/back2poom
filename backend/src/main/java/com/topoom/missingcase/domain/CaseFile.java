@@ -14,6 +14,13 @@ import java.time.LocalDateTime;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class CaseFile extends BaseTimeEntity {
 
+    public enum IoRole { INPUT, OUTPUT }
+    public enum Purpose {
+        BEFORE, APPEARANCE, FACE, FULL_BODY, UNUSABLE, TEXT, ENHANCED, ANALYSIS
+    }
+    public enum ContentKind { IMAGE, JSON }
+
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -22,11 +29,13 @@ public class CaseFile extends BaseTimeEntity {
     @JoinColumn(name = "case_id", nullable = false)
     private MissingCase missingCase;
 
-    @Column(length = 20, nullable = false)
-    private String ioRole;
+    @Enumerated(EnumType.STRING)
+    @Column(length = 10, nullable = false)
+    private IoRole ioRole;
 
+    @Enumerated(EnumType.STRING)
     @Column(length = 20, nullable = false)
-    private String purpose;
+    private Purpose purpose;
 
     @Column(length = 20, nullable = false)
     private String contentKind;

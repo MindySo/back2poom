@@ -3,6 +3,7 @@ package com.topoom.external.scheduler;
 import com.topoom.external.openapi.Safe182Client;
 import com.topoom.missingcase.dto.MissingCaseDto;
 import com.topoom.missingcase.repository.MissingCaseRepository;
+import com.topoom.missingcase.service.MissingCaseSyncService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -15,21 +16,21 @@ import java.util.List;
 @RequiredArgsConstructor
 public class DataUpdateScheduler {
 
-    private final Safe182Client safe182Client;
-    private final MissingCaseRepository missingCaseRepository;
+    private final MissingCaseSyncService missingCaseSyncService;
 
     @Scheduled(cron = "0 0 2 * * *")  // 매일 새벽 2시
     public void scheduleDataUpdate() {
-        // TODO: 정기적 데이터 수집 스케줄링 로직 구현
-        log.info("Starting scheduled data update");
-        List<MissingCaseDto.Response> apiCases = safe182Client.fetchMissingCases();
+        log.info("Safe182 정기 데이터 수집 시작");
 
-        for (MissingCaseDto.Response apiCase : apiCases) {
-            missingCaseRepository.findBySourceId(apiCase.getSourceId())
-                    .ifPresentOrElse(
-                            existing -> updateEntity(existing, apiCase),
-                            () -> missingCaseRepository.save(convertToEntity(apiCase))
-                    );
+        try {
+            int rowSize = 100;  // 한 번에 가져올 데이터 수
+            int page = 1;
+
+            missingCaseSyncService.syncMissingChildren(rowSize, page);
+
+            log.info("Safe182 정기 데이터 수집 완료");
+        } catch (Exception e) {
+            log.error("Safe182 정기 데이터 수집 중 오류 발생", e);
         }
     }
 }

@@ -5,6 +5,7 @@ import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -12,7 +13,8 @@ import java.time.LocalDateTime;
 @Entity
 @Table(name = "missing_case")
 @Getter
-@NoArgsConstructor(access = AccessLevel.PROTECTED)
+@Setter
+@NoArgsConstructor
 public class MissingCase extends BaseTimeEntity {
 
     @Id
@@ -82,4 +84,11 @@ public class MissingCase extends BaseTimeEntity {
 
     @Column(columnDefinition = "JSON")
     private String etcFeatures;
+
+    @Column(nullable = false)
+    private Boolean isDeleted;
+
+    @OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "main_file_id")
+    private CaseFile mainImage;
 }
