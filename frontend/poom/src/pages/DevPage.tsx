@@ -5,6 +5,7 @@ import Badge from '../components/common/atoms/Badge';
 import Text from '../components/common/atoms/Text';
 import TopBar from '../components/common/molecules/TopBar/TopBar';
 import MobileTopBar from '../components/common/molecules/MobileTopBar/MobileTopBar';
+import Marker from './MapPage/component/Marker/Marker';
 import { theme } from '../theme';
 
 const DevPage: React.FC = () => {
@@ -109,6 +110,28 @@ const DevPage: React.FC = () => {
         </p>
       </div>
 
+      {/* 지도페이지 컴포넌트 영역 */}
+      <div style={{ maxWidth: '1200px', margin: '60px auto 0' }}>
+        <h2 style={{ color: '#333', marginBottom: '30px', textAlign: 'center' }}>
+          🗺️ 지도페이지 컴포넌트
+        </h2>
+
+        {/* Marker 컴포넌트 */}
+        <div style={{
+          backgroundColor: 'white',
+          padding: '30px',
+          borderRadius: '10px',
+          marginBottom: '30px',
+          boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
+        }}>
+          <h3 style={{ marginBottom: '20px', color: '#333' }}>Marker</h3>
+          <div style={{ display: 'flex', gap: '20px', justifyContent: 'center', alignItems: 'flex-end' }}>
+            <Marker size="small" />
+            <Marker size="medium" />
+            <Marker size="large" />
+          </div>
+        </div>
+      </div>
 
       {/* Molecules 컴포넌트 테스트 섹션 */}
       <div style={{ maxWidth: '1200px', margin: '60px auto 0' }}>
