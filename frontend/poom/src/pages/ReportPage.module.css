@@ -1,0 +1,23 @@
+.container {
+  display: flex;
+  flex-direction: column;
+  padding: 20px;
+  min-height: 100vh;
+}
+
+.context {
+  font-size: 16px;
+  line-height: 1.5;
+  margin-bottom: 4px;
+}
+
+@media (max-width: 375px) {
+  .container {
+    padding: 16px;
+  }
+
+  .context {
+    font-size: 14px;
+  }
+}
+
