@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import type { MissingPerson } from '../../types/archive';
+import type { MissingPerson } from '../../types/missing';
 import styles from './MArchiveCard.module.css';
 import Badge from '../common/atoms/Badge';
 import Text from '../common/atoms/Text';

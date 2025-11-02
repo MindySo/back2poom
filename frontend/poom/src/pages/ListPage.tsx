@@ -2,7 +2,7 @@ import { useState, useMemo } from "react";
 import { ArchiveCard } from "../components/archive/ArchiveCard";
 import { MArchiveCard } from "../components/archive/MArchiveCard";
 import { ArchiveDetailPopup } from "../components/archive/ArchiveDetailPopup";
-import type { MissingPerson } from "../types/archive";
+import type { MissingPerson } from "../types/missing";
 import styles from "./ListPage.module.css";
 import bannerImg from "../assets/ListPageBanner.png";
 import { useIsMobile } from "../hooks/useMediaQuery";

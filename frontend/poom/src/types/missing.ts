@@ -47,3 +47,4 @@ export type MissingPersonWithTypo = Omit<MissingPerson, 'occurredAt' | 'occurred
   occuredAt: string;
   occuredLocation: string;
 };
+
