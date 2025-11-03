@@ -57,21 +57,23 @@ services:
     networks:
       - topoom-network
 
-#  # Spring Boot
-#  spring:
-#    image: ${REGISTRY}/topoom-spring:latest
-#    container_name: topoom-spring
-#    restart: always
-#    environment:
-#      - TZ=Asia/Seoul
-#      - SPRING_PROFILES_ACTIVE=${SPRING_PROFILES_ACTIVE:-prod}
-#    depends_on:
-#      - mysql
-#      - redis
-#    expose:
-#      - "8080"
-#    networks:
-#      - topoom-network
+  # Spring Boot
+  spring:
+    image: ${REGISTRY}/topoom-spring:latest
+    container_name: topoom-spring
+    restart: always
+    environment:
+      - TZ=Asia/Seoul
+      - SPRING_PROFILES_ACTIVE=${SPRING_PROFILES_ACTIVE:-prod}
+    env_file:
+      - .env
+    depends_on:
+      - mysql
+      - redis
+    expose:
+      - "8080"
+    networks:
+      - topoom-network
 
   # nginx
   nginx:
@@ -80,8 +82,8 @@ services:
     restart: always
     environment:
       - TZ=Asia/Seoul
-#    depends_on:
-#      - spring
+    depends_on:
+      - spring
     ports:
       - "80:80"
       - "443:443"
