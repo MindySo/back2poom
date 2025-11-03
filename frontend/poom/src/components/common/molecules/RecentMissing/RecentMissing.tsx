@@ -17,6 +17,7 @@ export interface RecentMissingProps {
   age: number;
   location: string;
   className?: string;
+  onClick?: () => void;
 }
 
 const RecentMissing: React.FC<RecentMissingProps> = ({
@@ -27,9 +28,14 @@ const RecentMissing: React.FC<RecentMissingProps> = ({
   age,
   location,
   className = '',
+  onClick,
 }) => {
   return (
-    <div className={`${styles.card} ${className}`}>
+    <div
+      className={`${styles.card} ${className}`}
+      onClick={onClick}
+      style={onClick ? { cursor: 'pointer' } : undefined}
+    >
       {/* 왼쪽: 사진 프레임 */}
       <div className={styles.imageFrame}>
         <img

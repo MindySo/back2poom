@@ -18,25 +18,11 @@ const MapPage: React.FC = () => {
 
   return (
     <>
-      {!isMobile && <SideBar />}
+      {!isMobile && <SideBar onMissingCardClick={handleOpenDashboard} />}
       <div style={{ padding: '20px', textAlign: 'center' }}>
         <h1>지도페이지입니다</h1>
 
         <div style={{ marginTop: '40px' }}>
-          <button
-            onClick={handleOpenDashboard}
-            style={{
-              padding: '10px 20px',
-              backgroundColor: '#007bff',
-              color: 'white',
-              border: 'none',
-              borderRadius: '5px',
-              cursor: 'pointer',
-              marginRight: '10px',
-            }}
-          >
-            대시보드 열기
-          </button>
           <Link to="/" style={{ padding: '10px', backgroundColor: '#6c757d', color: 'white', textDecoration: 'none', borderRadius: '5px' }}>
             개발 페이지로 돌아가기
           </Link>

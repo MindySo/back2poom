@@ -23,26 +23,25 @@
 
 .dashboard {
   position: fixed;
-  left: 18.75vw;
-  top: 7.5vh;
+  left: 380px;
+  top: calc(90px + (100vh - 90px) / 2);
+  transform: translateY(-50%);
   width: 40vw;
   height: calc(100vh - 13vh);
   border-radius: 12px;
   display: flex;
   flex-direction: column;
   animation: slideInFromLeft 0.3s ease-out;
-  margin-left: 1.04vw;
-  margin-top: 4.5vh;
   z-index: 998;
 }
 
 @keyframes slideInFromLeft {
   from {
-    transform: translateX(-23.4vw);
+    transform: translateX(-380px) translateY(-50%);
     opacity: 0;
   }
   to {
-    transform: translateX(0);
+    transform: translateX(0) translateY(-50%);
     opacity: 1;
   }
 }
@@ -53,11 +52,11 @@
 
 @keyframes slideOutToLeft {
   from {
-    transform: translateX(0);
+    transform: translateX(0) translateY(-50%);
     opacity: 1;
   }
   to {
-    transform: translateX(-23.4vw);
+    transform: translateX(-380px) translateY(-50%);
     opacity: 0;
   }
 }

@@ -7,9 +7,10 @@ import styles from './SideBar.module.css';
 
 export interface SideBarProps {
   className?: string;
+  onMissingCardClick?: () => void;
 }
 
-const SideBar: React.FC<SideBarProps> = ({ className = '' }) => {
+const SideBar: React.FC<SideBarProps> = ({ className = '', onMissingCardClick }) => {
   return (
     <aside
       className={`${styles.sideBar} ${className}`}
@@ -51,6 +52,7 @@ const SideBar: React.FC<SideBarProps> = ({ className = '' }) => {
           gender="남성"
           age={26}
           location="서울특별시 강남구"
+          onClick={onMissingCardClick}
         />
         <RecentMissing
           image="https://via.placeholder.com/120"
@@ -62,6 +64,7 @@ const SideBar: React.FC<SideBarProps> = ({ className = '' }) => {
           gender="여성"
           age={10}
           location="서울특별시 서초구"
+          onClick={onMissingCardClick}
         />
         <RecentMissing
           image="https://via.placeholder.com/120"
@@ -72,6 +75,7 @@ const SideBar: React.FC<SideBarProps> = ({ className = '' }) => {
           gender="남성"
           age={28}
           location="서울특별시 송파구"
+          onClick={onMissingCardClick}
         />
         <RecentMissing
           image="https://via.placeholder.com/120"
@@ -82,6 +86,7 @@ const SideBar: React.FC<SideBarProps> = ({ className = '' }) => {
           gender="여성"
           age={27}
           location="서울특별시 노원구"
+          onClick={onMissingCardClick}
         />
         <RecentMissing
           image="https://via.placeholder.com/120"
@@ -93,6 +98,7 @@ const SideBar: React.FC<SideBarProps> = ({ className = '' }) => {
           gender="여성"
           age={26}
           location="경기도 안양시"
+          onClick={onMissingCardClick}
         />
       </div>
     </aside>
