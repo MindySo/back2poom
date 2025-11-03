@@ -5,6 +5,7 @@ import Dashboard from '../components/map/Dashboard/Dashboard';
 import { useIsMobile } from '../hooks/useMediaQuery';
 import MyLocationButton from '../components/map/MyLocationButton/MyLocationButton';
 import MyLocationMarker from '../components/map/MyLocationMarker/MyLocationMarker';
+import MobileStatusBoard from '../components/map/MobileStatusBoard/MobileStatusBoard';
 
 const API_KEY = import.meta.env.VITE_KAKAO_JAVASCRIPT_KEY; 
 
@@ -86,6 +87,22 @@ const MapPage: React.FC = () => {
       <div style={{ width: '100%', height: '100vh', position: 'relative' }}>
         {!isLoaded && <p style={{ textAlign: 'center' }}>지도를 불러오는 중...</p>}
         <div ref={mapRef} style={{ width: '100%', height: '100%' }} />
+
+        {/* 모바일 상태 보드 */}
+        {isMobile && (
+          <div style={{ position: 'absolute', top: '1.5vw', left: '1.5vw', marginTop: '60px' }}>
+            <MobileStatusBoard
+              data={[
+                { label: '실종자', value: 42 },
+                { label: '발견', value: 18 },
+                { label: '해결', value: 15 }
+              ]}
+              onBackClick={() => {
+                // 뒤로가기 로직 필요시 추가
+              }}
+            />
+          </div>
+        )}
 
         {/* 내 위치 마커 */}
         {map && myLocation && (

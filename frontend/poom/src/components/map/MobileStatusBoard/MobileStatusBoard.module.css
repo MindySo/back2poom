@@ -1,0 +1,49 @@
+.container {
+  position: absolute;
+  top: 0;
+  left: 0;
+  border-radius: 12px;
+  padding: 0;
+  z-index: 10;
+  width: 50vw;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  padding: 1vw 1vw;
+  border-bottom: 0.1vw solid rgba(255, 255, 255, 0.1);
+}
+
+.backButton {
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.4vw;
+  height: 2.4vw;
+}
+
+.backButton img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.content {
+  padding: 1vw;
+}
+
+.statusBoardOverride {
+  background-color: transparent !important;
+}
+
+.statusBoardOverride :global(h2),
+.statusBoardOverride :global(p),
+.statusBoardOverride :global(div) {
+  color: white !important;
+}
