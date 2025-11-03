@@ -36,6 +36,7 @@ public class CaseFile extends BaseTimeEntity {
     @Column(nullable = false)
     private FilePurpose purpose;
 
+    @Builder.Default
     @Enumerated(EnumType.STRING)
     @Column(name = "content_kind", nullable = false)
     private ContentKind contentKind = ContentKind.IMAGE;
@@ -58,6 +59,7 @@ public class CaseFile extends BaseTimeEntity {
     @Column(name = "source_seq", nullable = false)
     private Integer sourceSeq;
 
+    @Builder.Default
     @Column(name = "is_last_image", nullable = false)
     private boolean isLastImage = false;
 

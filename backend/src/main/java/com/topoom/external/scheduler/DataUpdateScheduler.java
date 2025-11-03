@@ -21,7 +21,7 @@ public class DataUpdateScheduler {
             int rowSize = 100;  // 한 번에 가져올 데이터 수
             int page = 1;
 
-            missingCaseSyncService.syncMissingChildren(rowSize, page);
+            missingCaseSyncService.syncMissing(rowSize);
 
             log.info("Safe182 정기 데이터 수집 완료");
         } catch (Exception e) {

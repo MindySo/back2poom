@@ -3,7 +3,9 @@ package com.topoom.missingcase.domain;
 import com.topoom.common.BaseTimeEntity;
 import jakarta.persistence.*;
 import lombok.*;
+import lombok.Builder.Default;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -44,8 +46,11 @@ public class MissingCase extends BaseTimeEntity {
     @Column(name = "occurred_location", columnDefinition = "TEXT", nullable = false)
     private String occurredLocation;
 
-    private Double latitude;
-    private Double longitude;
+    @Column(precision = 9, scale = 6)
+    private BigDecimal latitude;
+
+    @Column(precision = 9, scale = 6)
+    private BigDecimal longitude;
 
     @Column(name = "height_cm", nullable = false)
     private Short heightCm;
@@ -74,7 +79,6 @@ public class MissingCase extends BaseTimeEntity {
     @Column(name = "etc_features", columnDefinition = "TEXT")
     private String etcFeatures;
 
-    // OCR 관련
     @Column(name = "ocr_text", columnDefinition = "TEXT")
     private String ocrText;
 
@@ -94,6 +98,7 @@ public class MissingCase extends BaseTimeEntity {
     @Column(name = "crawled_at", nullable = false)
     private LocalDateTime crawledAt;
 
+    @Builder.Default
     @Column(name = "is_deleted", nullable = false)
     private boolean isDeleted = false;
 

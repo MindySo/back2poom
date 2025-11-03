@@ -21,22 +21,20 @@ public class MissingCaseSyncService {
     /**
      * Safe182 API 데이터를 DB로 동기화
      */
-    public void syncMissingChildren(int rowSize, int page) {
-        Safe182Response response = safe182Client.getMissingChildren(rowSize, page);
+    public void syncMissing(int rowSize) {
+        Safe182Response response = safe182Client.getMissing(rowSize);
 
         if (response == null || response.getBody() == null) return;
 
         DateTimeFormatter formatter = DateTimeFormatter.ISO_DATE_TIME;
 
-        for (Safe182Response.MissingChildItem item : response.getBody().getItems()) {
-            // DB 저장 전, 중복 체크 가능 (예: sourceUrl or childId 기준)
+        for (Safe182Response.MissingItem item : response.getBody().getItems()) {
+            // DB 저장 전, 중복 체크 가능
             MissingCase missingCase = new MissingCase();
-            missingCase.setPersonName(item.getChildName());
+            missingCase.setPersonName(item.getName());
             missingCase.setGender(item.getGender());
-            missingCase.setAgeAtTime(item.getAge() != null ? item.getAge().shortValue() : null);
             missingCase.setOccurredAt(LocalDateTime.parse(item.getOccurredAt(), formatter));
             missingCase.setOccurredLocation(item.getOccurredLocation());
-            missingCase.setSourceUrl(item.getSourceUrl());
             missingCase.setCrawledAt(LocalDateTime.now());
             missingCase.setDeleted(false);
 

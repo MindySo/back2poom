@@ -28,10 +28,20 @@ public class Safe182Client {
     /**
      * 실종아동 목록 조회
      */
-    public Safe182Response getMissingChildren(int rowSize, int page) {
+    public Safe182Response getMissing(int rowSize) {
         try {
             log.info("Safe182 API 호출 시작, url={}", apiUrl);
-
+            log.info(webClient.post()
+                    .uri(apiUrl)
+                    .contentType(MediaType.APPLICATION_FORM_URLENCODED)
+                    .body(BodyInserters
+                            .fromFormData("esntlId", esntlId)
+                            .with("authKey", authKey)
+                            .with("rowSize", String.valueOf(rowSize))
+                    )
+                    .retrieve()
+                    .bodyToMono(String.class)
+                    .block());
             return webClient.post()
                     .uri(apiUrl)
                     .contentType(MediaType.APPLICATION_FORM_URLENCODED)
@@ -39,11 +49,11 @@ public class Safe182Client {
                             .fromFormData("esntlId", esntlId)
                             .with("authKey", authKey)
                             .with("rowSize", String.valueOf(rowSize))
-                            .with("page", String.valueOf(page))
                     )
                     .retrieve()
                     .bodyToMono(Safe182Response.class)
                     .block();
+
 
         } catch (Exception e) {
             log.error("Safe182 API 호출 실패", e);
