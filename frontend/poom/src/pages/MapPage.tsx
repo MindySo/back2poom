@@ -90,7 +90,7 @@ const MapPage: React.FC = () => {
 
         {/* 모바일 상태 보드 */}
         {isMobile && (
-          <div style={{ position: 'absolute', top: '1.5vw', left: '1.5vw', marginTop: '60px' }}>
+          <div style={{ position: 'absolute', top: '1rem', left: '1rem' }}>
             <MobileStatusBoard
               data={[
                 { label: '실종자', value: 42 },
