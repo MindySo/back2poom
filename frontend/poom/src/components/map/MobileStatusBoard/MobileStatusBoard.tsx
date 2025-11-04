@@ -1,6 +1,6 @@
 import React from 'react';
 import { theme } from '../../../theme';
-import backIcon from '../../../assets/back_icon.png';
+import backIcon from '../../../assets/back_icon.svg';
 import StatusBoard, { type StatusBoardProps } from '../StatusBoard/StatusBoard';
 import styles from './MobileStatusBoard.module.css';
 
@@ -8,7 +8,7 @@ interface MobileStatusBoardProps extends Omit<StatusBoardProps, 'className'> {
   onBackClick?: () => void;
 }
 
-const MobileStatusBoard: React.FC<MobileStatusBoardProps> = ({ data, onBackClick }) => {
+const MobileStatusBoard: React.FC<MobileStatusBoardProps> = ({ data, textColor, borderColor, onBackClick }) => {
   return (
     <div
       className={styles.container}
@@ -31,6 +31,8 @@ const MobileStatusBoard: React.FC<MobileStatusBoardProps> = ({ data, onBackClick
       <div className={styles.content}>
         <StatusBoard
           data={data}
+          textColor={textColor}
+          borderColor={borderColor}
           className={styles.statusBoardOverride}
         />
       </div>

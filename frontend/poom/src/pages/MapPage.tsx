@@ -90,13 +90,15 @@ const MapPage: React.FC = () => {
 
         {/* 모바일 상태 보드 */}
         {isMobile && (
-          <div style={{ position: 'absolute', top: '1rem', left: '1rem' }}>
+          <div style={{ position: 'absolute', top: '9rem', left: '1rem' }}>
             <MobileStatusBoard
               data={[
                 { label: '실종자', value: 42 },
                 { label: '발견', value: 18 },
                 { label: '해결', value: 15 }
               ]}
+              textColor="white"
+              borderColor="transparent"
               onBackClick={() => {
                 // 뒤로가기 로직 필요시 추가
               }}
