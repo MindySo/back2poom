@@ -1,11 +1,11 @@
 import React, { useEffect, useRef, useState } from 'react';
-import SideBar from '../../components/common/molecules/SideBar/SideBar';
-import useKakaoMap from '../../hooks/useKakaoMap';
-import Dashboard from '../../components/map/Dashboard/Dashboard';
-import { useIsMobile } from '../../hooks/useMediaQuery';
-import MyLocationButton from '../../components/map/MyLocationButton/MyLocationButton';
-import MyLocationMarker from '../../components/map/MyLocationMarker/MyLocationMarker';
-import MobileStatusBoard from '../../components/map/MobileStatusBoard/MobileStatusBoard';
+import SideBar from '../components/map/SideBar/SideBar';
+import useKakaoMap from '../hooks/useKakaoMap';
+import Dashboard from '../components/map/Dashboard/Dashboard';
+import { useIsMobile } from '../hooks/useMediaQuery';
+import MyLocationButton from '../components/map/MyLocationButton/MyLocationButton';
+import MyLocationMarker from '../components/map/MyLocationMarker/MyLocationMarker';
+import MobileStatusBoard from '../components/map/MobileStatusBoard/MobileStatusBoard';
 
 const API_KEY = import.meta.env.VITE_KAKAO_JAVASCRIPT_KEY; 
 

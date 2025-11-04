@@ -1,6 +1,6 @@
 import React from 'react';
-import Text from '../../atoms/Text';
-import Badge from '../../atoms/Badge';
+import Text from '../../common/atoms/Text';
+import Badge from '../../common/atoms/Badge';
 import styles from './RecentMissing.module.css';
 
 export interface Badge {

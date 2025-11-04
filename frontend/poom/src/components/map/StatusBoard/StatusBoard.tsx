@@ -1,6 +1,6 @@
 import React from 'react';
-import { theme } from '../../../../theme';
-import Text from '../../atoms/Text';
+import { theme } from '../../../theme';
+import Text from '../../common/atoms/Text';
 import styles from './StatusBoard.module.css';
 
 export interface StatusData {
