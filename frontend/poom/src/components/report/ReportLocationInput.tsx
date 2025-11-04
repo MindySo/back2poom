@@ -6,12 +6,17 @@ import styles from './ReportLocationInput.module.css';
 export interface ReportLocationInputProps {
   context: { selectedMethod: string; confidenceLevel: string; location?: string };
   history: any;
+  readOnly?: boolean; // 읽기 전용 모드
+  hideButtons?: boolean; // 버튼 숨기기 (버튼을 외부에서 렌더링할 때 사용)
+  location?: string; // 외부에서 location 상태를 제어할 때 사용
+  onLocationChange?: (value: string) => void; // 외부에서 location 상태를 제어할 때 사용
 }
 
-const ReportLocationInput: React.FC<ReportLocationInputProps> = React.memo(({ context, history }) => {
-  // useState 초기값을 함수로 전달하여 컴포넌트 마운트 시 한 번만 초기화
-  // context에 저장된 값이 있으면 그것을 초기값으로 사용
-  const [location, setLocation] = useState(() => context.location || '');
+const ReportLocationInput: React.FC<ReportLocationInputProps> = React.memo(({ context, history, readOnly = false, hideButtons = false, location: externalLocation, onLocationChange }) => {
+  // 외부에서 location을 제어하는 경우와 내부에서 제어하는 경우를 구분
+  const [internalLocation, setInternalLocation] = useState(() => context.location || '');
+  const location = externalLocation !== undefined ? externalLocation : internalLocation;
+  const setLocation = onLocationChange || setInternalLocation;
 
   const handleSubmit = () => {
     if (location.trim()) {
@@ -33,40 +38,56 @@ const ReportLocationInput: React.FC<ReportLocationInputProps> = React.memo(({ co
 
   return (
     <>
-      <Text size="xxl" weight="bold" color="black" className={styles.question}>
-        목격한 장소를 입력해주세요.
-      </Text>
-      <div className={styles.inputContainer}>
-        <input
-          type="text"
-          value={location}
-          onChange={(e) => setLocation(e.target.value)}
-          placeholder="예: 서울시 강남구 테헤란로 123"
-          className={styles.input}
-          onKeyPress={(e) => {
-            if (e.key === 'Enter' && location.trim()) {
-              handleSubmit();
-            }
-          }}
-        />
-      </div>
-      <div className={styles.buttonContainer}>
-        <Button
-          variant="darkSecondary"
-          fullWidth
-          onClick={handleBack}
-        >
-          이전
-        </Button>
-        <Button
-          variant="darkPrimary"
-          fullWidth
-          onClick={handleSubmit}
-          disabled={!location.trim()}
-        >
-          다음
-        </Button>
-      </div>
+      {!readOnly && (
+        <Text size="xxl" weight="bold" color="black" className={styles.question}>
+          목격한 장소를 입력해주세요.
+        </Text>
+      )}
+      {readOnly && location ? (
+        <div className={styles.readOnlyContainer}>
+          <Text size="sm" color="gray" className={styles.readOnlyLabel}>
+            목격 위치
+          </Text>
+          <Text size="md" weight="bold" color="black" className={styles.readOnlyValue}>
+            {location}
+          </Text>
+        </div>
+      ) : (
+        <div className={styles.inputContainer}>
+          <input
+            type="text"
+            value={location}
+            onChange={(e) => !readOnly && setLocation(e.target.value)}
+            placeholder="예: 서울시 강남구 테헤란로 123"
+            className={`${styles.input} ${readOnly ? styles.readOnly : ''}`}
+            readOnly={readOnly}
+            onKeyPress={(e) => {
+              if (!readOnly && e.key === 'Enter' && location.trim()) {
+                handleSubmit();
+              }
+            }}
+          />
+        </div>
+      )}
+      {!readOnly && !hideButtons && (
+        <div className={styles.buttonContainer}>
+          <Button
+            variant="darkSecondary"
+            fullWidth
+            onClick={handleBack}
+          >
+            이전
+          </Button>
+          <Button
+            variant="darkPrimary"
+            fullWidth
+            onClick={handleSubmit}
+            disabled={!location.trim()}
+          >
+            다음
+          </Button>
+        </div>
+      )}
     </>
   );
 });

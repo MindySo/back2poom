@@ -6,22 +6,52 @@
 
 .textarea {
   width: 100%;
-  padding: 16px 20px;
+  padding: 12px 0;
   font-size: 16px;
-  border: 1px solid #EEF1F6;
-  border-radius: 12px;
+  border: none;
+  border-bottom: 1px solid #EEF1F6;
+  border-radius: 0;
   font-family: 'Pretendard, -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif';
   outline: none;
   resize: vertical;
-  min-height: 120px;
+  min-height: 60px;
+  background: transparent;
+}
+
+.textarea:focus {
+  border-bottom-color: #2B3A55;
 }
 
 .inputContainer {
-  margin-top: 24px;
+  margin-top: 16px;
+}
+
+.textarea.readOnly {
+  background-color: transparent;
+  cursor: default;
+  opacity: 0.7;
+}
+
+.readOnlyContainer {
+  margin-top: 16px;
+}
+
+.readOnlyLabel {
+  font-size: 14px;
+  color: #767676;
+  margin-bottom: 8px;
+  display: block;
+}
+
+.readOnlyValue {
+  font-size: 16px;
+  font-weight: 700;
+  color: #000000;
+  display: block;
 }
 
 .buttonContainer {
-  margin-top: 24px;
+  margin-top: 16px;
   display: flex;
   gap: 12px;
 }

@@ -13,11 +13,13 @@ export interface ReportQuestionStepProps {
   question: string; // 질문 텍스트 (예: "신고 방법을 선택해주세요.")
   answers: AnswerOption[]; // 답변 옵션들
   selectedAnswerId?: string; // 선택된 답변 ID
-  onAnswerSelect: (answerId: string) => void; // 답변 선택 핸들러
+  onAnswerSelect?: (answerId: string) => void; // 답변 선택 핸들러 (readOnly일 때는 선택사항)
   showNavigationButtons?: boolean; // 이전/다음 버튼 표시 여부
   onBack?: () => void; // 이전 버튼 핸들러
   onNext?: () => void; // 다음 버튼 핸들러
   nextButtonDisabled?: boolean; // 다음 버튼 비활성화 여부
+  readOnly?: boolean; // 읽기 전용 모드
+  hideButtons?: boolean; // 버튼 숨기기 (버튼을 외부에서 렌더링할 때 사용)
 }
 
 const ReportQuestionStep: React.FC<ReportQuestionStepProps> = ({
@@ -30,37 +32,60 @@ const ReportQuestionStep: React.FC<ReportQuestionStepProps> = ({
   onBack,
   onNext,
   nextButtonDisabled = false,
+  readOnly = false,
+  hideButtons = false,
 }) => {
+  // 읽기 전용일 때 선택된 답변의 label 찾기
+  const selectedAnswer = readOnly && selectedAnswerId 
+    ? answers.find(a => a.id === selectedAnswerId)
+    : null;
+
   return (
     <>
-      {context && (
+      {context && !readOnly && (
         <Text size="md" color="gray" className={styles.context}>
           {context}
         </Text>
       )}
-      <Text size="xxl" weight="bold" color="black" className={styles.question}>
-        {question}
-      </Text>
-      <div className={styles.answerContainer}>
-        {answers.map((answer) => {
-          const isSelected = selectedAnswerId === answer.id;
-          return (
-            <button
-              key={answer.id}
-              className={`${styles.answerButton} ${isSelected ? styles.selected : ''}`}
-              onClick={() => {
-                // 이미 선택된 버튼을 클릭한 경우 무시 (무한 루프 방지)
-                if (!isSelected) {
-                  onAnswerSelect(answer.id);
-                }
-              }}
-            >
-              {answer.label}
-            </button>
-          );
-        })}
-      </div>
-      {showNavigationButtons && (
+      {!readOnly && (
+        <Text size="xxl" weight="bold" color="black" className={styles.question}>
+          {question}
+        </Text>
+      )}
+      {readOnly && selectedAnswer ? (
+        // 읽기 전용일 때는 라벨-값 형태로 표시
+        <div className={styles.readOnlyContainer}>
+          <Text size="sm" color="gray" className={styles.readOnlyLabel}>
+            {question.replace('을 선택해주세요.', '').replace('를 선택해주세요.', '')}
+          </Text>
+          <Text size="md" weight="bold" color="black" className={styles.readOnlyValue}>
+            {selectedAnswer.label}
+          </Text>
+        </div>
+      ) : (
+        <div className={styles.answerContainer}>
+          {answers.map((answer) => {
+            const isSelected = selectedAnswerId === answer.id;
+            return (
+              <button
+                key={answer.id}
+                className={`${styles.answerButton} ${isSelected ? styles.selected : ''} ${readOnly ? styles.readOnly : ''}`}
+                onClick={() => {
+                  // 읽기 전용 모드이거나 이미 선택된 버튼을 클릭한 경우 무시
+                  if (readOnly || !onAnswerSelect) return;
+                  if (!isSelected) {
+                    onAnswerSelect(answer.id);
+                  }
+                }}
+                disabled={readOnly}
+              >
+                {answer.label}
+              </button>
+            );
+          })}
+        </div>
+      )}
+      {showNavigationButtons && !readOnly && !hideButtons && (
         <div style={{ marginTop: '24px', display: 'flex', gap: '12px' }}>
           {onBack && (
             <Button

@@ -12,12 +12,17 @@ export interface ReportDetailInputProps {
     detail?: string;
   };
   history: any;
+  readOnly?: boolean; // 읽기 전용 모드
+  hideButtons?: boolean; // 버튼 숨기기 (버튼을 외부에서 렌더링할 때 사용)
+  detail?: string; // 외부에서 detail 상태를 제어할 때 사용
+  onDetailChange?: (value: string) => void; // 외부에서 detail 상태를 제어할 때 사용
 }
 
-const ReportDetailInput: React.FC<ReportDetailInputProps> = React.memo(({ context, history }) => {
-  // useState 초기값을 함수로 전달하여 컴포넌트 마운트 시 한 번만 초기화
-  // context에 저장된 값이 있으면 그것을 초기값으로 사용
-  const [detail, setDetail] = useState(() => context.detail || '');
+const ReportDetailInput: React.FC<ReportDetailInputProps> = React.memo(({ context, history, readOnly = false, hideButtons = false, detail: externalDetail, onDetailChange }) => {
+  // 외부에서 detail을 제어하는 경우와 내부에서 제어하는 경우를 구분
+  const [internalDetail, setInternalDetail] = useState(() => context.detail || '');
+  const detail = externalDetail !== undefined ? externalDetail : internalDetail;
+  const setDetail = onDetailChange || setInternalDetail;
 
   const handleSubmit = () => {
     if (detail.trim()) {
@@ -40,35 +45,51 @@ const ReportDetailInput: React.FC<ReportDetailInputProps> = React.memo(({ contex
 
   return (
     <>
-      <Text size="xxl" weight="bold" color="black" className={styles.question}>
-        추가적인 정보를 입력해주세요.
-      </Text>
-      <div className={styles.inputContainer}>
-        <textarea
-          value={detail}
-          onChange={(e) => setDetail(e.target.value)}
-          placeholder="추가적인 정보를 입력해주세요."
-          rows={8}
-          className={styles.textarea}
-        />
-      </div>
-      <div className={styles.buttonContainer}>
-        <Button
-          variant="darkSecondary"
-          fullWidth
-          onClick={handleBack}
-        >
-          이전
-        </Button>
-        <Button
-          variant="darkPrimary"
-          fullWidth
-          onClick={handleSubmit}
-          disabled={!detail.trim()}
-        >
-          제출
-        </Button>
-      </div>
+      {!readOnly && (
+        <Text size="xxl" weight="bold" color="black" className={styles.question}>
+          추가적인 정보를 입력해주세요.
+        </Text>
+      )}
+      {readOnly && detail ? (
+        <div className={styles.readOnlyContainer}>
+          <Text size="sm" color="gray" className={styles.readOnlyLabel}>
+            추가 정보
+          </Text>
+          <Text size="md" weight="bold" color="black" className={styles.readOnlyValue}>
+            {detail}
+          </Text>
+        </div>
+      ) : (
+        <div className={styles.inputContainer}>
+          <textarea
+            value={detail}
+            onChange={(e) => !readOnly && setDetail(e.target.value)}
+            placeholder="추가적인 정보를 입력해주세요."
+            rows={3}
+            className={`${styles.textarea} ${readOnly ? styles.readOnly : ''}`}
+            readOnly={readOnly}
+          />
+        </div>
+      )}
+      {!readOnly && !hideButtons && (
+        <div className={styles.buttonContainer}>
+          <Button
+            variant="darkSecondary"
+            fullWidth
+            onClick={handleBack}
+          >
+            이전
+          </Button>
+          <Button
+            variant="darkPrimary"
+            fullWidth
+            onClick={handleSubmit}
+            disabled={!detail.trim()}
+          >
+            제출
+          </Button>
+        </div>
+      )}
     </>
   );
 });

@@ -1,7 +1,7 @@
 .container {
   display: flex;
   flex-direction: column;
-  padding: 20px;
+  padding: 20px 24px;
   min-height: 100vh;
 }
 
@@ -13,7 +13,7 @@
 
 @media (max-width: 375px) {
   .container {
-    padding: 16px;
+    padding: 16px 20px;
   }
 
   .context {

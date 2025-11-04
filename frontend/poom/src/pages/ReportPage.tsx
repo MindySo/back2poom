@@ -2,6 +2,7 @@ import React, { useCallback } from 'react';
 import { useFunnel } from '@use-funnel/react-router-dom';
 import { useSearchParams } from 'react-router-dom';
 import Text from '../components/common/atoms/Text';
+import Button from '../components/common/atoms/Button';
 import ReportQuestionStep from '../components/report/ReportQuestionStep';
 import ReportLocationInput from '../components/report/ReportLocationInput';
 import ReportTimeInput from '../components/report/ReportTimeInput';
@@ -55,8 +56,8 @@ const confidenceLevelAnswers: AnswerOption[] = [
 const MethodStep: React.FC<{ context: any; history: any }> = React.memo(({ context, history }) => {
   const handleAnswerSelect = useCallback(
     (answerId: string) => {
-      // 공식 문서 방식: 이전 context를 spread하고 새로운 값만 추가
-      history.push('level', (prev: any) => ({
+      // 선택된 답변을 저장하지만 자동으로 다음 단계로 이동하지 않음
+      history.push('method', (prev: any) => ({
         ...prev,
         selectedMethod: answerId,
       }));
@@ -64,12 +65,31 @@ const MethodStep: React.FC<{ context: any; history: any }> = React.memo(({ conte
     [history]
   );
 
+  const handleMethodNext = useCallback(() => {
+    // 다음 버튼 클릭 시 다음 단계로 이동
+    if (context.selectedMethod) {
+      history.push('level', (prev: any) => ({
+        ...prev,
+        selectedMethod: context.selectedMethod,
+      }));
+    }
+  }, [history, context.selectedMethod]);
+
+  const handleMethodBack = useCallback(() => {
+    // 첫 단계이므로 이전 단계가 없음 (일관성을 위해 함수만 정의)
+    // 필요시 홈으로 이동하거나 다른 동작 추가 가능
+  }, []);
+
   return (
     <ReportQuestionStep
       question="신고 방법을 선택해주세요."
       answers={reportMethodAnswers}
       selectedAnswerId={context.selectedMethod}
       onAnswerSelect={handleAnswerSelect}
+      showNavigationButtons={true}
+      onBack={handleMethodBack}
+      onNext={handleMethodNext}
+      nextButtonDisabled={!context.selectedMethod}
     />
   );
 });
@@ -88,7 +108,7 @@ const LevelStep: React.FC<{ context: any; history: any }> = React.memo(({ contex
     [history]
   );
 
-  const handleNext = useCallback(() => {
+  const handleLevelNext = useCallback(() => {
     // 다음 버튼 클릭 시 다음 단계로 이동
     if (context.confidenceLevel) {
       history.push('location', (prev: any) => ({
@@ -99,7 +119,7 @@ const LevelStep: React.FC<{ context: any; history: any }> = React.memo(({ contex
     }
   }, [history, context.selectedMethod, context.confidenceLevel]);
 
-  const handleBack = useCallback(() => {
+  const handleLevelBack = useCallback(() => {
     // 이전 단계로 돌아갈 때는 현재 단계의 입력값을 제거
     history.push('method', (prev: any) => {
       const { confidenceLevel, ...restContext } = prev;
@@ -108,20 +128,266 @@ const LevelStep: React.FC<{ context: any; history: any }> = React.memo(({ contex
   }, [history]);
 
   return (
-    <ReportQuestionStep
-      question="확신도를 선택해주세요."
-      answers={confidenceLevelAnswers}
-      selectedAnswerId={context.confidenceLevel}
-      onAnswerSelect={handleAnswerSelect}
-      showNavigationButtons={true}
-      onBack={handleBack}
-      onNext={handleNext}
-      nextButtonDisabled={!context.confidenceLevel}
-    />
+    <>
+      {/* 현재 단계: level */}
+      <ReportQuestionStep
+        question="확신도를 선택해주세요."
+        answers={confidenceLevelAnswers}
+        selectedAnswerId={context.confidenceLevel}
+        onAnswerSelect={handleAnswerSelect}
+        hideButtons={true}
+      />
+      {/* 이전 단계: method */}
+      <div style={{ marginTop: '20px' }}>
+        <ReportQuestionStep
+          question="신고 방법을 선택해주세요."
+          answers={reportMethodAnswers}
+          selectedAnswerId={context.selectedMethod}
+          readOnly={true}
+        />
+      </div>
+      {/* 버튼 고정 */}
+      <div style={{ marginTop: '20px', display: 'flex', gap: '12px' }}>
+        <Button
+          variant="darkSecondary"
+          fullWidth
+          onClick={handleLevelBack}
+        >
+          이전
+        </Button>
+        <Button
+          variant="darkPrimary"
+          fullWidth
+          onClick={handleLevelNext}
+          disabled={!context.confidenceLevel}
+        >
+          다음
+        </Button>
+      </div>
+    </>
   );
 });
 
 LevelStep.displayName = 'LevelStep';
+
+const LocationStep: React.FC<{ context: any; history: any }> = React.memo(({ context, history }) => {
+  const [location, setLocation] = React.useState(() => context.location || '');
+
+  const handleSubmit = () => {
+    if (location.trim()) {
+      history.push('time', (prev: any) => ({
+        ...prev,
+        location: location.trim(),
+      }));
+    }
+  };
+
+  const handleBack = () => {
+    history.push('level', (prev: any) => {
+      const { location: _, ...restContext } = prev;
+      return restContext;
+    });
+  };
+
+  return (
+    <>
+      {/* 현재 단계 */}
+      <ReportLocationInput 
+        context={context}
+        history={history} 
+        hideButtons={true}
+        location={location}
+        onLocationChange={setLocation}
+      />
+      {/* 이전 단계들 */}
+      <div style={{ marginTop: '20px' }}>
+        <ReportQuestionStep
+          question="확신도를 선택해주세요."
+          answers={confidenceLevelAnswers}
+          selectedAnswerId={context.confidenceLevel}
+          readOnly={true}
+        />
+      </div>
+      <div style={{ marginTop: '20px' }}>
+        <ReportQuestionStep
+          question="신고 방법을 선택해주세요."
+          answers={reportMethodAnswers}
+          selectedAnswerId={context.selectedMethod}
+          readOnly={true}
+        />
+      </div>
+      {/* 버튼 고정 */}
+      <div style={{ marginTop: '20px', display: 'flex', gap: '12px' }}>
+        <Button
+          variant="darkSecondary"
+          fullWidth
+          onClick={handleBack}
+        >
+          이전
+        </Button>
+        <Button
+          variant="darkPrimary"
+          fullWidth
+          onClick={handleSubmit}
+          disabled={!location.trim()}
+        >
+          다음
+        </Button>
+      </div>
+    </>
+  );
+});
+
+LocationStep.displayName = 'LocationStep';
+
+const TimeStep: React.FC<{ context: any; history: any }> = React.memo(({ context, history }) => {
+  const [time, setTime] = React.useState(() => context.time || '');
+
+  const handleSubmit = () => {
+    if (time.trim()) {
+      history.push('detail', (prev: any) => ({
+        ...prev,
+        time: time.trim(),
+      }));
+    }
+  };
+
+  const handleBack = () => {
+    history.push('location', (prev: any) => {
+      const { time: _, ...restContext } = prev;
+      return restContext;
+    });
+  };
+
+  return (
+    <>
+      {/* 현재 단계 */}
+      <ReportTimeInput 
+        context={context}
+        history={history} 
+        hideButtons={true}
+        time={time}
+        onTimeChange={setTime}
+      />
+      {/* 이전 단계들 */}
+      <div style={{ marginTop: '20px' }}>
+        <ReportLocationInput context={context} history={history} readOnly={true} />
+      </div>
+      <div style={{ marginTop: '20px' }}>
+        <ReportQuestionStep
+          question="확신도를 선택해주세요."
+          answers={confidenceLevelAnswers}
+          selectedAnswerId={context.confidenceLevel}
+          readOnly={true}
+        />
+      </div>
+      <div style={{ marginTop: '20px' }}>
+        <ReportQuestionStep
+          question="신고 방법을 선택해주세요."
+          answers={reportMethodAnswers}
+          selectedAnswerId={context.selectedMethod}
+          readOnly={true}
+        />
+      </div>
+      {/* 버튼 고정 */}
+      <div style={{ marginTop: '20px', display: 'flex', gap: '12px' }}>
+        <Button
+          variant="darkSecondary"
+          fullWidth
+          onClick={handleBack}
+        >
+          이전
+        </Button>
+        <Button
+          variant="darkPrimary"
+          fullWidth
+          onClick={handleSubmit}
+          disabled={!time.trim()}
+        >
+          다음
+        </Button>
+      </div>
+    </>
+  );
+});
+
+TimeStep.displayName = 'TimeStep';
+
+const DetailStep: React.FC<{ context: any; history: any }> = React.memo(({ context, history }) => {
+  const [detail, setDetail] = React.useState(() => context.detail || '');
+
+  const handleSubmit = () => {
+    if (detail.trim()) {
+      console.log('신고 완료:', {
+        ...context,
+        detail: detail.trim(),
+      });
+    }
+  };
+
+  const handleBack = () => {
+    history.push('time', (prev: any) => {
+      const { detail: _, ...restContext } = prev;
+      return restContext;
+    });
+  };
+
+  return (
+    <>
+      {/* 현재 단계 */}
+      <ReportDetailInput 
+        context={context}
+        history={history} 
+        hideButtons={true}
+        detail={detail}
+        onDetailChange={setDetail}
+      />
+      {/* 이전 단계들 */}
+      <div style={{ marginTop: '20px' }}>
+        <ReportTimeInput context={context} history={history} readOnly={true} />
+      </div>
+      <div style={{ marginTop: '20px' }}>
+        <ReportLocationInput context={context} history={history} readOnly={true} />
+      </div>
+      <div style={{ marginTop: '20px' }}>
+        <ReportQuestionStep
+          question="확신도를 선택해주세요."
+          answers={confidenceLevelAnswers}
+          selectedAnswerId={context.confidenceLevel}
+          readOnly={true}
+        />
+      </div>
+      <div style={{ marginTop: '20px' }}>
+        <ReportQuestionStep
+          question="신고 방법을 선택해주세요."
+          answers={reportMethodAnswers}
+          selectedAnswerId={context.selectedMethod}
+          readOnly={true}
+        />
+      </div>
+      {/* 버튼 고정 */}
+      <div style={{ marginTop: '20px', display: 'flex', gap: '12px' }}>
+        <Button
+          variant="darkSecondary"
+          fullWidth
+          onClick={handleBack}
+        >
+          이전
+        </Button>
+        <Button
+          variant="darkPrimary"
+          fullWidth
+          onClick={handleSubmit}
+          disabled={!detail.trim()}
+        >
+          제출
+        </Button>
+      </div>
+    </>
+  );
+});
+
+DetailStep.displayName = 'DetailStep';
 
 
 const ReportPage: React.FC = () => {
@@ -149,13 +415,13 @@ const ReportPage: React.FC = () => {
           <LevelStep context={context} history={history} />
         )}
         location={({ context, history }) => (
-          <ReportLocationInput context={context} history={history} />
+          <LocationStep context={context} history={history} />
         )}
         time={({ context, history }) => (
-          <ReportTimeInput context={context} history={history} />
+          <TimeStep context={context} history={history} />
         )}
         detail={({ context, history }) => (
-          <ReportDetailInput context={context} history={history} />
+          <DetailStep context={context} history={history} />
         )}
       />
     </div>

@@ -6,12 +6,17 @@ import styles from './ReportTimeInput.module.css';
 export interface ReportTimeInputProps {
   context: { selectedMethod: string; confidenceLevel: string; location: string; time?: string };
   history: any;
+  readOnly?: boolean; // 읽기 전용 모드
+  hideButtons?: boolean; // 버튼 숨기기 (버튼을 외부에서 렌더링할 때 사용)
+  time?: string; // 외부에서 time 상태를 제어할 때 사용
+  onTimeChange?: (value: string) => void; // 외부에서 time 상태를 제어할 때 사용
 }
 
-const ReportTimeInput: React.FC<ReportTimeInputProps> = React.memo(({ context, history }) => {
-  // useState 초기값을 함수로 전달하여 컴포넌트 마운트 시 한 번만 초기화
-  // context에 저장된 값이 있으면 그것을 초기값으로 사용
-  const [time, setTime] = useState(() => context.time || '');
+const ReportTimeInput: React.FC<ReportTimeInputProps> = React.memo(({ context, history, readOnly = false, hideButtons = false, time: externalTime, onTimeChange }) => {
+  // 외부에서 time을 제어하는 경우와 내부에서 제어하는 경우를 구분
+  const [internalTime, setInternalTime] = useState(() => context.time || '');
+  const time = externalTime !== undefined ? externalTime : internalTime;
+  const setTime = onTimeChange || setInternalTime;
 
   const handleSubmit = () => {
     if (time.trim()) {
@@ -33,40 +38,56 @@ const ReportTimeInput: React.FC<ReportTimeInputProps> = React.memo(({ context, h
 
   return (
     <>
-      <Text size="xxl" weight="bold" color="black" className={styles.question}>
-        목격한 시간을 입력해주세요.
-      </Text>
-      <div className={styles.inputContainer}>
-        <input
-          type="text"
-          value={time}
-          onChange={(e) => setTime(e.target.value)}
-          placeholder="예: 2024년 1월 15일 오후 3시"
-          className={styles.input}
-          onKeyPress={(e) => {
-            if (e.key === 'Enter' && time.trim()) {
-              handleSubmit();
-            }
-          }}
-        />
-      </div>
-      <div className={styles.buttonContainer}>
-        <Button
-          variant="darkSecondary"
-          fullWidth
-          onClick={handleBack}
-        >
-          이전
-        </Button>
-        <Button
-          variant="darkPrimary"
-          fullWidth
-          onClick={handleSubmit}
-          disabled={!time.trim()}
-        >
-          다음
-        </Button>
-      </div>
+      {!readOnly && (
+        <Text size="xxl" weight="bold" color="black" className={styles.question}>
+          목격한 시간을 입력해주세요.
+        </Text>
+      )}
+      {readOnly && time ? (
+        <div className={styles.readOnlyContainer}>
+          <Text size="sm" color="gray" className={styles.readOnlyLabel}>
+            목격 시간
+          </Text>
+          <Text size="md" weight="bold" color="black" className={styles.readOnlyValue}>
+            {time}
+          </Text>
+        </div>
+      ) : (
+        <div className={styles.inputContainer}>
+          <input
+            type="text"
+            value={time}
+            onChange={(e) => !readOnly && setTime(e.target.value)}
+            placeholder="예: 2024년 1월 15일 오후 3시"
+            className={`${styles.input} ${readOnly ? styles.readOnly : ''}`}
+            readOnly={readOnly}
+            onKeyPress={(e) => {
+              if (!readOnly && e.key === 'Enter' && time.trim()) {
+                handleSubmit();
+              }
+            }}
+          />
+        </div>
+      )}
+      {!readOnly && !hideButtons && (
+        <div className={styles.buttonContainer}>
+          <Button
+            variant="darkSecondary"
+            fullWidth
+            onClick={handleBack}
+          >
+            이전
+          </Button>
+          <Button
+            variant="darkPrimary"
+            fullWidth
+            onClick={handleSubmit}
+            disabled={!time.trim()}
+          >
+            다음
+          </Button>
+        </div>
+      )}
     </>
   );
 });
