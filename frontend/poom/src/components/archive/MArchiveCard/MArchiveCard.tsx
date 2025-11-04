@@ -1,13 +1,13 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useQueryClient } from '@tanstack/react-query';
-import { useMissingDetail } from '../../hooks/useMissingDetail';
-import type { MissingPerson } from '../../types/missing';
+import { useMissingDetail } from '../../../hooks/useMissingDetail';
+import type { MissingPerson } from '../../../types/missing';
 import styles from './MArchiveCard.module.css';
-import Badge from '../common/atoms/Badge';
-import Text from '../common/atoms/Text';
-import tempImg from '../../assets/TempImg.png';
-import Button from '../common/atoms/Button';
+import Badge from '../../common/atoms/Badge';
+import Text from '../../common/atoms/Text';
+import tempImg from '../../../assets/TempImg.png';
+import Button from '../../common/atoms/Button';
 
 export interface MArchiveCardProps {
   personId: number;

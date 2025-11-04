@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
-import Text from '../common/atoms/Text';
-import Button from '../common/atoms/Button';
+import Text from '../../common/atoms/Text';
+import Button from '../../common/atoms/Button';
 import styles from './ReportDetailInput.module.css';
 
 export interface ReportDetailInputProps {
@@ -46,7 +46,7 @@ const ReportDetailInput: React.FC<ReportDetailInputProps> = React.memo(({ contex
   return (
     <>
       {!readOnly && (
-        <Text size="xxl" weight="bold" color="black" className={styles.question}>
+        <Text size="xxl" weight="bold" color="darkMain" className={styles.question}>
           추가적인 정보를 입력해주세요.
         </Text>
       )}
@@ -65,7 +65,7 @@ const ReportDetailInput: React.FC<ReportDetailInputProps> = React.memo(({ contex
             value={detail}
             onChange={(e) => !readOnly && setDetail(e.target.value)}
             placeholder="추가적인 정보를 입력해주세요."
-            rows={3}
+            rows={1}
             className={`${styles.textarea} ${readOnly ? styles.readOnly : ''}`}
             readOnly={readOnly}
           />

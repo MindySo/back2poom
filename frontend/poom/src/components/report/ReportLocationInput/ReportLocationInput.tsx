@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
-import Text from '../common/atoms/Text';
-import Button from '../common/atoms/Button';
+import Text from '../../common/atoms/Text';
+import Button from '../../common/atoms/Button';
 import styles from './ReportLocationInput.module.css';
 
 export interface ReportLocationInputProps {
@@ -39,7 +39,7 @@ const ReportLocationInput: React.FC<ReportLocationInputProps> = React.memo(({ co
   return (
     <>
       {!readOnly && (
-        <Text size="xxl" weight="bold" color="black" className={styles.question}>
+        <Text size="xxl" weight="bold" color="darkMain" className={styles.question}>
           목격한 장소를 입력해주세요.
         </Text>
       )}

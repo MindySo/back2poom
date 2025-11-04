@@ -1,6 +1,6 @@
 import React from 'react';
-import Text from '../common/atoms/Text';
-import Button from '../common/atoms/Button';
+import Text from '../../common/atoms/Text';
+import Button from '../../common/atoms/Button';
 import styles from './ReportQuestionStep.module.css';
 
 export type AnswerOption = {
@@ -48,7 +48,7 @@ const ReportQuestionStep: React.FC<ReportQuestionStepProps> = ({
         </Text>
       )}
       {!readOnly && (
-        <Text size="xxl" weight="bold" color="black" className={styles.question}>
+        <Text size="xxl" weight="bold" color="darkMain" className={styles.question}>
           {question}
         </Text>
       )}

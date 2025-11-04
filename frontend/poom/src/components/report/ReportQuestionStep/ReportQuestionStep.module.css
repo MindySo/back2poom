@@ -37,6 +37,7 @@
 .answerButton.selected {
   background-color: #2B3A55;
   color: #FFFFFF;
+  border-color: #2B3A55;
 }
 
 .answerButton.readOnly {

@@ -1,11 +1,11 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useMissingDetail } from '../../hooks/useMissingDetail';
+import { useMissingDetail } from '../../../hooks/useMissingDetail';
 import styles from './ArchiveDetailPopup.module.css';
-import Badge from '../common/atoms/Badge';
-import Text from '../common/atoms/Text';
-import Button from '../common/atoms/Button';
-import tempImg from '../../assets/TempImg.png';
+import Badge from '../../common/atoms/Badge';
+import Text from '../../common/atoms/Text';
+import Button from '../../common/atoms/Button';
+import tempImg from '../../../assets/TempImg.png';
 
 export interface ArchiveDetailPopupProps {
   personId: number;

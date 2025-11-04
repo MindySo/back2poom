@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
-import Text from '../common/atoms/Text';
-import Button from '../common/atoms/Button';
+import Text from '../../common/atoms/Text';
+import Button from '../../common/atoms/Button';
 import styles from './ReportTimeInput.module.css';
 
 export interface ReportTimeInputProps {
@@ -39,7 +39,7 @@ const ReportTimeInput: React.FC<ReportTimeInputProps> = React.memo(({ context, h
   return (
     <>
       {!readOnly && (
-        <Text size="xxl" weight="bold" color="black" className={styles.question}>
+        <Text size="xxl" weight="bold" color="darkMain" className={styles.question}>
           목격한 시간을 입력해주세요.
         </Text>
       )}
