@@ -3,16 +3,14 @@
   justify-content: space-between;
   align-items: stretch;
   padding: 0;
-  padding-right: 40px;
   width: 100vw;
   height: 90px;
-  position: relative;
+  position: fixed;
   left: 50%;
   right: 50%;
   margin-left: -50vw;
   margin-right: -50vw;
   box-sizing: border-box;
-  box-shadow: 0 4px 12px rgba(255, 255, 255, 0.3);
   z-index: 101;
 }
 
@@ -20,6 +18,18 @@
 .logoContainer {
   display: flex;
   align-items: stretch;
+  z-index: 102;
+  position: relative;
+}
+
+/* 로고를 제외한 나머지 영역 */
+.rightSection {
+  display: flex;
+  align-items: flex-end;
+  justify-content: flex-end;
+  flex: 1;
+  padding-right: 28px;
+  padding-bottom: 8px;
 }
 
 .logoBox {
@@ -60,7 +70,6 @@
   display: flex;
   gap: 12px;
   align-items: center;
-  margin-bottom: -30px;
 }
 
 .navButton {

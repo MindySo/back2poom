@@ -1,6 +1,6 @@
 import React from 'react';
-import { theme } from '../../../../theme';
-import Text from '../../atoms/Text';
+import { theme } from '../../../theme';
+import Text from '../../common/atoms/Text';
 import StatusBoard from '../StatusBoard/StatusBoard';
 import RecentMissing from '../RecentMissing/RecentMissing';
 import styles from './SideBar.module.css';
@@ -16,7 +16,7 @@ const SideBar: React.FC<SideBarProps> = ({ className = '', onMissingCardClick })
       className={`${styles.sideBar} ${className}`}
       style={{
         backgroundColor: theme.colors.beige,
-        boxShadow: '0 4px 12px rgba(255, 255, 255, 0.3)',
+        boxShadow: '0 4px 12px rgba(0, 0, 0, 0.2)',
       }}
     >
       {/* 현황판 */}

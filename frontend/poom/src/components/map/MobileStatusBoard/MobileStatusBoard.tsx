@@ -1,7 +1,7 @@
 import React from 'react';
 import { theme } from '../../../theme';
 import backIcon from '../../../assets/back_icon.png';
-import StatusBoard, { type StatusBoardProps } from '../../common/molecules/StatusBoard/StatusBoard';
+import StatusBoard, { type StatusBoardProps } from '../StatusBoard/StatusBoard';
 import styles from './MobileStatusBoard.module.css';
 
 interface MobileStatusBoardProps extends Omit<StatusBoardProps, 'className'> {
