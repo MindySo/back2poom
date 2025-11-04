@@ -79,6 +79,9 @@ public class MissingCase extends BaseTimeEntity {
     @Column(name = "etc_features", columnDefinition = "TEXT")
     private String etcFeatures;
 
+    @Column(name = "missing_id")
+    private Integer missingId;
+
     @Column(name = "ocr_text", columnDefinition = "TEXT")
     private String ocrText;
 

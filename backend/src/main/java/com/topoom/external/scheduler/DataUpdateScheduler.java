@@ -19,9 +19,7 @@ public class DataUpdateScheduler {
 
         try {
             int rowSize = 100;  // 한 번에 가져올 데이터 수
-
             missingCaseSyncService.syncMissing(rowSize);
-
             log.info("Safe182 정기 데이터 수집 완료");
         } catch (Exception e) {
             log.error("Safe182 정기 데이터 수집 중 오류 발생", e);

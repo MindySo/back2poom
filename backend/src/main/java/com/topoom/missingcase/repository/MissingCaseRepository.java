@@ -28,4 +28,6 @@ public interface MissingCaseRepository extends JpaRepository<MissingCase, Long> 
         WHERE mc.id = :id AND mc.isDeleted = false
     """)
     Optional<MissingCase> findDetailById(@Param("id") Long id);
+
+    Optional<MissingCase> findByMissingId(Integer missingId);
 }
