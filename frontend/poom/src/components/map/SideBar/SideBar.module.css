@@ -1,8 +1,8 @@
 .sideBar {
   position: fixed;
   left: 0;
-  top: 90px;
-  width: 360px;
+  top: 5.625rem;
+  width: 22.5rem;
   bottom: 0;
   box-sizing: border-box;
   z-index: 100;
@@ -12,8 +12,8 @@
 
 /* 최신 실종자 제목 */
 .recentMissingHeader {
-  padding: 24px 24px 0;
-  margin-bottom: 16px;
+  padding: 1.5rem 1.5rem 0;
+  margin-bottom: 1rem;
   flex-shrink: 0;
 }
 
@@ -21,15 +21,15 @@
 .recentMissingList {
   display: flex;
   flex-direction: column;
-  gap: 24px;
-  padding: 0 16px 24px 16px;
+  gap: 1.5rem;
+  padding: 0 1rem 1.5rem 1rem;
   overflow-y: auto;
   flex: 1;
 }
 
 /* 스크롤바 스타일 */
 .recentMissingList::-webkit-scrollbar {
-  width: 8px;
+  width: 0.5rem;
 }
 
 .recentMissingList::-webkit-scrollbar-track {
@@ -38,7 +38,7 @@
 
 .recentMissingList::-webkit-scrollbar-thumb {
   background: transparent;
-  border-radius: 4px;
+  border-radius: 0.25rem;
 }
 
 .recentMissingList:hover::-webkit-scrollbar-thumb {

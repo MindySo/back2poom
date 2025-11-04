@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
-import SideBar from '../components/common/molecules/SideBar/SideBar';
+import SideBar from '../components/map/SideBar/SideBar';
 import useKakaoMap from '../hooks/useKakaoMap';
 import Dashboard from '../components/map/Dashboard/Dashboard';
 import { useIsMobile } from '../hooks/useMediaQuery';

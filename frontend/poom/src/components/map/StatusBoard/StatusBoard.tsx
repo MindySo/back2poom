@@ -1,6 +1,6 @@
 import React from 'react';
-import { theme } from '../../../../theme';
-import Text from '../../atoms/Text';
+import { theme } from '../../../theme';
+import Text from '../../common/atoms/Text';
 import styles from './StatusBoard.module.css';
 
 export interface StatusData {
@@ -11,9 +11,16 @@ export interface StatusData {
 export interface StatusBoardProps {
   data: [StatusData, StatusData, StatusData];
   className?: string;
+  textColor?: keyof typeof theme.colors;
+  borderColor?: string;
 }
 
-const StatusBoard: React.FC<StatusBoardProps> = ({ data, className = '' }) => {
+const StatusBoard: React.FC<StatusBoardProps> = ({
+  data,
+  className = '',
+  textColor = 'darkMain',
+  borderColor = '#2B3A55',
+}) => {
   const getFormattedDate = () => {
     const now = new Date();
     const year = now.getFullYear();
@@ -29,6 +36,7 @@ const StatusBoard: React.FC<StatusBoardProps> = ({ data, className = '' }) => {
       className={`${styles.statusBoard} ${className}`}
       style={{
         backgroundColor: 'transparent',
+        borderBottom: `1px solid ${borderColor}`,
       }}
     >
       {/* 제목 */}
@@ -37,7 +45,7 @@ const StatusBoard: React.FC<StatusBoardProps> = ({ data, className = '' }) => {
           as="h2"
           size="xxl"
           weight="bold"
-          color="darkMain"
+          color={textColor}
         >
           실종자 현황판
         </Text>
@@ -48,7 +56,7 @@ const StatusBoard: React.FC<StatusBoardProps> = ({ data, className = '' }) => {
         <Text
           size="xl"
           weight="extraLight"
-          color="darkMain"
+          color={textColor}
         >
           {getFormattedDate()}
         </Text>
@@ -61,14 +69,14 @@ const StatusBoard: React.FC<StatusBoardProps> = ({ data, className = '' }) => {
             <Text
               size="md"
               weight="regular"
-              color="darkMain"
+              color={textColor}
             >
               {item.label}
             </Text>
             <Text
               size="display"
               weight="semiBold"
-              color="darkMain"
+              color={textColor}
             >
               {item.value}
             </Text>

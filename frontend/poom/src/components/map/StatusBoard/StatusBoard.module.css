@@ -1,9 +1,8 @@
 .statusBoard {
   display: flex;
   flex-direction: column;
-  gap: 4px;
-  padding: 36px 24px 24px;
-  border-bottom: 1px solid #2B3A55;
+  gap: 0.25rem;
+  padding: 2.25rem 1.5rem 1.5rem;
 }
 
 .header {
@@ -19,8 +18,8 @@
 .dataContainer {
   display: flex;
   justify-content: space-between;
-  gap: 24px;
-  margin-top: 8px;
+  gap: 1.5rem;
+  margin-top: 0.5rem;
 }
 
 .dataItem {
