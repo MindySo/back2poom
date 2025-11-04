@@ -1,0 +1,8 @@
+.appContainer {
+  padding-top: 65px; /* TopBar 높이 */
+}
+
+.appContainer.mobile {
+  padding-top: 104px; /* MobileTopBar 높이: padding-top 16px + 로고 40px + margin-bottom 16px + 버튼(8px*2 + 16px) + padding-bottom 16px = 104px */
+}
+
