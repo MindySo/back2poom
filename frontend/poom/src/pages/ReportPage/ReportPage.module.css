@@ -1,0 +1,70 @@
+.container {
+  display: flex;
+  flex-direction: column;
+  padding: 20px 24px;
+  min-height: 100vh;
+}
+
+.stepWrapper {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+}
+
+.stepContent {
+  flex: 1;
+  min-height: 0;
+}
+
+.nextButtonContainer {
+  margin-top: auto;
+  padding-top: 20px;
+  position: sticky;
+  bottom: 0;
+  background-color: white;
+  padding-bottom: 20px;
+}
+
+.context {
+  font-size: 16px;
+  line-height: 1.5;
+  margin-bottom: 12px;
+}
+
+.backButton {
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  width: 24px;
+  height: 24px;
+  margin-bottom: 16px;
+}
+
+.backButton img {
+  width: 50%;
+  height: 100%;
+  object-fit: contain;
+  filter: grayscale(100%) brightness(0.6) opacity(0.7);
+}
+
+@media (max-width: 375px) {
+  .container {
+    padding: 16px 20px;
+  }
+
+  .context {
+    font-size: 14px;
+  }
+
+  .backButton {
+    width: 20px;
+    height: 20px;
+    margin-bottom: 12px;
+  }
+}
+

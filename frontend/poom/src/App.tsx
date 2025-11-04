@@ -2,10 +2,10 @@ import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import TopBar from './components/common/molecules/TopBar/TopBar';
 import MobileTopBar from './components/common/molecules/MobileTopBar/MobileTopBar';
 import { useIsMobile } from './hooks/useMediaQuery';
-import DevPage from './pages/DevPage';
+import DevPage from './pages/DevPage/DevPage';
 import MapPage from './pages/MapPage';
-import ListPage from './pages/ListPage';
-import ReportPage from './pages/ReportPage';
+import ListPage from './pages/ListPage/ListPage';
+import ReportPage from './pages/ReportPage/ReportPage';
 
 function App() {
   const isMobile = useIsMobile(1024);

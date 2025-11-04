@@ -1,12 +1,12 @@
-import { useState, useMemo } from "react";
-import { ArchiveCard } from "../components/archive/ArchiveCard";
-import { MArchiveCard } from "../components/archive/MArchiveCard";
-import { ArchiveDetailPopup } from "../components/archive/ArchiveDetailPopup";
+import React, { useState, useMemo } from "react";
+import { ArchiveCard } from "../../components/archive/ArchiveCard/ArchiveCard";
+import { MArchiveCard } from "../../components/archive/MArchiveCard/MArchiveCard";
+import { ArchiveDetailPopup } from "../../components/archive/ArchiveDetailPopup/ArchiveDetailPopup";
 import styles from "./ListPage.module.css";
-import bannerImg from "../assets/ListPageBanner.png";
-import { useIsMobile } from "../hooks/useMediaQuery";
-import { useMissingList } from "../hooks/useMissingList";
-import { theme } from "../theme";
+import bannerImg from "../../assets/ListPageBanner.png";
+import { useIsMobile } from "../../hooks/useMediaQuery";
+import { useMissingList } from "../../hooks/useMissingList";
+import { theme } from "../../theme";
 
 // hoursSinceMissing 계산 헬퍼 함수
 const calculateHoursSinceMissing = (occurredAt: string): number => {

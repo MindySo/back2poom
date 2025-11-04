@@ -1,10 +1,10 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import Button from '../components/common/atoms/Button';
-import Badge from '../components/common/atoms/Badge';
-import Text from '../components/common/atoms/Text';
-import MobileTopBar from '../components/common/molecules/MobileTopBar/MobileTopBar';
-import { theme } from '../theme';
+import Button from '../../components/common/atoms/Button';
+import Badge from '../../components/common/atoms/Badge';
+import Text from '../../components/common/atoms/Text';
+import MobileTopBar from '../../components/common/molecules/MobileTopBar/MobileTopBar';
+import { theme } from '../../theme';
 
 const DevPage: React.FC = () => {
   return (
