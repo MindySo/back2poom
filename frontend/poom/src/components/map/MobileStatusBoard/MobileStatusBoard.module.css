@@ -11,6 +11,7 @@
   transform-origin: top left;
   transition: opacity 0.2s ease;
   user-select: none;
+  pointer-events: auto;
 }
 
 .content {

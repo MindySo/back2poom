@@ -14,7 +14,7 @@ function App() {
     <Router>
       <div style={{ display: 'flex', flexDirection: 'column', height: '100dvh', width: '100%' }}>
         {isMobile ? <MobileTopBar /> : <TopBar />}
-        <div style={{ flex: 1, overflow: 'hidden' }}>
+        <div style={{ flex: 1, overflow: 'auto' }}>
           <Routes>
             <Route path="/" element={<DevPage />} />
             <Route path="/map" element={<MapPage />} />

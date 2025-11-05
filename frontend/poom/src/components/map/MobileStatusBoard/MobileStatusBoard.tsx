@@ -25,23 +25,32 @@ const MobileStatusBoard: React.FC<MobileStatusBoardProps> = ({
   borderColor = 'transparent',
   padding = '1.5rem 0 1.5rem 2.5rem',
 }) => {
-  const [scale, setScale] = useState(MAX_SCALE);
+  const [scale, setScale] = useState(MIN_SCALE);
   const [isResizing, setIsResizing] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
   const startXRef = useRef(0);
-  const startScaleRef = useRef(MAX_SCALE);
+  const startScaleRef = useRef(MIN_SCALE);
 
-  const handleResizeStart = (e: React.TouchEvent) => {
+  // 터치 또는 마우스 이벤트에서 X 좌표 추출
+  const getClientX = (e: React.TouchEvent | React.MouseEvent | TouchEvent | MouseEvent): number => {
+    if ('touches' in e) {
+      return e.touches[0].clientX;
+    }
+    return e.clientX;
+  };
+
+  const handleResizeStart = (e: React.TouchEvent | React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
     setIsResizing(true);
-    startXRef.current = e.touches[0].clientX;
+    startXRef.current = getClientX(e);
     startScaleRef.current = scale;
   };
 
-  const handleResizeMove = (e: React.TouchEvent) => {
+  const handleResizeMove = (clientX: number) => {
     if (!isResizing) return;
 
-    const currentX = e.touches[0].clientX;
-    const deltaX = currentX - startXRef.current;
+    const deltaX = clientX - startXRef.current;
 
     // deltaX를 scale 변화로 변환 (100px 드래그 = 0.1 스케일 변화)
     const scaleDelta = deltaX / 1000;
@@ -57,24 +66,32 @@ const MobileStatusBoard: React.FC<MobileStatusBoardProps> = ({
     setIsResizing(false);
   };
 
-  // 터치 이벤트 리스너 추가 (window 레벨)
+  // 터치 및 마우스 이벤트 리스너 추가 (window 레벨)
   useEffect(() => {
     if (!isResizing) return;
 
     const handleTouchMove = (e: TouchEvent) => {
-      handleResizeMove(e as any);
+      handleResizeMove(e.touches[0].clientX);
     };
 
-    const handleTouchEnd = () => {
+    const handleMouseMove = (e: MouseEvent) => {
+      handleResizeMove(e.clientX);
+    };
+
+    const handleEnd = () => {
       handleResizeEnd();
     };
 
     window.addEventListener('touchmove', handleTouchMove, { passive: true });
-    window.addEventListener('touchend', handleTouchEnd);
+    window.addEventListener('touchend', handleEnd);
+    window.addEventListener('mousemove', handleMouseMove);
+    window.addEventListener('mouseup', handleEnd);
 
     return () => {
       window.removeEventListener('touchmove', handleTouchMove);
-      window.removeEventListener('touchend', handleTouchEnd);
+      window.removeEventListener('touchend', handleEnd);
+      window.removeEventListener('mousemove', handleMouseMove);
+      window.removeEventListener('mouseup', handleEnd);
     };
   }, [isResizing, scale]);
 
@@ -102,6 +119,7 @@ const MobileStatusBoard: React.FC<MobileStatusBoardProps> = ({
       <div
         className={styles.resizeHandle}
         onTouchStart={handleResizeStart}
+        onMouseDown={handleResizeStart}
         role="slider"
         aria-label="크기 조절"
       />
