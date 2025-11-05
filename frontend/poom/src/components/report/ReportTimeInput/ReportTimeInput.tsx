@@ -36,6 +36,25 @@ const ReportTimeInput: React.FC<ReportTimeInputProps> = React.memo(({ context, h
     });
   };
 
+  const handleGetCurrentTime = () => {
+    if (readOnly) return;
+
+    const now = new Date();
+    const year = now.getFullYear();
+    const month = now.getMonth() + 1;
+    const date = now.getDate();
+    const hours = now.getHours();
+    const minutes = now.getMinutes();
+
+    // 오전/오후 구분
+    const ampm = hours >= 12 ? '오후' : '오전';
+    const displayHours = hours > 12 ? hours - 12 : hours === 0 ? 12 : hours;
+    const displayMinutes = minutes.toString().padStart(2, '0');
+
+    const formattedTime = `${year}년 ${month}월 ${date}일 ${ampm} ${displayHours}시 ${displayMinutes}분`;
+    setTime(formattedTime);
+  };
+
   return (
     <>
       {!readOnly && (
@@ -54,19 +73,30 @@ const ReportTimeInput: React.FC<ReportTimeInputProps> = React.memo(({ context, h
         </div>
       ) : (
         <div className={styles.inputContainer}>
-          <input
-            type="text"
-            value={time}
-            onChange={(e) => !readOnly && setTime(e.target.value)}
-            placeholder="예: 2024년 1월 15일 오후 3시"
-            className={`${styles.input} ${readOnly ? styles.readOnly : ''}`}
-            readOnly={readOnly}
-            onKeyPress={(e) => {
-              if (!readOnly && e.key === 'Enter' && time.trim()) {
-                handleSubmit();
-              }
-            }}
-          />
+          <div className={styles.inputWrapper}>
+            <input
+              type="text"
+              value={time}
+              onChange={(e) => !readOnly && setTime(e.target.value)}
+              placeholder="예: 2024년 1월 15일 오후 3시"
+              className={`${styles.input} ${readOnly ? styles.readOnly : ''}`}
+              readOnly={readOnly}
+              onKeyPress={(e) => {
+                if (!readOnly && e.key === 'Enter' && time.trim()) {
+                  handleSubmit();
+                }
+              }}
+            />
+            {!readOnly && (
+              <button
+                type="button"
+                onClick={handleGetCurrentTime}
+                className={styles.timeButton}
+              >
+                현재 시간
+              </button>
+            )}
+          </div>
         </div>
       )}
       {!readOnly && !hideButtons && (

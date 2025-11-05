@@ -1,4 +1,4 @@
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom';
 import TopBar from './components/common/molecules/TopBar/TopBar';
 import MobileTopBar from './components/common/molecules/MobileTopBar/MobileTopBar';
 import { useIsMobile } from './hooks/useMediaQuery';
@@ -8,22 +8,33 @@ import ListPage from './pages/ListPage/ListPage';
 import ReportPage from './pages/ReportPage/ReportPage';
 import styles from './App.module.css';
 
-function App() {
+function AppContent() {
   const isMobile = useIsMobile(1024);
+  const location = useLocation();
+  const isReportPage = location.pathname === '/report';
 
   return (
-    <Router>
-      <div style={{ display: 'flex', flexDirection: 'column', height: '100dvh', width: '100%' }}>
-        {isMobile ? <MobileTopBar /> : <TopBar />}
-        <div className={`${styles.appContainer} ${isMobile ? styles.mobile : ''}`} style={{ flex: 1, overflow: 'auto' }}>
-          <Routes>
-            <Route path="/" element={<DevPage />} />
-            <Route path="/map" element={<MapPage />} />
-            <Route path="/list" element={<ListPage />} />
-            <Route path="/report" element={<ReportPage />} />
-          </Routes>
-        </div>
+    <div style={{ display: 'flex', flexDirection: 'column', height: '100dvh', width: '100%' }}>
+      {isMobile ? <MobileTopBar /> : <TopBar />}
+      <div 
+        className={`${styles.appContainer} ${isMobile ? styles.mobile : ''}`} 
+        style={{ flex: 1, overflow: isReportPage ? 'hidden' : 'auto' }}
+      >
+        <Routes>
+          <Route path="/" element={<DevPage />} />
+          <Route path="/map" element={<MapPage />} />
+          <Route path="/list" element={<ListPage />} />
+          <Route path="/report" element={<ReportPage />} />
+        </Routes>
       </div>
+    </div>
+  );
+}
+
+function App() {
+  return (
+    <Router>
+      <AppContent />
     </Router>
   );
 }
