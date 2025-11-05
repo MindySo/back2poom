@@ -1,5 +1,8 @@
 models/
 
+# Configuration files with sensitive information
+config.py
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
