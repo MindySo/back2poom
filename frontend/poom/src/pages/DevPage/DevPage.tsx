@@ -8,10 +8,7 @@ import { theme } from '../../theme';
 const DevPage: React.FC = () => {
   return (
     <div style={{
-      paddingTop: '150px',
-      paddingRight: '40px',
-      paddingBottom: '40px',
-      paddingLeft: '40px',
+      padding: '80px 40px',
       textAlign: 'center',
       fontFamily: 'Arial, sans-serif',
       backgroundColor: '#f8f9fa',

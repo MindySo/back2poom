@@ -92,11 +92,7 @@ const MapPage: React.FC = () => {
         {/* 모바일 상태 보드 */}
         {isMobile && (
           <div className={styles.mobileStatusBoardWrapper}>
-            <MobileStatusBoard
-              onBackClick={() => {
-                // 뒤로가기 로직 필요시 추가
-              }}
-            />
+            <MobileStatusBoard />
           </div>
         )}
 

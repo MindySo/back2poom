@@ -15,7 +15,6 @@ const DEFAULT_DATA: StatusBoardProps['data'] = [
   { label: '해결', value: 15 }
 ];
 
-const DEFAULT_WIDTH = 400; // px (25rem)
 const MIN_SCALE = 0.5;
 const MAX_SCALE = 1;
 
