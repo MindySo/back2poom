@@ -1,13 +1,21 @@
 package com.topoom.missingcase.service;
 
-import com.topoom.missingcase.domain.MissingCase;
-import com.topoom.missingcase.dto.MissingCaseDto;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.topoom.missingcase.entity.CaseFile;
+import com.topoom.missingcase.entity.MissingCase;
+import com.topoom.missingcase.dto.MissingCaseDetailResponse;
+import com.topoom.missingcase.dto.MissingCaseListResponse;
+import com.topoom.missingcase.dto.MissingCaseStatsResponse;
+import com.topoom.missingcase.repository.CaseFileRepository;
 import com.topoom.missingcase.repository.MissingCaseRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.ZoneOffset;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -15,20 +23,131 @@ import java.util.List;
 public class MissingCaseService {
 
     private final MissingCaseRepository missingCaseRepository;
+    private final CaseFileRepository caseFileRepository;
+    private final ObjectMapper objectMapper;
 
-    public List<MissingCaseDto.Response> getAllCases() {
-        // TODO: 실종 사건 목록 조회 로직 구현
-        return List.of();
+    private String generateFileUrl(String s3Key) {
+        return "https://cdn.example.com/" + s3Key;
     }
 
-    public MissingCaseDto.DetailResponse getCaseById(Long id) {
-        // TODO: 실종 사건 상세 조회 로직 구현
+    public List<MissingCaseListResponse> getAllCases() {
+        return missingCaseRepository.findAllWithMainFile().stream()
+                .map(this::toDto)
+                .collect(Collectors.toList());
+    }
+
+    private MissingCaseListResponse toDto(MissingCase mc) {
+        MissingCaseListResponse.MainImage mainImage = null;
+
+        CaseFile file = mc.getMainFile();
+        if (file != null && file.getId() != null) {
+            mainImage = MissingCaseListResponse.MainImage.builder()
+                    .fileId(file.getId())
+                    .url(generateFileUrl(file.getS3Key()))
+                    .build();
+        }
+
+        return MissingCaseListResponse.builder()
+                .id(mc.getId())
+                .personName(mc.getPersonName())
+                .targetType(mc.getTargetType())
+                .ageAtTime((int) mc.getAgeAtTime())
+                .gender(mc.getGender())
+                .occurredAt(mc.getOccurredAt().atZone(ZoneOffset.UTC))
+                .occurredLocation(mc.getOccurredLocation())
+                .mainImage(mainImage)
+                .build();
+    }
+
+
+    @Transactional(readOnly = true)
+    public MissingCaseDetailResponse getCaseDetail(Long id) {
+        MissingCase mc = missingCaseRepository.findDetailById(id)
+                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 사건입니다."));
+
+        MissingCaseDetailResponse.MainImage mainImage = null;
+        if (mc.getMainFile() != null) {
+            mainImage = MissingCaseDetailResponse.MainImage.builder()
+                    .fileId(mc.getMainFile().getId())
+                    .url(generateFileUrl(mc.getMainFile().getS3Key()))
+                    .build();
+        }
+
+        List<MissingCaseDetailResponse.ImageItem> inputImages = caseFileRepository
+                .findByMissingCaseIdAndIoRole(mc.getId(), CaseFile.IoRole.INPUT)
+                .stream()
+                .map(this::toImageItem)
+                .collect(Collectors.toList());
+
+        List<MissingCaseDetailResponse.ImageItem> outputImages = caseFileRepository
+                .findByMissingCaseIdAndIoRole(mc.getId(), CaseFile.IoRole.OUTPUT)
+                .stream()
+                .map(this::toImageItem)
+                .collect(Collectors.toList());
+        
+        MissingCaseDetailResponse.AiSupport aiSupport = null;
+        if (mc.getAiSupport() != null) {
+            aiSupport = MissingCaseDetailResponse.AiSupport.builder()
+                    .top1Desc(mc.getAiSupport().getTop1Desc())
+                    .top2Desc(mc.getAiSupport().getTop2Desc())
+                    .infoItems(parseJson(mc.getAiSupport().getInfoItems()))
+                    .build();
+        }
+
+        return MissingCaseDetailResponse.builder()
+                .id(mc.getId())
+                .personName(mc.getPersonName())
+                .targetType(mc.getTargetType())
+                .ageAtTime((int) mc.getAgeAtTime())
+                .currentAge((int) mc.getCurrentAge())
+                .gender(mc.getGender())
+                .nationality(mc.getNationality())
+                .occurredAt(mc.getOccurredAt().atZone(ZoneOffset.UTC))
+                .occurredLocation(mc.getOccurredLocation())
+                .heightCm((int) mc.getHeightCm())
+                .weightKg((int) mc.getWeightKg())
+                .bodyType(mc.getBodyType())
+                .faceShape(mc.getFaceShape())
+                .hairColor(mc.getHairColor())
+                .hairStyle(mc.getHairStyle())
+                .clothingDesc(mc.getClothingDesc())
+                .progressStatus(mc.getProgressStatus())
+                .etcFeatures(mc.getEtcFeatures())
+                .mainImage(mainImage)
+                .inputImages(inputImages)
+                .outputImages(outputImages)
+                .aiSupport(aiSupport)
+                .build();
+    }
+
+    private MissingCaseDetailResponse.ImageItem toImageItem(CaseFile file) {
+        return MissingCaseDetailResponse.ImageItem.builder()
+                .fileId(file.getId())
+                .purpose(file.getPurpose().name())
+                .url(generateFileUrl(file.getS3Key()))
+                .contentType(file.getContentType())
+                .width(null)
+                .height(null)
+                .build();
+    }
+
+    private Object parseJson(String json) {
+        if (json == null) return null;
+        try {
+            return objectMapper.readValue(json, new TypeReference<>() {});
+        } catch (Exception e) {
+            return null;
+        }
+    }
+
+    public MissingCaseStatsResponse getStats() {
         return null;
     }
 
-    @Transactional
-    public Long createCase(MissingCase missingCase) {
-        // TODO: 실종 사건 생성 로직 구현
-        return null;
+    public List<MissingCaseListResponse> getRecentCases() {
+        return missingCaseRepository.findTop5ByOrderByCrawledAtDesc()
+                .stream()
+                .map(this::toDto)
+                .collect(Collectors.toList());
     }
 }

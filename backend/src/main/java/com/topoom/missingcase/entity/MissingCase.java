@@ -1,0 +1,116 @@
+package com.topoom.missingcase.entity;
+
+import com.topoom.common.BaseTimeEntity;
+import jakarta.persistence.*;
+import lombok.*;
+
+import java.math.BigDecimal;
+import java.time.LocalDateTime;
+import java.util.List;
+
+@Entity
+@Table(name = "missing_case")
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
+public class MissingCase extends BaseTimeEntity {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    @Column(name = "person_name", nullable = false)
+    private String personName;
+
+    @Column(name = "target_type", nullable = false)
+    private String targetType;
+
+    @Column(name = "age_at_time", nullable = false)
+    private Short ageAtTime;
+
+    @Column(name = "current_age", nullable = false)
+    private Short currentAge;
+
+    @Column(nullable = false)
+    private String gender;
+
+    @Column
+    private String nationality;
+
+    @Column(name = "occurred_at", nullable = false)
+    private LocalDateTime occurredAt;
+
+    @Column(name = "occurred_location", columnDefinition = "TEXT", nullable = false)
+    private String occurredLocation;
+
+    @Column(precision = 9, scale = 6)
+    private BigDecimal latitude;
+
+    @Column(precision = 9, scale = 6)
+    private BigDecimal longitude;
+
+    @Column(name = "height_cm", nullable = false)
+    private Short heightCm;
+
+    @Column(name = "weight_kg", nullable = false)
+    private Short weightKg;
+
+    @Column(name = "body_type", nullable = false)
+    private String bodyType;
+
+    @Column(name = "face_shape", nullable = false)
+    private String faceShape;
+
+    @Column(name = "hair_color", nullable = false)
+    private String hairColor;
+
+    @Column(name = "hair_style", nullable = false)
+    private String hairStyle;
+
+    @Column(name = "clothing_desc")
+    private String clothingDesc;
+
+    @Column(name = "progress_status")
+    private String progressStatus;
+
+    @Column(name = "etc_features", columnDefinition = "TEXT")
+    private String etcFeatures;
+
+    @Column(name = "missing_id")
+    private Integer missingId;
+
+    @Column(name = "ocr_text", columnDefinition = "TEXT")
+    private String ocrText;
+
+    @Column(name = "ocr_result", columnDefinition = "JSON")
+    private String ocrResult;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "main_file_id", foreignKey = @ForeignKey(name = "fk_missing_case_main_file"))
+    private CaseFile mainFile;
+
+    @Column(name = "source_url", columnDefinition = "TEXT", nullable = false)
+    private String sourceUrl;
+
+    @Column(name = "source_title", length = 300, nullable = false)
+    private String sourceTitle;
+
+    @Column(name = "crawled_at", nullable = false)
+    private LocalDateTime crawledAt;
+
+    @Builder.Default
+    @Column(name = "is_deleted", nullable = false)
+    private boolean isDeleted = false;
+
+    @OneToMany(mappedBy = "missingCase", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<CaseFile> files;
+
+    @OneToOne(mappedBy = "missingCase", cascade = CascadeType.ALL, orphanRemoval = true)
+    private CaseContact contact;
+
+    @OneToOne(mappedBy = "missingCase", cascade = CascadeType.ALL, orphanRemoval = true)
+    private CaseAiSupport aiSupport;
+
+}

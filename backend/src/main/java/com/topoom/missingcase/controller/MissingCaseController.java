@@ -1,9 +1,15 @@
 package com.topoom.missingcase.controller;
 
 import com.topoom.common.ApiResponse;
-import com.topoom.missingcase.dto.MissingCaseDto;
+import com.topoom.external.openapi.Safe182Client;
+import com.topoom.missingcase.dto.MissingCaseDetailResponse;
+import com.topoom.missingcase.dto.MissingCaseListResponse;
+import com.topoom.missingcase.dto.MissingCaseStatsResponse;
+import com.topoom.missingcase.dto.Safe182Response;
 import com.topoom.missingcase.service.MissingCaseService;
+import com.topoom.missingcase.service.MissingCaseSyncService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -13,17 +19,36 @@ import java.util.List;
 @RequiredArgsConstructor
 public class MissingCaseController {
 
+    private final Safe182Client safe182Client;
     private final MissingCaseService missingCaseService;
+    private final MissingCaseSyncService missingCaseSyncService;
 
     @GetMapping
-    public ApiResponse<List<MissingCaseDto.Response>> getAllCases() {
-        List<MissingCaseDto.Response> cases = missingCaseService.getAllCases();
-        return ApiResponse.success(cases);
+    public ResponseEntity<ApiResponse<List<MissingCaseListResponse>>> getAllCases() {
+        List<MissingCaseListResponse> cases = missingCaseService.getAllCases();
+        return ResponseEntity.ok(ApiResponse.success(cases));
     }
 
     @GetMapping("/{id}")
-    public ApiResponse<MissingCaseDto.DetailResponse> getCaseById(@PathVariable Long id) {
-        MissingCaseDto.DetailResponse caseDetail = missingCaseService.getCaseById(id);
-        return ApiResponse.success(caseDetail);
+    public ResponseEntity<ApiResponse<MissingCaseDetailResponse>> getCaseDetail(@PathVariable Long id) {
+        return ResponseEntity.ok(ApiResponse.success(missingCaseService.getCaseDetail(id)));
+    }
+
+    @GetMapping("/stats")
+    public ResponseEntity<ApiResponse<MissingCaseStatsResponse>> getStats() {
+        MissingCaseStatsResponse stats = missingCaseService.getStats();
+        return ResponseEntity.ok(ApiResponse.success(stats));
+    }
+
+    @GetMapping("/recent")
+    public ResponseEntity<ApiResponse<List<MissingCaseListResponse>>> getRecentCases() {
+        List<MissingCaseListResponse> cases = missingCaseService.getRecentCases();
+        return ResponseEntity.ok(ApiResponse.success(cases));
+    }
+
+    @GetMapping("/call")
+    public ResponseEntity<ApiResponse<Safe182Response>> getApi() {
+        missingCaseSyncService.syncMissing(100);
+        return ResponseEntity.ok(ApiResponse.success(safe182Client.getMissing(1)));
     }
 }
