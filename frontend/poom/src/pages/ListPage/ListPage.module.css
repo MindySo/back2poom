@@ -136,6 +136,8 @@
   background: #f7f7f8; /* 밝은 회색 배경 */
   margin: 0;
   border-radius: 0;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 /* 모바일 탭의 버튼 기본 스타일 초기화 및 캡슐 모양 적용 */
@@ -161,23 +163,52 @@
 
 /* 모바일 그리드 */
 .mobile-grid {
+  width: 100%;
   max-width: 100%;
-  grid-template-columns: repeat(auto-fit, minmax(360px, 1fr));
+  grid-template-columns: repeat(2, 1fr); /* 최대 2열로 고정 */
   gap: 16px;
   margin: 16px auto 0;
-  justify-content: center; /* 2열 기본, 공간 부족 시 자동 1열 */
+  justify-items: stretch; /* 그리드 아이템이 셀 전체를 채우도록 */
   align-items: start; /* 카드가 독립적으로 높이를 가지도록 */
+  box-sizing: border-box;
+  /* 탭/검색바와 동일한 너비를 위해 패딩 컨테이너와 동일한 너비 사용 */
 }
+
+/* 작은 화면에서는 1열로 */
+@media (max-width: 610px) {
+  .mobile-grid {
+    grid-template-columns: 1fr; /* 610px 이하에서는 1열 */
+  }
+}
+
+/* 그리드 아이템이 최대 너비를 사용하도록 */
+.mobile-grid > * {
+  width: 100%;
+  max-width: 100%;
+}
+
+/* 화면 크기 기준으로 min/max 설정 */
+@media (max-width: 320px) {
+  .mobile-grid {
+    min-width: calc(100vw - 60px); /* 320px 화면에서 패딩(30px * 2) 제외 */
+  }
+}
+
+/* 큰 화면에서도 계속 늘어나도록 제한 제거 */
+/* @media (min-width: 795px) {
+  .mobile-grid {
+    max-width: calc(795px - 60px);
+  }
+} */
 
 /* 모바일 검색바 - 탭 바로 아래, 캡슐 모양 */
 .search-bar.mobile-search {
   display: flex;
   align-items: center;
   border-radius: 8px;
-
   background: #ffffff; /* 배경 투명 */
   margin: 0; /* 중앙 정렬 */
-  width: auto !important; /* 너비 자동 조절 */
+  width: 100%; /* 탭과 동일한 너비 */
   box-sizing: border-box;
   border: none; /* 외부 테두리 제거 */
   box-shadow: none; /* 그림자 제거 */

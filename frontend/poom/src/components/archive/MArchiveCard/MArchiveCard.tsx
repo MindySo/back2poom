@@ -80,9 +80,9 @@ const MArchiveCard: React.FC<MArchiveCardProps> = ({ personId }) => {
         <div className={styles['m-archive-card__right']}>
           <div className={styles['m-archive-card__main']}>
             <div className={styles['m-archive-card__header']}>
-              <Badge variant="time" size="small">{formatElapsed(occurredAt)}</Badge>
+              <Badge variant="time" size="xs">{formatElapsed(occurredAt)}</Badge>
               {classificationCode && (
-                <Badge variant="feature" size="small">{classificationCode}</Badge>
+                <Badge variant="feature" size="xs">{classificationCode}</Badge>
               )}
             </div>
 
