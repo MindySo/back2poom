@@ -80,9 +80,9 @@ public class MissingCaseSyncService {
                 } else {
                     missingCase.setOccurredAt(null);
                 }
-
                 kakaoClient.getCoordinates(item.getOccrAdres())
                         .ifPresent(coords -> {
+                            log.info("좌표 변환 성공 [{}]: {}, {}", item.getOccrAdres(), coords[0], coords[1]);
                             missingCase.setLatitude(BigDecimal.valueOf(coords[0]));
                             missingCase.setLongitude(BigDecimal.valueOf(coords[1]));
                         });
