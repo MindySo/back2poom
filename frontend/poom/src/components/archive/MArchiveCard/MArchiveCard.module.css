@@ -4,12 +4,19 @@
   border-radius: 12px;
   border: 1px solid #eef0f3;
   box-shadow: 0 4px 12px rgba(0,0,0,0.06);
-  padding: 12px 16px; /* 더 작은 패딩 */
-  width: 100%; /* 모바일에서는 전체 너비 */
-  max-width: 360px; /* 모바일 카드 최대 너비 */
-  margin: 0 auto; /* 가운데 정렬 */
+  padding: 12px 16px;
+  width: 100%;
+  margin: 0;
   overflow: hidden;
   box-sizing: border-box;
+}
+
+/* 작은 화면에서 카드 크기 조정 */
+@media (max-width: 365px) {
+  .m-archive-card {
+    padding: 10px 12px;
+    border-radius: 10px;
+  }
 }
 
 .m-archive-card, .m-archive-card * { 
@@ -18,18 +25,33 @@
 
 .m-archive-card__content {
   display: grid;
-  grid-template-columns: 120px 1fr; /* 이미지 크기 조정: 100px -> 120px */
-  gap: 12px; /* 간격 축소: 20px -> 12px */
+  grid-template-columns: 120px 1fr;
+  gap: 12px;
   align-items: stretch;
 }
 
+@media (max-width: 365px) {
+  .m-archive-card__content {
+    grid-template-columns: 100px 1fr;
+    gap: 10px;
+  }
+}
+
 .m-archive-card__imageWrap {
-  width: 120px; /* 100px -> 120px */
-  height: 160px; /* 133px -> 160px (비율 유지) */
+  width: 120px;
+  height: 160px;
   border-radius: 8px;
   overflow: hidden;
   align-self: start;
   flex: 0 0 120px;
+}
+
+@media (max-width: 365px) {
+  .m-archive-card__imageWrap {
+    width: 100px;
+    height: 133px;
+    flex: 0 0 100px;
+  }
 }
 
 .m-archive-card__image {
@@ -43,9 +65,15 @@
 .m-archive-card__right { 
   display: flex; 
   flex-direction: column; 
-  height: 160px; /* 이미지 높이에 맞춤 */
+  height: 160px;
   justify-content: space-between; 
   min-width: 0; 
+}
+
+@media (max-width: 365px) {
+  .m-archive-card__right {
+    height: 133px;
+  }
 }
 
 .m-archive-card__main { 
@@ -60,13 +88,13 @@
 .m-archive-card__header {
   display: flex;
   align-items: center;
-  gap: 6px; /* 간격 축소: 8px -> 6px */
+  gap: 6px;
 }
 
 .m-archive-card__row {
   display: flex;
   align-items: baseline;
-  gap: 10px; /* 간격 축소: 15px -> 10px */
+  gap: 10px;
 }
 
 .m-archive-card__name {
@@ -76,26 +104,27 @@
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+  font-size: 14px !important;
 }
 
 .m-archive-card__meta {
-  font-size: 10px; /* 13px -> 12px */
+  font-size: 10px !important;
   color: #6b7280;
 }
 
 .m-archive-card__info {
   display: grid;
   grid-template-columns: 1fr;
-  gap: 2px; /* 간격 축소: 3px -> 2px */
+  gap: 2px;
 }
 
 .m-archive-card__label {
-  font-size: 8px; /* 12px -> 11px */
+  font-size: 8px !important;
   color: #9aa3af;
 }
 
 .m-archive-card__value {
-  font-size: 14px; /* 14px -> 13px */
+  font-size: 12px !important;
   color: #374151;
   max-width: 100%;
   overflow-wrap: anywhere;
@@ -106,6 +135,36 @@
   overflow: hidden;
 }
 
+@media (max-width: 365px) {
+  .m-archive-card__header {
+    gap: 4px;
+  }
+  
+  .m-archive-card__row {
+    gap: 6px;
+  }
+  
+  .m-archive-card__name {
+    font-size: 12px !important;
+  }
+  
+  .m-archive-card__meta {
+    font-size: 9px !important;
+  }
+  
+  .m-archive-card__info {
+    gap: 1px;
+  }
+  
+  .m-archive-card__label {
+    font-size: 7px !important;
+  }
+  
+  .m-archive-card__value {
+    font-size: 11px !important;
+  }
+}
+
 .m-archive-card__actions {
   display: flex;
   align-items: center;
@@ -114,17 +173,34 @@
 }
 
 .m-archive-card__primaryBtn {
-  height: 28px !important; /* 더 작게 조정: 36px -> 28px */
-  padding: 0 12px !important; /* 패딩도 축소: 14px -> 12px */
+  height: 28px !important;
+  padding: 0 12px !important;
   display: inline-flex;
   align-items: center;
   font-size: 12px !important;
 }
 
 .m-archive-card__iconBtn {
-  width: 28px !important; /* 더 작게 조정: 36px -> 28px */
-  height: 28px !important; /* 더 작게 조정: 36px -> 28px */
+  width: 28px !important;
+  height: 28px !important;
   padding: 0 !important;
+}
+
+@media (max-width: 365px) {
+  .m-archive-card__actions {
+    gap: 6px;
+  }
+  
+  .m-archive-card__primaryBtn {
+    height: 24px !important;
+    padding: 0 10px !important;
+    font-size: 10px !important;
+  }
+  
+  .m-archive-card__iconBtn {
+    width: 24px !important;
+    height: 24px !important;
+  }
 }
 
 /* 아코디언 확장 영역 */
@@ -132,7 +208,7 @@
   max-height: 0;
   overflow: hidden;
   transition: max-height 0.3s ease-out;
-  margin-top: 0; /* 접힌 상태에선 여백 없음 */
+  margin-top: 10px; 
   border-top: 1px solid #eef0f3;
 }
 
@@ -233,8 +309,7 @@
 /* 카드 펼치기 버튼 */
 .m-archive-card__expandButton {
   width: 100%;
-  margin-top: 3px;
-  padding: 1px 16px;
+  margin-top: 10px;
   border: none; /* border-breaking 제거 - 확장 영역과 중복 방지 */
   background: #fff;
   color: #6b7280;
