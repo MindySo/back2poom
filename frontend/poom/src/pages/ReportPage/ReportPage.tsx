@@ -57,7 +57,13 @@ const confidenceLevelAnswers: AnswerOption[] = [
 const MethodStep: React.FC<{ context: any; history: any; personName: string }> = React.memo(({ context, history, personName }) => {
   const handleAnswerSelect = useCallback(
     (answerId: string) => {
-      // 선택된 답변을 저장하지만 자동으로 다음 단계로 이동하지 않음
+      // 전화로 신고하기를 선택한 경우 바로 전화 걸기
+      if (answerId === 'phone') {
+        window.location.href = 'tel:182';
+        return;
+      }
+      
+      // 문자로 신고하기를 선택한 경우 선택된 답변을 저장
       history.push('method', (prev: any) => ({
         ...prev,
         selectedMethod: answerId,
@@ -67,8 +73,8 @@ const MethodStep: React.FC<{ context: any; history: any; personName: string }> =
   );
 
   const handleMethodNext = useCallback(() => {
-    // 다음 버튼 클릭 시 다음 단계로 이동
-    if (context.selectedMethod) {
+    // 다음 버튼 클릭 시 다음 단계로 이동 (문자로 신고하기인 경우에만)
+    if (context.selectedMethod && context.selectedMethod === 'message') {
       history.push('level', (prev: any) => ({
         ...prev,
         selectedMethod: context.selectedMethod,
@@ -96,7 +102,7 @@ const MethodStep: React.FC<{ context: any; history: any; personName: string }> =
           variant="darkPrimary"
           fullWidth
           onClick={handleMethodNext}
-          disabled={!context.selectedMethod}
+          disabled={!context.selectedMethod || context.selectedMethod !== 'message'}
         >
           다음
         </Button>
@@ -347,10 +353,23 @@ const DetailStep: React.FC<{ context: any; history: any; personName: string }> =
 
   const handleSubmit = () => {
     if (detail.trim()) {
-      console.log('신고 완료:', {
-        ...context,
-        detail: detail.trim(),
-      });
+      // 확신도 label 찾기
+      const confidenceLevelLabel = confidenceLevelAnswers.find(
+        (answer) => answer.id === context.confidenceLevel
+      )?.label || context.confidenceLevel;
+
+      // SMS 본문 작성
+      const smsBody = [
+        `실종자: ${personName}`,
+        `확신도: ${confidenceLevelLabel}`,
+        `목격 위치: ${context.location}`,
+        `목격 시간: ${context.time}`,
+        `추가 정보: ${detail.trim()}`,
+      ].join('\n');
+
+      // SMS 전송
+      const encodedBody = encodeURIComponent(smsBody);
+      window.location.href = `sms:182?body=${encodedBody}`;
     }
   };
 

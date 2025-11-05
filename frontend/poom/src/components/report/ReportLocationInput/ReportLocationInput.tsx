@@ -17,6 +17,7 @@ const ReportLocationInput: React.FC<ReportLocationInputProps> = React.memo(({ co
   const [internalLocation, setInternalLocation] = useState(() => context.location || '');
   const location = externalLocation !== undefined ? externalLocation : internalLocation;
   const setLocation = onLocationChange || setInternalLocation;
+  const [isLoadingLocation, setIsLoadingLocation] = useState(false);
 
   const handleSubmit = () => {
     if (location.trim()) {
@@ -34,6 +35,87 @@ const ReportLocationInput: React.FC<ReportLocationInputProps> = React.memo(({ co
       const { location, ...restContext } = prev;
       return restContext;
     });
+  };
+
+  const handleGetCurrentLocation = () => {
+    if (readOnly || isLoadingLocation) return;
+
+    setIsLoadingLocation(true);
+
+    if ('geolocation' in navigator) {
+      navigator.geolocation.getCurrentPosition(
+        async (position) => {
+          const { latitude, longitude } = position.coords;
+          
+          try {
+            // 카카오 맵 REST API를 사용한 역지오코딩
+            const REST_API_KEY = import.meta.env.VITE_KAKAO_REST_API_KEY || '';
+            if (REST_API_KEY && window.kakao && window.kakao.maps) {
+              // 카카오 맵 SDK가 로드된 경우
+              const geocoder = new (window.kakao.maps as any).services.Geocoder();
+              geocoder.coord2Address(longitude, latitude, (result: any, status: any) => {
+                if (status === (window.kakao.maps as any).services.Status.OK) {
+                  const address = result[0]?.road_address?.address_name || result[0]?.address?.address_name;
+                  if (address) {
+                    setLocation(address);
+                  } else {
+                    setLocation(`${latitude.toFixed(6)}, ${longitude.toFixed(6)}`);
+                  }
+                  setIsLoadingLocation(false);
+                } else {
+                  // 실패 시 좌표로 표시
+                  setLocation(`${latitude.toFixed(6)}, ${longitude.toFixed(6)}`);
+                  setIsLoadingLocation(false);
+                }
+              });
+            } else if (REST_API_KEY) {
+              // REST API 직접 호출
+              const response = await fetch(
+                `https://dapi.kakao.com/v2/local/geo/coord2address.json?x=${longitude}&y=${latitude}`,
+                {
+                  headers: {
+                    Authorization: `KakaoAK ${REST_API_KEY}`,
+                  },
+                }
+              );
+              const data = await response.json();
+              if (data.documents && data.documents.length > 0) {
+                const address = data.documents[0]?.road_address?.address_name || data.documents[0]?.address?.address_name;
+                if (address) {
+                  setLocation(address);
+                } else {
+                  setLocation(`${latitude.toFixed(6)}, ${longitude.toFixed(6)}`);
+                }
+              } else {
+                setLocation(`${latitude.toFixed(6)}, ${longitude.toFixed(6)}`);
+              }
+              setIsLoadingLocation(false);
+            } else {
+              // API 키가 없는 경우 좌표로 표시
+              setLocation(`${latitude.toFixed(6)}, ${longitude.toFixed(6)}`);
+              setIsLoadingLocation(false);
+            }
+          } catch (error) {
+            console.error('위치 변환 실패:', error);
+            setLocation(`${latitude.toFixed(6)}, ${longitude.toFixed(6)}`);
+            setIsLoadingLocation(false);
+          }
+        },
+        (error) => {
+          console.error('위치 정보를 가져오는데 실패했습니다:', error);
+          alert('위치 정보를 가져올 수 없습니다. 브라우저 설정에서 위치 접근 권한을 확인해주세요.');
+          setIsLoadingLocation(false);
+        },
+        {
+          enableHighAccuracy: true,
+          timeout: 10000,
+          maximumAge: 0,
+        }
+      );
+    } else {
+      alert('이 브라우저는 위치 서비스를 지원하지 않습니다.');
+      setIsLoadingLocation(false);
+    }
   };
 
   return (
@@ -54,19 +136,31 @@ const ReportLocationInput: React.FC<ReportLocationInputProps> = React.memo(({ co
         </div>
       ) : (
         <div className={styles.inputContainer}>
-          <input
-            type="text"
-            value={location}
-            onChange={(e) => !readOnly && setLocation(e.target.value)}
-            placeholder="예: 서울시 강남구 테헤란로 123"
-            className={`${styles.input} ${readOnly ? styles.readOnly : ''}`}
-            readOnly={readOnly}
-            onKeyPress={(e) => {
-              if (!readOnly && e.key === 'Enter' && location.trim()) {
-                handleSubmit();
-              }
-            }}
-          />
+          <div className={styles.inputWrapper}>
+            <input
+              type="text"
+              value={location}
+              onChange={(e) => !readOnly && setLocation(e.target.value)}
+              placeholder="예: 서울시 강남구 테헤란로 123"
+              className={`${styles.input} ${readOnly ? styles.readOnly : ''}`}
+              readOnly={readOnly}
+              onKeyPress={(e) => {
+                if (!readOnly && e.key === 'Enter' && location.trim()) {
+                  handleSubmit();
+                }
+              }}
+            />
+            {!readOnly && (
+              <button
+                type="button"
+                onClick={handleGetCurrentLocation}
+                disabled={isLoadingLocation}
+                className={styles.locationButton}
+              >
+                {isLoadingLocation ? '가져오는 중...' : '현재 위치'}
+              </button>
+            )}
+          </div>
         </div>
       )}
       {!readOnly && !hideButtons && (
