@@ -1,13 +1,14 @@
 import React, { useEffect, useRef, useState } from 'react';
-import SideBar from '../components/map/SideBar/SideBar';
-import useKakaoMap from '../hooks/useKakaoMap';
-import Dashboard from '../components/map/Dashboard/Dashboard';
-import { useIsMobile } from '../hooks/useMediaQuery';
-import MyLocationButton from '../components/map/MyLocationButton/MyLocationButton';
-import MyLocationMarker from '../components/map/MyLocationMarker/MyLocationMarker';
-import MobileStatusBoard from '../components/map/MobileStatusBoard/MobileStatusBoard';
+import SideBar from '../../components/map/SideBar/SideBar';
+import useKakaoMap from '../../hooks/useKakaoMap';
+import Dashboard from '../../components/map/Dashboard/Dashboard';
+import { useIsMobile } from '../../hooks/useMediaQuery';
+import MyLocationButton from '../../components/map/MyLocationButton/MyLocationButton';
+import MyLocationMarker from '../../components/map/MyLocationMarker/MyLocationMarker';
+import MobileStatusBoard from '../../components/map/MobileStatusBoard/MobileStatusBoard';
+import styles from './MapPage.module.css';
 
-const API_KEY = import.meta.env.VITE_KAKAO_JAVASCRIPT_KEY; 
+const API_KEY = import.meta.env.VITE_KAKAO_JAVASCRIPT_KEY;
 
 const MapPage: React.FC = () => {
   const isMobile = useIsMobile(1024);
@@ -84,19 +85,14 @@ const MapPage: React.FC = () => {
   return (
     <>
       {!isMobile && <SideBar onMissingCardClick={handleOpenDashboard} />}
-      <div style={{ width: '100%', height: '100vh', position: 'relative' }}>
-        {!isLoaded && <p style={{ textAlign: 'center' }}>지도를 불러오는 중...</p>}
-        <div ref={mapRef} style={{ width: '100%', height: '100%' }} />
+      <div className={styles.mapContainer}>
+        {!isLoaded && <p className={styles.loadingText}>지도를 불러오는 중...</p>}
+        <div ref={mapRef} className={styles.mapElement} />
 
         {/* 모바일 상태 보드 */}
         {isMobile && (
-          <div style={{ position: 'absolute', top: '1rem', left: '1rem' }}>
+          <div className={styles.mobileStatusBoardWrapper}>
             <MobileStatusBoard
-              data={[
-                { label: '실종자', value: 42 },
-                { label: '발견', value: 18 },
-                { label: '해결', value: 15 }
-              ]}
               onBackClick={() => {
                 // 뒤로가기 로직 필요시 추가
               }}

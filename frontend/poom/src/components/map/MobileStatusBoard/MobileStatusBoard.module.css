@@ -6,17 +6,22 @@
   padding: 0;
   z-index: 10;
   width: 25rem;
+  background-color: rgba(43, 58, 85, 0.9);
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+  transform-origin: top left;
+  transition: opacity 0.2s ease;
+  user-select: none;
+  pointer-events: auto;
 }
 
-.header {
-  display: flex;
-  align-items: center;
-  padding: 0.5rem 0.5rem;
-  border-bottom: 0.05rem solid rgba(255, 255, 255, 0.1);
+.content {
+  position: relative;
 }
 
 .backButton {
+  position: absolute;
+  top: 1.5rem;
+  left: 1.2rem;
   background: none;
   border: none;
   padding: 0;
@@ -24,22 +29,41 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 1.2rem;
-  height: 1.2rem;
+  width: 1rem;
+  height: auto;
+  z-index: 5;
 }
 
 .backButton img {
   width: 100%;
   height: 100%;
   object-fit: contain;
+  filter: brightness(0) saturate(100%) invert(100%);
 }
 
-.statusBoardOverride {
-  background-color: transparent !important;
+.resizeHandle {
+  position: absolute;
+  bottom: 0.5rem;
+  right: 0.5rem;
+  width: 2rem;
+  height: 2rem;
+  cursor: nwse-resize;
+  touch-action: none;
+  z-index: 20;
 }
 
-.statusBoardOverride :global(h2),
-.statusBoardOverride :global(p),
-.statusBoardOverride :global(div) {
-  color: white !important;
+.resizeHandle::after {
+  content: '';
+  position: absolute;
+  bottom: 0.4rem;
+  right: 0.4rem;
+  width: 0.6rem;
+  height: 0.6rem;
+  background: repeating-linear-gradient(
+    -45deg,
+    rgba(255, 255, 255, 0.8),
+    rgba(255, 255, 255, 0.8) 0.2rem,
+    transparent 0.2rem,
+    transparent 0.4rem
+  );
 }

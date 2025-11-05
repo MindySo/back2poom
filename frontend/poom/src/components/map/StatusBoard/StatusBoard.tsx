@@ -13,6 +13,7 @@ export interface StatusBoardProps {
   className?: string;
   textColor?: keyof typeof theme.colors;
   borderColor?: string;
+  padding?: string;
 }
 
 const StatusBoard: React.FC<StatusBoardProps> = ({
@@ -20,6 +21,7 @@ const StatusBoard: React.FC<StatusBoardProps> = ({
   className = '',
   textColor = 'darkMain',
   borderColor = '#2B3A55',
+  padding = '2.25rem 1.5rem 1.5rem',
 }) => {
   const getFormattedDate = () => {
     const now = new Date();
@@ -37,6 +39,7 @@ const StatusBoard: React.FC<StatusBoardProps> = ({
       style={{
         backgroundColor: 'transparent',
         borderBottom: `1px solid ${borderColor}`,
+        padding: padding,
       }}
     >
       {/* 제목 */}
