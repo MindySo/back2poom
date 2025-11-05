@@ -32,14 +32,38 @@ const ListPage = () => {
   type TabKey = "all" | "within24" | "over24";
   const [activeTab, setActiveTab] = useState<TabKey>("all");
   const [selectedPersonId, setSelectedPersonId] = useState<number | null>(null);
+  const [searchTerm, setSearchTerm] = useState<string>("");
 
   const filteredPeople = useMemo(() => {
-    if (activeTab === "all") return people;
+    let filtered = people;
+
+    // 탭 필터링
     if (activeTab === "within24") {
-      return people.filter((p) => p.hoursSinceMissing < 24);
+      filtered = filtered.filter((p) => p.hoursSinceMissing < 24);
+    } else if (activeTab === "over24") {
+      filtered = filtered.filter((p) => p.hoursSinceMissing >= 24);
     }
-    return people.filter((p) => p.hoursSinceMissing >= 24);
-  }, [activeTab, people]);
+
+    // 검색어 필터링
+    if (searchTerm.trim()) {
+      const searchLower = searchTerm.toLowerCase().trim();
+      filtered = filtered.filter((p) => {
+        const name = p.personName?.toLowerCase() || "";
+        const location = p.occurredLocation?.toLowerCase() || "";
+        const gender = p.gender?.toLowerCase() || "";
+        const age = p.ageAtTime?.toString() || "";
+
+        return (
+          name.includes(searchLower) ||
+          location.includes(searchLower) ||
+          gender.includes(searchLower) ||
+          age.includes(searchLower)
+        );
+      });
+    }
+
+    return filtered;
+  }, [activeTab, people, searchTerm]);
 
   // 로딩 상태
   if (isLoading) {
@@ -104,8 +128,11 @@ const ListPage = () => {
 
         {/* 모바일 검색바 (탭 바로 아래) */}
         <div className={`${styles['search-bar']} ${styles['mobile-search']}`}>
-          <input placeholder="🔍 검색어 입력(저거 필터임→)" />
-          <button className={styles['mobile-menu-button']}>☰</button>
+          <input 
+            placeholder="실종자를 검색해보세요" 
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+          />
         </div>
 
         {/* 모바일 카드 리스트 영역 */}
@@ -130,8 +157,11 @@ const ListPage = () => {
         <header className={styles['list-header']}>
           <h2>실종자 목록</h2>
           <div className={styles['search-bar']}>
-            <input placeholder="실종자를 검색해보세요" />
-            <button>🔍</button>
+            <input 
+              placeholder="실종자를 검색해보세요" 
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+            />
           </div>
         </header>
       </div>

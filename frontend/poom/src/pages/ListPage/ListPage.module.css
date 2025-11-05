@@ -51,18 +51,18 @@
   align-items: center;
   gap: 8px;
   background: #ffffff;
-  padding: 2px 8px;
-  border-radius: 28px;
+  padding: 12px 20px;
+  border-radius: 12px;
   border: 1px solid #e5e7eb;
-  width: 460px;
+  width: 520px;
   box-shadow: 0 2px 8px rgba(0,0,0,0.04);
 }
 .search-bar input {
   flex: 1;
   border: none;
   outline: none;
-  font-size: 14px;
-  padding-left: 12px; /* 글자 시작 위치를 오른쪽으로 */
+  font-size: 16px;
+  padding-left: 0; /* 글자 시작 위치를 오른쪽으로 */
 }
 
 .search-bar button {
@@ -95,11 +95,11 @@
   cursor: pointer;
 }
 
-.list-tabs button.active {
+.list-tabs button:global(.active) {
   color: #ffffff;
 }
 
-.list-tabs button.active::after {
+.list-tabs button:global(.active)::after {
   content: "";
   position: absolute;
   left: 50%;
