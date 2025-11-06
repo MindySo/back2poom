@@ -16,6 +16,11 @@ export interface AISupportInfo {
   }>;
 }
 
+export interface CaseContact {
+  // 연락처 정보 (구체적인 필드는 백엔드 응답에 따라 추가 필요)
+  [key: string]: unknown;
+}
+
 export interface MissingPerson {
   id: number;
   personName: string;
@@ -23,9 +28,9 @@ export interface MissingPerson {
   ageAtTime: number;
   currentAge?: number;
   gender?: string;
-  speed?: number;
   nationality?: string;
-  occurredAt: string; // ISO string (API에서 occurredAt 사용)
+  occurredAt: string; // ISO string - 실종 발생 시각
+  crawledAt: string; // ISO string - 크롤링된 시각 (경과시간 계산에 사용)
   occurredLocation: string;
   heightCm?: number;
   weightKg?: number;
@@ -40,6 +45,7 @@ export interface MissingPerson {
   mainImage?: ImageFile;
   inputImages?: ImageFile[];
   outputImages?: ImageFile[];
+  caseContact?: CaseContact;
   aiSupport?: AISupportInfo;
 }
 

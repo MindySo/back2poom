@@ -1,34 +1,25 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useMissingDetail } from '../../../hooks/useMissingDetail';
+import { useElapsedTime } from '../../../hooks/useElapsedTime';
 import styles from './ArchiveDetailPopup.module.css';
 import Badge from '../../common/atoms/Badge';
 import Text from '../../common/atoms/Text';
 import Button from '../../common/atoms/Button';
 import tempImg from '../../../assets/TempImg.png';
+import poomLogo from '../../../assets/poom_logo.png';
 
 export interface ArchiveDetailPopupProps {
   personId: number;
   onClose: () => void;
 }
 
-function formatElapsed(iso: string): string {
-  const occured = new Date(iso).getTime();
-  const now = Date.now();
-  const ms = Math.max(0, now - occured);
-  const totalSeconds = Math.floor(ms / 1000);
-  const days = Math.floor(totalSeconds / 86400);
-  const hours = Math.floor((totalSeconds % 86400) / 3600);
-  const minutes = Math.floor((totalSeconds % 3600) / 60);
-  const seconds = totalSeconds % 60;
-  return days > 0
-    ? `실종 후 ${days}일 ${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`
-    : `실종 후 ${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
-}
-
 const ArchiveDetailPopup: React.FC<ArchiveDetailPopupProps> = ({ personId, onClose }) => {
   const navigate = useNavigate();
   const { data: person, isLoading, error } = useMissingDetail(personId);
+  
+  const safeCrawledAt = person?.crawledAt || new Date().toISOString();
+  const elapsedTime = useElapsedTime(safeCrawledAt);
 
   // 로딩 상태
   if (isLoading) {
@@ -58,7 +49,7 @@ const ArchiveDetailPopup: React.FC<ArchiveDetailPopupProps> = ({ personId, onClo
     personName,
     ageAtTime,
     gender,
-    occurredAt,
+    crawledAt,
     occurredLocation,
     classificationCode,
     heightCm,
@@ -73,6 +64,14 @@ const ArchiveDetailPopup: React.FC<ArchiveDetailPopupProps> = ({ personId, onClo
     outputImages,
     aiSupport,
   } = person;
+  
+  // 발생일 포맷팅 (안전하게 처리)
+  const formatDate = (dateString: string | undefined): string => {
+    if (!dateString) return '-';
+    const date = new Date(dateString);
+    if (isNaN(date.getTime())) return '-';
+    return date.toISOString().slice(0, 10);
+  };
   
   // 이미지 URL 가져오기 (없으면 임시 이미지)
   const mainImageUrl = mainImage?.url || tempImg;
@@ -92,15 +91,13 @@ const ArchiveDetailPopup: React.FC<ArchiveDetailPopupProps> = ({ personId, onClo
         {/* 헤더 */}
         <div className={styles['popup-header']}>
           <div className={styles['popup-header-left']}>
-            <h1 className={styles['popup-title']}>
-              품<span className={styles['popup-title-heart']}>❤️</span>으<span className={styles['popup-title-dot']}>로</span>
-            </h1>
-          </div>
-          <div className={styles['popup-badges']}>
-            <Badge variant="time" size="small">{formatElapsed(occurredAt)}</Badge>
-            {classificationCode && (
-              <Badge variant="feature" size="small">{classificationCode}</Badge>
-            )}
+            <img src={poomLogo} alt="품으로" className={styles['popup-logo']} />
+            <div className={styles['popup-badges']}>
+              <Badge variant="time" size="small">{elapsedTime}</Badge>
+              {classificationCode && (
+                <Badge variant="feature" size="small">{classificationCode}</Badge>
+              )}
+            </div>
           </div>
         </div>
 
@@ -138,7 +135,7 @@ const ArchiveDetailPopup: React.FC<ArchiveDetailPopupProps> = ({ personId, onClo
               
               <Text as="div" size="sm" weight="bold" className={styles['popup-info-label']}>발생일</Text>
               <Text as="div" size="md" className={styles['popup-info-value']}>
-                {new Date(occurredAt).toISOString().slice(0, 10)}
+                {formatDate(crawledAt)}
               </Text>
               
               <Text as="div" size="sm" weight="bold" className={styles['popup-info-label']}>발생장소</Text>

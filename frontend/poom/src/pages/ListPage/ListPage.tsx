@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from "react";
+import { useState, useMemo } from "react";
 import { ArchiveCard } from "../../components/archive/ArchiveCard/ArchiveCard";
 import { MArchiveCard } from "../../components/archive/MArchiveCard/MArchiveCard";
 import { ArchiveDetailPopup } from "../../components/archive/ArchiveDetailPopup/ArchiveDetailPopup";
@@ -9,8 +9,8 @@ import { useMissingList } from "../../hooks/useMissingList";
 import { theme } from "../../theme";
 
 // hoursSinceMissing 계산 헬퍼 함수
-const calculateHoursSinceMissing = (occurredAt: string): number => {
-  const occurred = new Date(occurredAt).getTime();
+const calculateHoursSinceMissing = (crawledAt: string): number => {
+  const occurred = new Date(crawledAt).getTime();
   const now = Date.now();
   return Math.floor((now - occurred) / (1000 * 60 * 60));
 };
@@ -24,7 +24,7 @@ const ListPage = () => {
     if (!missingList) return [];
     return missingList.map((person) => ({
       ...person,
-      hoursSinceMissing: calculateHoursSinceMissing(person.occurredAt),
+      hoursSinceMissing: calculateHoursSinceMissing(person.crawledAt),
     }));
   }, [missingList]);
 
