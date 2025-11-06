@@ -1,5 +1,6 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useShareMissingPerson } from '../../../hooks/useShareMissingPerson';
 import type { MissingPerson } from '../../../types/missing';
 import styles from './ArchiveCard.module.css';
 import Badge from '../../common/atoms/Badge';
@@ -27,6 +28,7 @@ function formatElapsed(iso: string): string {
 
 const ArchiveCard: React.FC<ArchiveCardProps> = ({ person, onClick }) => {
   const navigate = useNavigate();
+  const { share, isSharing } = useShareMissingPerson();
   const {
     personName,
     ageAtTime,
@@ -88,9 +90,11 @@ const ArchiveCard: React.FC<ArchiveCardProps> = ({ person, onClick }) => {
               size="medium" 
               className={styles['archive-card__iconBtn']} 
               aria-label="공유"
-              onClick={() => {
-                // 공유 로직
+              onClick={(e) => {
+                e.stopPropagation(); // 카드 클릭 이벤트와 충돌 방지
+                share(person);
               }}
+              disabled={isSharing}
             >
               ↗
             </Button>
