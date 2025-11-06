@@ -28,7 +28,7 @@ RUN mkdir -p /usr/local/lib/docker/cli-plugins && \
 RUN ln -s /usr/local/lib/docker/cli-plugins/docker-compose /usr/local/bin/docker-compose
 
 # Java 환경변수
-ENV JAVA_HOME=/usr/lib/jvm/java-17-openjdk-amd64
+ENV JAVA_HOME=/opt/java/openjdk
 
 # Jenkins 사용자로 전환 (보안)
 USER jenkins

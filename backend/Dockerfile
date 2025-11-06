@@ -4,7 +4,9 @@ WORKDIR /app
 
 ENV TZ=Asia/Seoul
 
-COPY build/libs/*.jar app.jar
+RUN apk add --no-cache curl
+
+COPY build/libs/*-SNAPSHOT.jar app.jar
 
 EXPOSE 8080
 
