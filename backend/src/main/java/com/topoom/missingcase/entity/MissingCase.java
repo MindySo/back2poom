@@ -81,20 +81,14 @@ public class MissingCase extends BaseTimeEntity {
     @Column(name = "missing_id")
     private Integer missingId;
 
-    @Column(name = "ocr_text", columnDefinition = "TEXT")
-    private String ocrText;
-
-    @Column(name = "ocr_result", columnDefinition = "JSON")
-    private String ocrResult;
-
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "main_file_id", foreignKey = @ForeignKey(name = "fk_missing_case_main_file"))
     private CaseFile mainFile;
 
-    @Column(name = "source_url", columnDefinition = "TEXT", nullable = false)
+    @Column(name = "source_url", columnDefinition = "TEXT")
     private String sourceUrl;
 
-    @Column(name = "source_title", length = 300, nullable = false)
+    @Column(name = "source_title", length = 300)
     private String sourceTitle;
 
     @Column(name = "crawled_at", nullable = false)
