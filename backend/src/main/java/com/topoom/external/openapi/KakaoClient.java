@@ -29,20 +29,28 @@ public class KakaoClient {
         }
 
         try {
-            String encoded = URLEncoder.encode(address, StandardCharsets.UTF_8);
-            String uri = "https://dapi.kakao.com/v2/local/search/address.json?query=" + encoded;
-
             Map<String, Object> response = webClient.get()
-                    .uri(uri)
+                    .uri(uriBuilder -> uriBuilder
+                            .scheme("https")
+                            .host("dapi.kakao.com")
+                            .path("/v2/local/search/address.json")
+                            .queryParam("query", address)
+                            .build())
                     .header("Authorization", "KakaoAK " + kakaoApiKey)
                     .retrieve()
                     .bodyToMono(new ParameterizedTypeReference<Map<String, Object>>() {})
                     .block();
 
-            if (response == null || !response.containsKey("documents")) return Optional.empty();
+            if (response == null || !response.containsKey("documents")) {
+                return Optional.empty();
+            }
 
             List<Map<String, Object>> documents = (List<Map<String, Object>>) response.get("documents");
-            if (documents.isEmpty()) return Optional.empty();
+            if (documents.isEmpty()) {
+                log.info("📭 [KakaoClient] 좌표 결과 없음 (address={}), {}", address, response);
+                return Optional.empty();
+            }
+
 
             Map<String, Object> first = documents.get(0);
             double latitude = Double.parseDouble((String) first.get("y"));
