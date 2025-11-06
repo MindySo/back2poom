@@ -65,3 +65,10 @@
   padding: 2rem 0;
   flex: 1;
 }
+
+/* 1024px 이하 (모바일/태블릿)에서는 숨기기 */
+@media (max-width: 1024px) {
+  .sideBar {
+    display: none;
+  }
+}

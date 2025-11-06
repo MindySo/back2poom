@@ -218,14 +218,12 @@
 }
 
 @media (max-width: 1024px) {
+  .dashboardOverlay {
+    display: none;
+  }
+
   .dashboard {
-    width: 100vw;
-    height: 100vh;
-    max-height: 100vh;
-    left: 0;
-    margin-left: 0;
-    border-radius: 0;
-    animation: slideInFromLeft 0.3s ease-out;
+    display: none;
   }
 
   .dashboard.slideOut {
