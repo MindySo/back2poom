@@ -17,8 +17,8 @@ public class CaseAiSupport {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "case_id", foreignKey = @ForeignKey(name = "fk_case_file_case"))
+    @OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "case_id", foreignKey = @ForeignKey(name = "fk_ai_support_case"))
     private MissingCase missingCase;
 
     @Column(name = "top1_desc")

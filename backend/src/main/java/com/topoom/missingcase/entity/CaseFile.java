@@ -55,20 +55,21 @@ public class CaseFile extends BaseTimeEntity {
     @Column(name = "source_url", columnDefinition = "TEXT")
     private String sourceUrl;
 
-    @Column(name = "source_seq", nullable = false)
+    @Column(name = "source_title", length = 300)
+    private String sourceTitle;
+
+    @Column(name = "source_seq")
     private Integer sourceSeq;
 
-    @Builder.Default
-    @Column(name = "is_last_image", nullable = false)
-    private boolean isLastImage = false;
+    @Column(name = "is_last_image")
+    private Boolean isLastImage;
 
     @Column(name = "crawled_at")
     private LocalDateTime crawledAt;
 
     public enum IoRole { INPUT, OUTPUT }
     public enum Purpose {
-        BEFORE, APPEARANCE, FACE, FULL_BODY,
-        UNUSABLE, TEXT, ENHANCED, ANALYSIS
+        SAFE, OCR, FACE, FULL_BODY, ENHANCED
     }
     public enum ContentKind { IMAGE, JSON }
 }
