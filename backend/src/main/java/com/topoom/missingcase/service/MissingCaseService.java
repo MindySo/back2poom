@@ -56,6 +56,9 @@ public class MissingCaseService {
                 .gender(mc.getGender())
                 .occurredAt(mc.getOccurredAt().atZone(ZoneOffset.UTC))
                 .occurredLocation(mc.getOccurredLocation())
+                .latitude(mc.getLatitude())
+                .longitude(mc.getLongitude())
+                .crawledAt(mc.getCrawledAt().atZone(ZoneOffset.UTC))
                 .mainImage(mainImage)
                 .build();
     }
@@ -86,6 +89,14 @@ public class MissingCaseService {
                 .map(this::toImageItem)
                 .collect(Collectors.toList());
         
+        MissingCaseDetailResponse.CaseContact caseContact = null;
+        if (mc.getContact() != null) {
+            caseContact = MissingCaseDetailResponse.CaseContact.builder()
+                    .organization(mc.getContact().getOrganization())
+                    .phoneNumber(mc.getContact().getPhoneNumber())
+                    .build();
+        }
+
         MissingCaseDetailResponse.AiSupport aiSupport = null;
         if (mc.getAiSupport() != null) {
             aiSupport = MissingCaseDetailResponse.AiSupport.builder()
@@ -105,6 +116,9 @@ public class MissingCaseService {
                 .nationality(mc.getNationality())
                 .occurredAt(mc.getOccurredAt().atZone(ZoneOffset.UTC))
                 .occurredLocation(mc.getOccurredLocation())
+                .latitude(mc.getLatitude())
+                .longitude(mc.getLongitude())
+                .crawledAt(mc.getCrawledAt().atZone(ZoneOffset.UTC))
                 .heightCm((int) mc.getHeightCm())
                 .weightKg((int) mc.getWeightKg())
                 .bodyType(mc.getBodyType())
@@ -117,6 +131,7 @@ public class MissingCaseService {
                 .mainImage(mainImage)
                 .inputImages(inputImages)
                 .outputImages(outputImages)
+                .caseContact(caseContact)
                 .aiSupport(aiSupport)
                 .build();
     }

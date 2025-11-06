@@ -2,6 +2,7 @@ package com.topoom.missingcase.dto;
 
 import lombok.*;
 
+import java.math.BigDecimal;
 import java.time.ZonedDateTime;
 import java.util.List;
 
@@ -21,6 +22,9 @@ public class MissingCaseDetailResponse {
     private String nationality;
     private ZonedDateTime occurredAt;
     private String occurredLocation;
+    private BigDecimal latitude;
+    private BigDecimal longitude;
+    private ZonedDateTime crawledAt;
     private Integer heightCm;
     private Integer weightKg;
     private String bodyType;
@@ -34,6 +38,7 @@ public class MissingCaseDetailResponse {
     private MainImage mainImage;
     private List<ImageItem> inputImages;
     private List<ImageItem> outputImages;
+    private CaseContact caseContact;
     private AiSupport aiSupport;
 
     @Getter
@@ -58,6 +63,16 @@ public class MissingCaseDetailResponse {
         private String contentType;
         private Integer width;
         private Integer height;
+    }
+
+    @Getter
+    @Setter
+    @NoArgsConstructor
+    @AllArgsConstructor
+    @Builder
+    public static class CaseContact {
+        private String organization;
+        private String phoneNumber;
     }
 
     @Getter
