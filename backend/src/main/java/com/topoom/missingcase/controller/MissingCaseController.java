@@ -40,15 +40,15 @@ public class MissingCaseController {
         return ResponseEntity.ok(ApiResponse.success(stats));
     }
 
-    @GetMapping("/recent")
-    public ResponseEntity<ApiResponse<List<MissingCaseListResponse>>> getRecentCases() {
-        List<MissingCaseListResponse> cases = missingCaseService.getRecentCases();
+    @GetMapping("/recent/{hours}")
+    public ResponseEntity<ApiResponse<List<MissingCaseListResponse>>> getRecentCases(@PathVariable Integer hours) {
+        List<MissingCaseListResponse> cases = missingCaseService.getRecentCases(hours);
         return ResponseEntity.ok(ApiResponse.success(cases));
     }
 
     @GetMapping("/call")
     public ResponseEntity<ApiResponse<Safe182Response>> getApi() {
         missingCaseSyncService.syncMissing(100);
-        return ResponseEntity.ok(ApiResponse.success(safe182Client.getMissing(1)));
+        return ResponseEntity.ok(ApiResponse.success(safe182Client.getMissing(100)));
     }
 }

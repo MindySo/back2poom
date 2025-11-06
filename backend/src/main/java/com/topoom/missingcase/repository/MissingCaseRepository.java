@@ -7,6 +7,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -32,5 +33,5 @@ public interface MissingCaseRepository extends JpaRepository<MissingCase, Long> 
 
     Optional<MissingCase> findByMissingId(Integer missingId);
 
-    List<MissingCase> findTop5ByOrderByCrawledAtDesc();
+    List<MissingCase> findByCrawledAtAfterOrderByCrawledAtDesc(LocalDateTime since);
 }

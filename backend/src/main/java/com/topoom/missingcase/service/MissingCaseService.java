@@ -13,6 +13,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -144,8 +145,10 @@ public class MissingCaseService {
         return null;
     }
 
-    public List<MissingCaseListResponse> getRecentCases() {
-        return missingCaseRepository.findTop5ByOrderByCrawledAtDesc()
+    public List<MissingCaseListResponse> getRecentCases(int hours) {
+        LocalDateTime since = LocalDateTime.now().minusHours(hours);
+
+        return missingCaseRepository.findByCrawledAtAfterOrderByCrawledAtDesc(since)
                 .stream()
                 .map(this::toDto)
                 .collect(Collectors.toList());

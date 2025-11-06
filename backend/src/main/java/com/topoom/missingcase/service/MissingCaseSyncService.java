@@ -77,6 +77,7 @@ public class MissingCaseSyncService {
                 if (item.getOccrde() != null && item.getOccrde().matches("\\d{8}")) {
                     LocalDate date = LocalDate.parse(item.getOccrde(), dateFormatter);
                     missingCase.setOccurredAt(date.atStartOfDay());
+                    missingCase.setCrawledAt(date.atStartOfDay());
                 } else {
                     missingCase.setOccurredAt(null);
                 }
@@ -98,7 +99,6 @@ public class MissingCaseSyncService {
 
                 missingCase.setSourceTitle("실종경보 Open Api");
                 missingCase.setSourceUrl("https://www.safe182.go.kr");
-                missingCase.setCrawledAt(LocalDateTime.now());
                 missingCase.setDeleted(false);
 
                 MissingCase savedCase = missingCaseRepository.save(missingCase);
