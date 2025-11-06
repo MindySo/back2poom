@@ -55,7 +55,7 @@ public class MissingCaseSyncService {
 
         // DB에는 있는데, API에는 없는 항목
         for (MissingCase existing : allCases) {
-            if (!currentIds.contains(existing.getMissingId()) && !existing.isDeleted()) {
+            if (existing.getMissingId() != null && !currentIds.contains(existing.getMissingId()) && !existing.isDeleted()) {
                 existing.setDeleted(true);
                 log.info("삭제된 실종자 처리: {}", existing.getMissingId());
             }

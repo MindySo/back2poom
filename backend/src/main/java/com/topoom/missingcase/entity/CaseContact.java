@@ -8,10 +8,10 @@ import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "case_contact",
-        uniqueConstraints = @UniqueConstraint(name = "uq_case_contact", columnNames = {"case_id", "phone_norm"}),
+        uniqueConstraints = @UniqueConstraint(name = "uq_case_contact", columnNames = {"case_id", "phone_number"}),
         indexes = {
                 @Index(name = "ix_case_contact_case", columnList = "case_id"),
-                @Index(name = "ix_case_contact_phone_norm", columnList = "phone_norm")
+                @Index(name = "ix_case_contact_phone_number", columnList = "phone_number")
         })
 @Getter
 @Setter
@@ -33,9 +33,6 @@ public class CaseContact extends BaseTimeEntity {
     @Column(name = "phone_number", nullable = false)
     private String phoneNumber;
 
-    @Column(name = "phone_norm", length = 20)
-    private String phoneNorm;
-
     @Column(name = "source_url", columnDefinition = "TEXT", nullable = false)
     private String sourceUrl;
 
@@ -44,6 +41,4 @@ public class CaseContact extends BaseTimeEntity {
 
     @Column(name = "crawled_at", nullable = false)
     private LocalDateTime crawledAt;
-
-    private LocalDateTime lastCheckedAt;
 }

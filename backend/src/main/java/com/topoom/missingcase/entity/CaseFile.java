@@ -55,6 +55,9 @@ public class CaseFile extends BaseTimeEntity {
     @Column(name = "source_url", columnDefinition = "TEXT")
     private String sourceUrl;
 
+    @Column(name = "source_title", nullable = false)
+    private String sourceTitle;
+
     @Column(name = "source_seq", nullable = false)
     private Integer sourceSeq;
 
@@ -67,8 +70,7 @@ public class CaseFile extends BaseTimeEntity {
 
     public enum IoRole { INPUT, OUTPUT }
     public enum Purpose {
-        BEFORE, APPEARANCE, FACE, FULL_BODY,
-        UNUSABLE, TEXT, ENHANCED, ANALYSIS
+        SAFEDREAM, OCR, FACE, FULL_BODY, ENHANCED
     }
     public enum ContentKind { IMAGE, JSON }
 }
