@@ -6,6 +6,7 @@ import Badge from '../../common/atoms/Badge';
 import Text from '../../common/atoms/Text';
 import Button from '../../common/atoms/Button';
 import tempImg from '../../../assets/TempImg.png';
+import poomLogo from '../../../assets/poom_logo.png';
 
 export interface ArchiveDetailPopupProps {
   personId: number;
@@ -92,15 +93,13 @@ const ArchiveDetailPopup: React.FC<ArchiveDetailPopupProps> = ({ personId, onClo
         {/* 헤더 */}
         <div className={styles['popup-header']}>
           <div className={styles['popup-header-left']}>
-            <h1 className={styles['popup-title']}>
-              품<span className={styles['popup-title-heart']}>❤️</span>으<span className={styles['popup-title-dot']}>로</span>
-            </h1>
-          </div>
-          <div className={styles['popup-badges']}>
-            <Badge variant="time" size="small">{formatElapsed(occurredAt)}</Badge>
-            {classificationCode && (
-              <Badge variant="feature" size="small">{classificationCode}</Badge>
-            )}
+            <img src={poomLogo} alt="품으로" className={styles['popup-logo']} />
+            <div className={styles['popup-badges']}>
+              <Badge variant="time" size="small">{formatElapsed(occurredAt)}</Badge>
+              {classificationCode && (
+                <Badge variant="feature" size="small">{classificationCode}</Badge>
+              )}
+            </div>
           </div>
         </div>
 
