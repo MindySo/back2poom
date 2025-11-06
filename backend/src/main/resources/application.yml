@@ -1,0 +1,68 @@
+spring:
+  application:
+    name: topoom
+  profiles:
+    active: local
+
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://k13a706.p.ssafy.io:3306/topoom-db?allowPublicKeyRetrieval=true&useSSL=false
+    username: ${MYSQL_USER}
+    password: ${MYSQL_PASSWORD}
+
+  data:
+    redis:
+      host: k13a706.p.ssafy.io
+      port: 6379
+      password: ${REDIS_PASSWORD}
+
+  cloud:
+    aws:
+      credentials:
+        access-key: ${S3_ACCESS_KEY_ID}
+        secret-key: ${S3_ACCESS_ACCESS_KEY}
+      s3:
+        bucket: topoom-s3-bucket
+      region:
+        static: ap-southeast-2
+      stack:
+        auto: false
+
+  jpa:
+    database: mysql
+    hibernate:
+      ddl-auto: validate
+    properties:
+      hibernate:
+        show_sql: false
+        format_sql: true
+        default_batch_fetch_size: 100
+    open-in-view: false
+
+  servlet:
+    multipart:
+      max-file-size: 50MB
+      max-request-size: 100MB
+
+  jackson:
+    time-zone: Asia/Seoul
+    serialization:
+      write-dates-as-timestamps: false
+
+safe182:
+  api:
+    url: ${SAFE182_API_URL}
+    esntlId: ${SAFE182_ESNTL_ID}
+    authKey: ${SAFE182_AUTH_KEY}
+
+kakao:
+  api:
+    key: ${KAKAO_API_KEY}
+
+server:
+  port: 8080
+
+logging:
+  level:
+    root: INFO
+    com.topoom: INFO
