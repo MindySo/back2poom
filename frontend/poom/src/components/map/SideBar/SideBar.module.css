@@ -57,3 +57,11 @@
 .recentMissingList:hover {
   scrollbar-color: rgba(43, 58, 85, 0.3) transparent;
 }
+
+/* 빈 상태 메시지 */
+.emptyMessage {
+  display: flex;
+  justify-content: center;
+  padding: 2rem 0;
+  flex: 1;
+}
