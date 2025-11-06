@@ -28,7 +28,7 @@ public class MissingCaseService {
     private final ObjectMapper objectMapper;
 
     private String generateFileUrl(String s3Key) {
-        return "https://cdn.example.com/" + s3Key;
+        return "https://cdn.back2poom.site/" + s3Key;
     }
 
     public List<MissingCaseListResponse> getAllCases() {
