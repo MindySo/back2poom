@@ -107,4 +107,7 @@ public class MissingCase extends BaseTimeEntity {
     @OneToOne(mappedBy = "missingCase", cascade = CascadeType.ALL, orphanRemoval = true)
     private CaseAiSupport aiSupport;
 
+    @OneToMany(mappedBy = "missingCase", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<CaseReport> reports;
+
 }

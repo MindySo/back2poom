@@ -2,13 +2,12 @@ package com.topoom.missingcase.controller;
 
 import com.topoom.common.ApiResponse;
 import com.topoom.external.openapi.Safe182Client;
-import com.topoom.missingcase.dto.MissingCaseDetailResponse;
-import com.topoom.missingcase.dto.MissingCaseListResponse;
-import com.topoom.missingcase.dto.MissingCaseStatsResponse;
-import com.topoom.missingcase.dto.Safe182Response;
+import com.topoom.missingcase.dto.*;
+import com.topoom.missingcase.service.CaseReportService;
 import com.topoom.missingcase.service.MissingCaseService;
 import com.topoom.missingcase.service.MissingCaseSyncService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -22,6 +21,7 @@ public class MissingCaseController {
     private final Safe182Client safe182Client;
     private final MissingCaseService missingCaseService;
     private final MissingCaseSyncService missingCaseSyncService;
+    private final CaseReportService caseReportService;
 
     @GetMapping
     public ResponseEntity<ApiResponse<List<MissingCaseListResponse>>> getAllCases() {
@@ -50,5 +50,15 @@ public class MissingCaseController {
     public ResponseEntity<ApiResponse<Safe182Response>> getApi() {
         missingCaseSyncService.syncMissing(100);
         return ResponseEntity.ok(ApiResponse.success(safe182Client.getMissing(100)));
+    }
+
+    @PostMapping("/report")
+    public ResponseEntity<ApiResponse<Void>> createReport(@RequestBody CaseReportRequest reportRequest) {
+        return ResponseEntity.status(HttpStatus.CREATED).body(ApiResponse.success("제보가 성공적으로 등록되었습니다.", null));
+    }
+
+    @GetMapping("/report/{id}")
+    public ResponseEntity<ApiResponse<List<CaseReportResponse>>> getReports(@PathVariable Long id) {
+        return ResponseEntity.ok(ApiResponse.success(caseReportService.getReportsByCaseId(id)));
     }
 }
