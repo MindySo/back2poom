@@ -1,5 +1,6 @@
 package com.topoom.missingcase.service;
 
+import com.topoom.external.openapi.KakaoClient;
 import com.topoom.missingcase.entity.CaseFile;
 import com.topoom.missingcase.entity.MissingCase;
 import com.topoom.missingcase.repository.CaseFileRepository;
@@ -14,6 +15,7 @@ import reactor.core.publisher.Mono;
 
 import java.time.LocalDateTime;
 import java.util.Map;
+import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -26,6 +28,7 @@ public class CaseOcrService {
     private final WebClient ocrWebClient;
     private final CaseFileRepository caseFileRepository;
     private final MissingCaseRepository missingCaseRepository;
+    private final KakaoClient kakaoClient;
 
     // 정규식 패턴들
     // 첫 줄 통합 패턴: "장애: 이우승(55세) 남자" 또는 "아동 김수아(14세) 여자" 형식
@@ -97,30 +100,6 @@ public class CaseOcrService {
                 })
                 .doOnSuccess(result -> log.info("OCR API 호출 성공: s3Key={}, 결과 길이={}", s3Key, result != null ? result.length() : 0))
                 .doOnError(error -> log.error("OCR API 호출 실패: s3Key={}", s3Key, error));
-    }
-
-    /**
-     * 테스트용: 특정 케이스의 마지막 이미지에 대해 OCR을 수행하고 원본 결과 반환
-     */
-    public String testOcrForCase(Long caseId) {
-        try {
-            log.info("테스트 OCR 처리 시작: caseId={}", caseId);
-
-            // 1. is_last_image=true인 CaseFile 조회
-            CaseFile lastImage = caseFileRepository.findByMissingCaseIdAndIsLastImage(caseId, true)
-                    .orElseThrow(() -> new RuntimeException("마지막 이미지를 찾을 수 없습니다: caseId=" + caseId));
-
-            // 2. OCR API 호출
-            String ocrResult = callOcrApi(lastImage.getS3Key()).block();
-
-            log.info("테스트 OCR 처리 완료: caseId={}, 결과 길이={}", caseId, ocrResult != null ? ocrResult.length() : 0);
-
-            return ocrResult;
-
-        } catch (Exception e) {
-            log.error("테스트 OCR 처리 실패: caseId={}", caseId, e);
-            throw new RuntimeException("OCR 처리 실패: " + e.getMessage(), e);
-        }
     }
 
     /**
@@ -316,7 +295,44 @@ public class CaseOcrService {
             }
 
             // occurred_at은 OCR에서 추출하지 못하면 null로 유지 (기본값 설정 안 함)
-            
+
+            // 발생장소를 좌표로 변환 (latitude, longitude 업데이트)
+            if (!isNullOrEmpty(missingCase.getOccurredLocation())
+                && (missingCase.getLatitude() == null || missingCase.getLongitude() == null)) {
+                try {
+                    Optional<double[]> coordinates = kakaoClient.getCoordinates(missingCase.getOccurredLocation());
+                    if (coordinates.isPresent()) {
+                        double[] coords = coordinates.get();
+                        missingCase.setLatitude(java.math.BigDecimal.valueOf(coords[0]));  // latitude (y)
+                        missingCase.setLongitude(java.math.BigDecimal.valueOf(coords[1])); // longitude (x)
+                        updated = true;
+                        log.info("좌표 변환 성공: caseId={}, location={}, lat={}, lng={}",
+                            caseId, missingCase.getOccurredLocation(), coords[0], coords[1]);
+                    } else {
+                        log.warn("좌표 변환 실패: caseId={}, location={}", caseId, missingCase.getOccurredLocation());
+                    }
+                } catch (Exception e) {
+                    log.error("좌표 변환 중 오류: caseId={}, location={}", caseId, missingCase.getOccurredLocation(), e);
+                }
+            }
+
+            // main_file_id 설정 (source_seq=1인 첫 번째 이미지)
+            if (missingCase.getMainFile() == null) {
+                try {
+                    Optional<CaseFile> firstImage = caseFileRepository
+                        .findByMissingCaseIdAndSourceSeq(caseId, 1);
+                    if (firstImage.isPresent()) {
+                        missingCase.setMainFile(firstImage.get());
+                        updated = true;
+                        log.info("메인 이미지 설정: caseId={}, fileId={}", caseId, firstImage.get().getId());
+                    } else {
+                        log.warn("source_seq=1 이미지를 찾을 수 없음: caseId={}", caseId);
+                    }
+                } catch (Exception e) {
+                    log.error("메인 이미지 설정 중 오류: caseId={}", caseId, e);
+                }
+            }
+
             if (updated) {
                 missingCaseRepository.save(missingCase);
                 log.info("MissingCase OCR 업데이트 완료: caseId={}", caseId);

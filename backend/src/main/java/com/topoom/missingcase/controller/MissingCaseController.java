@@ -66,21 +66,21 @@ public class MissingCaseController {
     }
 
     /**
-     * 테스트용: 특정 케이스의 OCR 원본 결과 확인
+     * 초기 데이터용: 모든 MissingCase의 crawled_at을 occurred_at으로 일괄 업데이트
+     * 최초 한 번만 실행
      */
-    @GetMapping("/test-ocr/{caseId}")
-    public ResponseEntity<Map<String, String>> testOcrResult(@PathVariable Long caseId) {
+    @PostMapping("/init-crawled-at")
+    public ResponseEntity<Map<String, Object>> initCrawledAt() {
         try {
-            String ocrResult = caseOcrService.testOcrForCase(caseId);
+            int updatedCount = missingCaseService.updateCrawledAtToOccurredAt();
             return ResponseEntity.ok(Map.of(
-                    "success", "true",
-                    "caseId", String.valueOf(caseId),
-                    "ocrResult", ocrResult != null ? ocrResult : "OCR 결과가 없습니다."
+                    "success", true,
+                    "message", "crawled_at 업데이트 완료",
+                    "updatedCount", updatedCount
             ));
         } catch (Exception e) {
             return ResponseEntity.badRequest().body(Map.of(
-                    "success", "false",
-                    "caseId", String.valueOf(caseId),
+                    "success", false,
                     "error", e.getMessage()
             ));
         }
