@@ -3,6 +3,7 @@ package com.topoom.missingcase.controller;
 import com.topoom.common.ApiResponse;
 import com.topoom.external.openapi.Safe182Client;
 import com.topoom.missingcase.dto.*;
+import com.topoom.missingcase.service.CaseOcrService;
 import com.topoom.missingcase.service.CaseReportService;
 import com.topoom.missingcase.service.MissingCaseService;
 import com.topoom.missingcase.service.MissingCaseSyncService;
@@ -12,6 +13,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/v1/missing")
@@ -22,6 +24,7 @@ public class MissingCaseController {
     private final MissingCaseService missingCaseService;
     private final MissingCaseSyncService missingCaseSyncService;
     private final CaseReportService caseReportService;
+    private final CaseOcrService caseOcrService;
 
     @GetMapping
     public ResponseEntity<ApiResponse<List<MissingCaseListResponse>>> getAllCases() {
@@ -60,5 +63,26 @@ public class MissingCaseController {
     @GetMapping("/report/{id}")
     public ResponseEntity<ApiResponse<List<CaseReportResponse>>> getReports(@PathVariable Long id) {
         return ResponseEntity.ok(ApiResponse.success(caseReportService.getReportsByCaseId(id)));
+    }
+
+    /**
+     * 초기 데이터용: 모든 MissingCase의 crawled_at을 occurred_at으로 일괄 업데이트
+     * 최초 한 번만 실행
+     */
+    @PostMapping("/init-crawled-at")
+    public ResponseEntity<Map<String, Object>> initCrawledAt() {
+        try {
+            int updatedCount = missingCaseService.updateCrawledAtToOccurredAt();
+            return ResponseEntity.ok(Map.of(
+                    "success", true,
+                    "message", "crawled_at 업데이트 완료",
+                    "updatedCount", updatedCount
+            ));
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(Map.of(
+                    "success", false,
+                    "error", e.getMessage()
+            ));
+        }
     }
 }

@@ -142,29 +142,6 @@ public class IntegratedBlogCrawlingService {
         //noinspection unchecked
         return (List<CaseFile>) result.get("images");
     }
-    
-    /** 테스트용: MissingCase 생성 및 이미지 크롤링 */
-    public String testCreateMissingCaseAndCrawlImages(BlogPostInfo info) {
-        try {
-            log.info("🧪 테스트 시작: title={}, url={}", info.getTitle(), info.getPostUrl());
-            
-            // 1. MissingCase 생성
-            Long caseId = createMissingCaseFromBlogPost(info);
-            log.info("✅ MissingCase 생성 완료: caseId={}", caseId);
-            
-            // 2. 이미지 크롤링
-            crawlImagesForNewPost(info.getPostUrl(), caseId);
-            log.info("✅ 이미지 크롤링 완료: caseId={}", caseId);
-            
-            return String.format("성공: MissingCase ID=%d 생성 및 이미지 크롤링 완료 (게시글: %s)", 
-                caseId, info.getTitle());
-                
-        } catch (Exception e) {
-            log.error("❌ 테스트 실패: title={}, url={}", info.getTitle(), info.getPostUrl(), e);
-            throw new RuntimeException("테스트 실패: " + e.getMessage(), e);
-        }
-    }
-
     // ────────────────────────── Internal helpers ──────────────────────────
 
     /** 새 WebDriver를 열고, 종료(quit)까지 보장하는 안전 래퍼 */
@@ -450,7 +427,7 @@ public class IntegratedBlogCrawlingService {
                     .latitude(null)
                     .longitude(null)
                     .clothingDesc(null)
-                    .progressStatus(null)
+                    .progressStatus("신고")
                     .etcFeatures(null)
                     .missingId(null)
                     .mainFile(null)
