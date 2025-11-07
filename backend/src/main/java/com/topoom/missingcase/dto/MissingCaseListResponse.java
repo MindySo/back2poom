@@ -16,6 +16,7 @@ public class MissingCaseListResponse {
     private String personName;
     private String targetType;
     private Integer ageAtTime;
+    private Integer currentAge;
     private String gender;
     private ZonedDateTime occurredAt;     // ISO 8601 (UTC 표준)
     private String occurredLocation;

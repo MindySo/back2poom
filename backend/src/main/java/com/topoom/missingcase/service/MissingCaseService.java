@@ -53,6 +53,7 @@ public class MissingCaseService {
                 .personName(mc.getPersonName())
                 .targetType(mc.getTargetType())
                 .ageAtTime((int) mc.getAgeAtTime())
+                .currentAge((int) mc.getCurrentAge())
                 .gender(mc.getGender())
                 .occurredAt(mc.getOccurredAt().atZone(ZoneOffset.UTC))
                 .occurredLocation(mc.getOccurredLocation())
@@ -88,7 +89,7 @@ public class MissingCaseService {
                 .stream()
                 .map(this::toImageItem)
                 .collect(Collectors.toList());
-        
+
         MissingCaseDetailResponse.CaseContact caseContact = null;
         if (mc.getContact() != null) {
             caseContact = MissingCaseDetailResponse.CaseContact.builder()
@@ -157,7 +158,14 @@ public class MissingCaseService {
     }
 
     public MissingCaseStatsResponse getStats() {
-        return null;
+        Object result = missingCaseRepository.getTodayStats();
+        Object[] row = (Object[]) result;
+
+        Long totalCases = ((Number) row[0]).longValue();
+        Long totalReports = ((Number) row[1]).longValue();
+        Long totalResolved = ((Number) row[2]).longValue();
+
+        return new MissingCaseStatsResponse(totalCases, totalReports, totalResolved);
     }
 
     public List<MissingCaseListResponse> getRecentCases(int hours) {

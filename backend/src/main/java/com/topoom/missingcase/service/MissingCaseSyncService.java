@@ -51,13 +51,13 @@ public class MissingCaseSyncService {
                 .filter(Objects::nonNull)
                 .collect(Collectors.toSet());
 
-        List<MissingCase> allCases = missingCaseRepository.findAll();
+        LocalDateTime cutoffDate = LocalDateTime.of(2021, 5, 22, 0, 0);
+        List<MissingCase> oldCases = missingCaseRepository.findByCrawledAtBefore(cutoffDate);
 
-        // DB에는 있는데, API에는 없는 항목
-        for (MissingCase existing : allCases) {
+        for (MissingCase existing : oldCases) {
             if (!currentIds.contains(existing.getMissingId()) && !existing.isDeleted()) {
                 existing.setDeleted(true);
-                log.info("삭제된 실종자 처리: {}", existing.getMissingId());
+                log.info("삭제된 실종자 처리(API): {}", existing.getMissingId());
             }
         }
 
@@ -106,10 +106,11 @@ public class MissingCaseSyncService {
                 if (item.getTknphotoFile() != null && !item.getTknphotoFile().isEmpty()) {
                     try {
                         CaseFile file = s3ImageUploadService.uploadBase64Image(item.getTknphotoFile().replaceAll("\\s+", ""), savedCase.getId());
-
-                        caseFileRepository.save(file);
-
                         log.info("S3 업로드 완료: {}", savedCase.getId());
+                        caseFileRepository.save(file);
+                        savedCase.setMainFile(file);
+                        missingCaseRepository.save(savedCase);
+
                     } catch (Exception e) {
                         log.error("이미지 업로드 실패 (missingId={}): {}", savedCase.getMissingId(), e.getMessage());
                     }

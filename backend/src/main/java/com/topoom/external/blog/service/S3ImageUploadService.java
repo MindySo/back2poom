@@ -73,7 +73,7 @@ public class S3ImageUploadService {
             CaseFile caseFile = CaseFile.builder()
                     .missingCase(missingCase)
                     .ioRole(CaseFile.IoRole.INPUT)
-                    .purpose(CaseFile.Purpose.SAFE)
+                    .purpose(CaseFile.Purpose.OCR)
                     .contentKind(CaseFile.ContentKind.IMAGE)
                     .s3Key(s3Key)
                     .s3Bucket(bucketName)

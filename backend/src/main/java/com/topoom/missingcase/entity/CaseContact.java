@@ -8,9 +8,10 @@ import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "case_contact",
+        uniqueConstraints = @UniqueConstraint(name = "uq_case_contact", columnNames = {"case_id", "phone_number"}),
         indexes = {
                 @Index(name = "ix_case_contact_case", columnList = "case_id"),
-                @Index(name = "ix_case_contact_phone", columnList = "phone_number")
+                @Index(name = "ix_case_contact_phone_number", columnList = "phone_number")
         })
 @Getter
 @Setter

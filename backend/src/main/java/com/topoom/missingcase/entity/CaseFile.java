@@ -55,10 +55,10 @@ public class CaseFile extends BaseTimeEntity {
     @Column(name = "source_url", columnDefinition = "TEXT")
     private String sourceUrl;
 
-    @Column(name = "source_title", length = 300)
+    @Column(name = "source_title", nullable = false)
     private String sourceTitle;
 
-    @Column(name = "source_seq")
+    @Column(name = "source_seq", nullable = false)
     private Integer sourceSeq;
 
     @Column(name = "is_last_image")

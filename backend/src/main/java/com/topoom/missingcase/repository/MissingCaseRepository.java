@@ -1,6 +1,7 @@
 package com.topoom.missingcase.repository;
 
 import com.topoom.missingcase.dto.MissingCaseListResponse;
+import com.topoom.missingcase.dto.MissingCaseStatsResponse;
 import com.topoom.missingcase.entity.MissingCase;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -23,9 +24,11 @@ public interface MissingCaseRepository extends JpaRepository<MissingCase, Long> 
     List<MissingCase> findAllWithMainFile();
 
     @Query("""
-        SELECT mc
+        SELECT DISTINCT mc
         FROM MissingCase mc
         LEFT JOIN FETCH mc.mainFile mf
+        LEFT JOIN FETCH mc.files f
+        LEFT JOIN FETCH mc.contact c
         LEFT JOIN FETCH mc.aiSupport ai
         WHERE mc.id = :id AND mc.isDeleted = false
     """)
@@ -34,4 +37,14 @@ public interface MissingCaseRepository extends JpaRepository<MissingCase, Long> 
     Optional<MissingCase> findByMissingId(Integer missingId);
 
     List<MissingCase> findByCrawledAtAfterOrderByCrawledAtDesc(LocalDateTime since);
+
+    List<MissingCase> findByCrawledAtBefore(LocalDateTime cutoffDate);
+
+    @Query(value = """
+        SELECT 
+            (SELECT COUNT(*) FROM missing_case mc1 WHERE DATE(mc1.occurred_at) = CURDATE()) AS totalCases,
+            (SELECT COUNT(*) FROM case_report r WHERE DATE(r.created_at) = CURDATE()) AS totalReports,
+            (SELECT COUNT(*) FROM missing_case mc2 WHERE mc2.is_deleted = TRUE AND DATE(mc2.updated_at) = CURDATE()) AS totalResolved
+        """, nativeQuery = true)
+    Object getTodayStats();
 }
