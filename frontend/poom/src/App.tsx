@@ -14,11 +14,10 @@ function AppContent() {
   const isReportPage = location.pathname === '/report';
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', height: '100dvh', width: '100%' }}>
+    <div style={{ display: 'flex', flexDirection: 'column', height: '100dvh', width: '100%', overflow: 'hidden' }}>
       {isMobile ? <MobileTopBar /> : <TopBar />}
       <div 
-        className={`${styles.appContainer} ${isMobile ? styles.mobile : ''}`} 
-        style={{ flex: 1, overflow: isReportPage ? 'hidden' : 'auto' }}
+        className={`${styles.appContainer} ${isMobile ? styles.mobile : ''} ${isReportPage ? styles.noScroll : ''}`}
       >
         <Routes>
           <Route path="/" element={<DevPage />} />

@@ -3,7 +3,7 @@
 .list-page {
   background: #f7f7f8; /* subtle light background */
   min-height: 100vh;
-  padding: 24px 0 48px; /* full-bleed hero, no side padding */
+  padding: 0 0 48px; /* full-bleed hero, no side padding, 상단 padding 제거 */
 }
 
 /* Hero banner containing the header and search */
@@ -13,7 +13,7 @@
   background-position: center;
   border-radius: 0; /* edge-to-edge */
   overflow: hidden;
-  height: 180px;
+  height: 300px;
   margin: 0; /* stick to tabs below */
 }
 
@@ -175,9 +175,9 @@
 }
 
 /* 작은 화면에서는 1열로 */
-@media (max-width: 610px) {
+@media (max-width: 620px) {
   .mobile-grid {
-    grid-template-columns: 1fr; /* 610px 이하에서는 1열 */
+    grid-template-columns: 1fr; /* 620px 이하에서는 1열 */
   }
 }
 
@@ -243,7 +243,7 @@
 
 /* 데스크톱 버전 스타일 */
 .list-page.desktop {
-  padding: 24px 0 48px;
+  padding: 0 0 48px; /* 상단 padding 제거하여 헤더와 배너가 붙도록 */
 }
 
 /* 기존 미디어 쿼리는 유지 (CSS만으로도 스타일 조정 가능) */

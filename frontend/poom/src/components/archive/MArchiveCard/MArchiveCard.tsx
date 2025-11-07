@@ -2,6 +2,8 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useQueryClient } from '@tanstack/react-query';
 import { useMissingDetail } from '../../../hooks/useMissingDetail';
+import { useShareMissingPerson } from '../../../hooks/useShareMissingPerson';
+import { useElapsedTime } from '../../../hooks/useElapsedTime';
 import type { MissingPerson } from '../../../types/missing';
 import styles from './MArchiveCard.module.css';
 import Badge from '../../common/atoms/Badge';
@@ -13,24 +15,11 @@ export interface MArchiveCardProps {
   personId: number;
 }
 
-function formatElapsed(iso: string): string {
-  const occured = new Date(iso).getTime();
-  const now = Date.now();
-  const ms = Math.max(0, now - occured);
-  const totalSeconds = Math.floor(ms / 1000);
-  const days = Math.floor(totalSeconds / 86400);
-  const hours = Math.floor((totalSeconds % 86400) / 3600);
-  const minutes = Math.floor((totalSeconds % 3600) / 60);
-  return days > 0
-    ? `${days}일 ${hours}시간 경과`
-    : `${hours}시간 ${minutes}분 경과`;
-}
-
 const MArchiveCard: React.FC<MArchiveCardProps> = ({ personId }) => {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const [isExpanded, setIsExpanded] = useState(false);
-  const [isSharing, setIsSharing] = useState(false); // 공유 진행 중 상태
+  const { share: handleShare, isSharing } = useShareMissingPerson();
   
   // 목록 캐시에서 기본 정보 가져오기
   const missingList = queryClient.getQueryData<MissingPerson[]>(['missing', 'list']);
@@ -52,7 +41,7 @@ const MArchiveCard: React.FC<MArchiveCardProps> = ({ personId }) => {
     personName,
     ageAtTime,
     gender,
-    occurredAt,
+    crawledAt,
     occurredLocation,
     classificationCode,
     mainImage,
@@ -65,7 +54,18 @@ const MArchiveCard: React.FC<MArchiveCardProps> = ({ personId }) => {
     clothingDesc,
     inputImages,
     outputImages,
+    aiSupport,
   } = displayData;
+  
+  const elapsedTime = useElapsedTime(crawledAt);
+  
+  // 발생일 포맷팅 (안전하게 처리)
+  const formatDate = (dateString: string | undefined): string => {
+    if (!dateString) return '-';
+    const date = new Date(dateString);
+    if (isNaN(date.getTime())) return '-';
+    return date.toISOString().slice(0, 10);
+  };
 
   // 이미지 URL 가져오기
   const thumbnailImages = inputImages?.slice(0, 4) || [];
@@ -73,72 +73,8 @@ const MArchiveCard: React.FC<MArchiveCardProps> = ({ personId }) => {
   const displayMainImageUrl = mainImage?.url || tempImg;
 
   // 공유하기 핸들러
-  const handleShare = async () => {
-    // 이미 공유 중이면 무시
-    if (isSharing) {
-      return;
-    }
-
-    setIsSharing(true);
-    const shareUrl = `${window.location.origin}/list?id=${personId}`;
-    const shareTitle = '실종자 정보 공유';
-    // 메시지 앱 호환성을 위해 text에 모든 정보 포함 (메시지 앱은 주로 text만 사용)
-    const shareText = [
-      `[실종자 정보]`,
-      `이름: ${personName}`,
-      `나이: ${ageAtTime}세`,
-      `성별: ${gender ?? '성별 미상'}`,
-      `발생일: ${new Date(occurredAt).toISOString().slice(0, 10)}`,
-      `발생장소: ${occurredLocation}`,
-      ``,
-      `자세한 정보는 '품으로'에서 확인해주세요: ${shareUrl}`
-    ].join('\n');
-
-    try {
-      // Web Share API 지원 여부 확인
-      if (navigator.share) {
-        try {
-          // 메시지 앱 호환성을 위해 text에 모든 정보 포함
-          // 메시지 앱은 url만 사용하면 데이터가 안 보일 수 있으므로 text에 URL도 포함
-          const shareData: ShareData = {
-            title: shareTitle,
-            text: shareText, // 메시지 앱에서 사용 (데이터 + URL 포함)
-            // url은 제거하거나 선택적으로 사용 (메시지 앱이 url만 사용하면 데이터가 안 보임)
-          };
-          
-          await navigator.share(shareData);
-          // 공유 성공 (사용자가 공유 완료)
-        } catch (error: any) {
-          // 사용자가 공유를 취소한 경우는 무시
-          if (error.name !== 'AbortError' && error.name !== 'InvalidStateError') {
-            console.error('공유 실패:', error);
-            // 대체 방법: 클립보드 복사
-            await fallbackShare(shareUrl);
-          }
-        }
-      } else {
-        // Web Share API를 지원하지 않는 경우 클립보드 복사
-        console.log('Web Share API를 지원하지 않는 브라우저입니다. 모바일 브라우저에서 시도해주세요.');
-        await fallbackShare(shareUrl);
-      }
-    } finally {
-      // 공유 완료 후 상태 해제 (약간의 딜레이로 중복 클릭 방지)
-      setTimeout(() => {
-        setIsSharing(false);
-      }, 500);
-    }
-  };
-
-  // 대체 방법: 클립보드 복사
-  const fallbackShare = async (url: string) => {
-    try {
-      await navigator.clipboard.writeText(url);
-      alert('링크가 클립보드에 복사되었습니다!');
-    } catch (error) {
-      console.error('복사 실패:', error);
-      // 최후의 수단: URL을 직접 표시
-      alert(`공유 링크: ${url}`);
-    }
+  const onShareClick = () => {
+    handleShare(displayData);
   };
 
   return (
@@ -150,7 +86,7 @@ const MArchiveCard: React.FC<MArchiveCardProps> = ({ personId }) => {
         <div className={styles['m-archive-card__right']}>
           <div className={styles['m-archive-card__main']}>
             <div className={styles['m-archive-card__header']}>
-              <Badge variant="time" size="xs">{formatElapsed(occurredAt)}</Badge>
+              <Badge variant="time" size="xs">{elapsedTime}</Badge>
               {classificationCode && (
                 <Badge variant="feature" size="xs">{classificationCode}</Badge>
               )}
@@ -158,12 +94,12 @@ const MArchiveCard: React.FC<MArchiveCardProps> = ({ personId }) => {
 
             <div className={styles['m-archive-card__row']}>
               <Text as="span" size="sm" weight="bold" className={styles['m-archive-card__name']}>{personName}</Text>
-              <Text as="span" size="xs" color="gray" className={styles['m-archive-card__meta']}>{gender ?? '성별 미상'} · {ageAtTime}세</Text>
+              <Text as="span" size="xs" color="gray" className={styles['m-archive-card__meta']}>{gender ?? '성별 미상'} / {ageAtTime}세</Text>
             </div>
             <div className={styles['m-archive-card__info']}>
               <div>
                 <Text as="div" size="xs" color="gray" className={styles['m-archive-card__label']}>발생일</Text>
-                <Text as="div" size="xs" className={styles['m-archive-card__value']}>{new Date(occurredAt).toISOString().slice(0, 10)}</Text>
+                <Text as="div" size="xs" className={styles['m-archive-card__value']}>{formatDate(crawledAt)}</Text>
               </div>
               <div>
                 <Text as="div" size="xs" color="gray" className={styles['m-archive-card__label']}>발생장소</Text>
@@ -186,7 +122,7 @@ const MArchiveCard: React.FC<MArchiveCardProps> = ({ personId }) => {
               size="small" 
               className={styles['m-archive-card__iconBtn']} 
               aria-label="공유"
-              onClick={handleShare}
+              onClick={onShareClick}
               disabled={isSharing}
             >
               ↗
@@ -213,44 +149,84 @@ const MArchiveCard: React.FC<MArchiveCardProps> = ({ personId }) => {
                 </div>
               )}
               
-              {/* 상세정보와 AI 이미지 - 좌우로 나뉨 */}
-              <div className={styles['m-archive-card__detailSection']}>
-                {/* 왼편: 상세정보 */}
-                <div className={styles['m-archive-card__detailInfo']}>
-                  <Text as="div" size="xs" weight="bold" className={styles['m-archive-card__detailTitle']}>상세정보</Text>
-                  <div className={styles['m-archive-card__detailList']}>
-                    <div className={styles['m-archive-card__detailItem']}>
-                      <Text as="div" size="xs" color="gray">신체정보</Text>
-                      <Text as="div" size="xs">{heightCm ? `${heightCm}cm` : '-'} / {weightKg ? `${weightKg}kg` : '-'}</Text>
-                    </div>
-                    <div className={styles['m-archive-card__detailItem']}>
-                      <Text as="div" size="xs" color="gray">체형</Text>
-                      <Text as="div" size="xs">{bodyType || '-'}</Text>
-                    </div>
-                    <div className={styles['m-archive-card__detailItem']}>
-                      <Text as="div" size="xs" color="gray">얼굴형</Text>
-                      <Text as="div" size="xs">{faceShape || '-'}</Text>
-                    </div>
-                    <div className={styles['m-archive-card__detailItem']}>
-                      <Text as="div" size="xs" color="gray">두발 형태</Text>
-                      <Text as="div" size="xs">{hairColor || '-'} / {hairStyle || '-'}</Text>
-                    </div>
-                    <div className={styles['m-archive-card__detailItem']}>
-                      <Text as="div" size="xs" color="gray">복장</Text>
-                      <Text as="div" size="xs">{clothingDesc || '-'}</Text>
-                    </div>
+              {/* 상세정보 - 한 행으로 배치 */}
+              <div className={styles['m-archive-card__detailInfo']}>
+                <Text as="div" size="xs" weight="bold" className={styles['m-archive-card__detailTitle']}>상세정보</Text>
+                <div className={styles['m-archive-card__detailList']}>
+                  <div className={styles['m-archive-card__detailItem']}>
+                    <Text as="div" size="xs" color="gray">신체정보</Text>
+                    <Text as="div" size="xs">{heightCm ? `${heightCm}cm` : '-'} / {weightKg ? `${weightKg}kg` : '-'}</Text>
+                  </div>
+                  <div className={styles['m-archive-card__detailItem']}>
+                    <Text as="div" size="xs" color="gray">체형</Text>
+                    <Text as="div" size="xs">{bodyType || '-'}</Text>
+                  </div>
+                  <div className={styles['m-archive-card__detailItem']}>
+                    <Text as="div" size="xs" color="gray">얼굴형</Text>
+                    <Text as="div" size="xs">{faceShape || '-'}</Text>
+                  </div>
+                  <div className={styles['m-archive-card__detailItem']}>
+                    <Text as="div" size="xs" color="gray">두발 형태</Text>
+                    <Text as="div" size="xs">{hairColor || '-'} / {hairStyle || '-'}</Text>
+                  </div>
+                  <div className={styles['m-archive-card__detailItem']}>
+                    <Text as="div" size="xs" color="gray">복장</Text>
+                    <Text as="div" size="xs">{clothingDesc || '-'}</Text>
                   </div>
                 </div>
-                
-                {/* 오른편: AI 이미지 */}
-                <div className={styles['m-archive-card__aiImage']}>
-                  <Text as="div" size="xs" weight="bold" className={styles['m-archive-card__detailTitle']}>AI 서포트</Text>
+              </div>
+              
+              {/* AI 이미지와 AI 서포트 정보 */}
+              <div className={styles['m-archive-card__aiSection']}>
+                <Text as="div" size="xs" weight="bold" className={styles['m-archive-card__detailTitle']}>AI 서포트</Text>
+                <div className={styles['m-archive-card__aiContent']}>
+                  {/* 왼쪽: AI 이미지 */}
                   <div className={styles['m-archive-card__aiImageWrapperOuter']}>
                     <div className={styles['m-archive-card__aiImageWrapper']}>
                       <img src={aiImageUrl} alt="AI 생성 이미지" />
                     </div>
                   </div>
+                  
+                  {/* 오른쪽: 우선순위와 미상 정보 */}
+                  <div className={styles['m-archive-card__aiInfoWrapper']}>
+                    <div className={styles['m-archive-card__aiInfo']}>
+                      {aiSupport && (
+                        <>
+                          <div className={styles['m-archive-card__aiInfoSection']}>
+                            <Text as="div" size="xs" weight="bold" className={styles['m-archive-card__aiInfoLabel']}>미상 정보</Text>
+                            {aiSupport.infoItems?.map((item, index) => (
+                              <div key={index} className={styles['m-archive-card__aiInfoItem']}>
+                                <Text as="div" size="xs" color="gray">{item.label}</Text>
+                                <Text as="div" size="xs">{item.value}</Text>
+                              </div>
+                            ))}
+                          </div>
+                          
+                          <div className={styles['m-archive-card__aiInfoSection']}>
+                            <Text as="div" size="xs" weight="bold" className={styles['m-archive-card__aiInfoLabel']}>우선순위</Text>
+                            <div className={styles['m-archive-card__aiInfoItem']}>
+                              <Text as="div" size="xs" color="gray">1순위</Text>
+                              <Text as="div" size="xs">{aiSupport.top1Desc || '-'}</Text>
+                            </div>
+                            <div className={styles['m-archive-card__aiInfoItem']}>
+                              <Text as="div" size="xs" color="gray">2순위</Text>
+                              <Text as="div" size="xs">{aiSupport.top2Desc || '-'}</Text>
+                            </div>
+                          </div>
+                        </>
+                      )}
+                      {!aiSupport && (
+                        <div className={styles['m-archive-card__aiInfoSection']}>
+                          <Text as="div" size="xs" color="gray">AI 정보가 없습니다.</Text>
+                        </div>
+                      )}
+                    </div>
+                  </div>
                 </div>
+                <Text as="div" size="xs" color="gray" className={styles['m-archive-card__aiCaption']}>
+                  ① AI 서포트 정보는 AI를 기반으로 정보를 제공합니다.
+                  제공되는 정보는 참고용이며, 사실과 다를 수 있습니다.
+                </Text>
               </div>
             </>
           ) : null}
