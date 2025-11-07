@@ -48,10 +48,6 @@ public class S3ImageUploadService {
             String s3Key = generateS3Key(caseId, fileExtension);
 
             BufferedImage image = ImageIO.read(new ByteArrayInputStream(imageData));
-            int width = image != null ? image.getWidth() : 0;
-            int height = image != null ? image.getHeight() : 0;
-
-            String checksum = calculateSHA256(imageData);
 
             PutObjectRequest putObjectRequest = PutObjectRequest.builder()
                     .bucket(bucketName)
@@ -113,11 +109,14 @@ public class S3ImageUploadService {
             byte[] imageBytes = Base64.getDecoder().decode(base64Data);
 
             String contentType = detectContentType(imageBytes);
-            String s3Key = generateS3Key(caseId, getFileExtension(contentType));
+            String timestamp = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMdd-HHmmss"));
+            String suffix = java.util.UUID.randomUUID().toString().replace("-", "").substring(0, 8);
+
+            String s3Key = (caseId != null) ?
+                    String.format("old/missing-person-%d/%s-%s.%s", caseId, timestamp, suffix, getFileExtension(contentType)) :
+                    String.format("old/crawled-unassigned/%s-%s.%s", timestamp, suffix, getFileExtension(contentType));
 
             BufferedImage image = ImageIO.read(new ByteArrayInputStream(imageBytes));
-            int width = image != null ? image.getWidth() : 0;
-            int height = image != null ? image.getHeight() : 0;
 
             PutObjectRequest putObjectRequest = PutObjectRequest.builder()
                     .bucket(bucketName)
@@ -143,14 +142,15 @@ public class S3ImageUploadService {
                     .contentType(contentType)
                     .sizeBytes((long) imageBytes.length)
                     .sourceUrl("https://www.safe182.go.kr")
+                    .sourceTitle("실종경보")
                     .sourceSeq(0)
                     .crawledAt(LocalDateTime.now())
                     .build();
 
             CaseFile saved = caseFileRepository.save(caseFile);
 
-            log.info("Base64 이미지 업로드 완료: id={}, bucket={}, key={}, size={} bytes, {}x{}",
-                    saved.getId(), bucketName, s3Key, imageBytes.length, width, height);
+            log.info("Base64 이미지 업로드 완료: id={}, bucket={}, key={}, size={} bytes",
+                    saved.getId(), bucketName, s3Key, imageBytes.length);
 
             return saved;
         } catch (Exception e) {

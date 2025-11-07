@@ -1,0 +1,24 @@
+spring:
+  application:
+    name: backend-ocr
+
+server:
+  port: 8081
+
+aws:
+  s3:
+    bucket-name: topoom-s3-bucket
+    access-key: ${S3_ACCESS_KEY_ID}
+    secret-key: ${S3_SECRET_ACCESS_KEY}
+    region: ap-southeast-2
+
+gms:
+  api:
+    base-url: https://gms.ssafy.io/gmsapi/api.openai.com/v1
+    key: ${GMS_API_KEY}
+
+logging:
+  level:
+    root: INFO
+    com.topoom: DEBUG
+    com.topoom.ocr: DEBUG

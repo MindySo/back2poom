@@ -9,6 +9,8 @@ networks:
 volumes:
   mysql-data:
     name: topoom-mysql-data
+  mysql-dev-data:
+    name: topoom-mysql-dev-data
   redis-data:
     name: topoom-redis-data
   jenkins-home:
@@ -18,7 +20,7 @@ volumes:
 #  SERVICES
 #############################
 services:
-  # MySQL
+  # MySQL (Production)
   mysql:
     image: mysql:8.0
     container_name: topoom-mysql
@@ -38,6 +40,29 @@ services:
       - --default-time-zone=+09:00
     ports:
       - "3306:3306"
+    networks:
+      - topoom-network
+
+  # MySQL Dev (개발용)
+  mysql-dev:
+    image: mysql:8.0
+    container_name: topoom-mysql-dev
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_DATABASE: ${MYSQL_DATABASE}
+      MYSQL_USER: ${MYSQL_USER}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+      TZ: Asia/Seoul
+    volumes:
+      - mysql-dev-data:/var/lib/mysql
+      - ./mysql/init:/docker-entrypoint-initdb.d:ro  # 초기화 SQL
+    command:
+      - --character-set-server=utf8mb4
+      - --collation-server=utf8mb4_unicode_ci
+      - --default-time-zone=+09:00
+    ports:
+      - "3307:3306"
     networks:
       - topoom-network
 

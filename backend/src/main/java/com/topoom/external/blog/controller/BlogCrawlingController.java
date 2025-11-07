@@ -1,7 +1,6 @@
 package com.topoom.external.blog.controller;
 
 import com.topoom.external.blog.service.IntegratedBlogCrawlingService;
-import com.topoom.external.blog.S3TestService;
 import com.topoom.external.blog.entity.BlogPost;
 import com.topoom.external.blog.repository.BlogPostRepository;
 import com.topoom.missingcase.entity.CaseFile;
@@ -21,7 +20,6 @@ import java.util.Map;
 public class BlogCrawlingController {
 
     private final IntegratedBlogCrawlingService integratedCrawlingService;
-    private final S3TestService s3TestService;
     private final BlogPostRepository blogPostRepository;
 
     /**
@@ -118,47 +116,4 @@ public class BlogCrawlingController {
         log.info("📋 저장된 블로그 게시글 목록 조회 요청");
         return blogPostRepository.findAllOrderByCrawledAtDesc();
     }
-    
-    /**
-     * S3 연결 테스트
-     */
-    @GetMapping("/test-s3")
-    public String testS3Connection() {
-        log.info("🔧 S3 연결 테스트 요청");
-        return s3TestService.testS3Connection();
-    }
-    
-    /**
-     * 특정 블로그 게시글로 MissingCase 생성 및 이미지 크롤링 테스트
-     */
-    @PostMapping("/test-missing-case-creation/{blogPostId}")
-    public String testMissingCaseCreation(@PathVariable Long blogPostId) {
-        String timestamp = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
-        log.info("🧪 MissingCase 생성 및 이미지 크롤링 테스트 시작: blogPostId={}, {}", blogPostId, timestamp);
-        
-        try {
-            // 1. BlogPost 조회
-            BlogPost blogPost = blogPostRepository.findById(blogPostId)
-                .orElseThrow(() -> new RuntimeException("BlogPost not found: " + blogPostId));
-            
-            // 2. BlogPostInfo 생성
-            com.topoom.external.blog.dto.BlogPostInfo info = com.topoom.external.blog.dto.BlogPostInfo.builder()
-                .title(blogPost.getSourceTitle())
-                .postUrl(blogPost.getSourceUrl())
-                .crawledAt(LocalDateTime.now())
-                .build();
-            
-            // 3. MissingCase 생성 (private 메서드 호출을 위해 public 메서드 추가 필요)
-            String result = integratedCrawlingService.testCreateMissingCaseAndCrawlImages(info);
-            
-            log.info("✅ MissingCase 생성 및 이미지 크롤링 테스트 완료: {}", result);
-            return result;
-            
-        } catch (Exception e) {
-            String error = String.format("❌ 테스트 실패: %s (%s)", e.getMessage(), timestamp);
-            log.error(error, e);
-            throw e;
-        }
-    }
-    
 }

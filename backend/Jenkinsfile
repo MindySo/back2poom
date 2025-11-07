@@ -104,7 +104,7 @@ pipeline {
 
                         # 헬스체크 (최대 60초 대기)
                         echo "헬스체크 시작..."
-                        for i in {1..30}; do
+                        for i in \$(seq 1 30); do
                             if docker exec topoom-spring curl -f http://localhost:8080/actuator/health >/dev/null 2>&1; then
                                 echo "Spring Boot 애플리케이션 정상 실행 중"
                                 break

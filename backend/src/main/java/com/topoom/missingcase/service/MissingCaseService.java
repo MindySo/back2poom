@@ -176,4 +176,23 @@ public class MissingCaseService {
                 .map(this::toDto)
                 .collect(Collectors.toList());
     }
+
+    /**
+     * 초기 데이터용: 모든 MissingCase의 crawled_at을 occurred_at으로 일괄 업데이트
+     * 최초 한 번만 실행하는 일회성 메서드
+     */
+    @Transactional
+    public int updateCrawledAtToOccurredAt() {
+        List<MissingCase> allCases = missingCaseRepository.findAll();
+        int updatedCount = 0;
+
+        for (MissingCase missingCase : allCases) {
+            if (missingCase.getOccurredAt() != null) {
+                missingCase.setCrawledAt(missingCase.getOccurredAt());
+                updatedCount++;
+            }
+        }
+
+        return updatedCount;
+    }
 }
