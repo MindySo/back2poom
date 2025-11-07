@@ -9,6 +9,7 @@ import com.topoom.missingcase.entity.CaseFile;
 import com.topoom.missingcase.entity.MissingCase;
 import com.topoom.missingcase.repository.CaseContactRepository;
 import com.topoom.missingcase.repository.MissingCaseRepository;
+import com.topoom.missingcase.service.CaseOcrService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.openqa.selenium.By;
@@ -36,6 +37,7 @@ public class IntegratedBlogCrawlingService {
     private final CaseContactRepository caseContactRepository;
     private final BlogPostRepository blogPostRepository;
     private final MissingCaseRepository missingCaseRepository;
+    private final CaseOcrService caseOcrService;
 
     private static final int WAIT_TIMEOUT_SECONDS = 10;
     private static final int MAX_PAGES = 50;
@@ -502,6 +504,12 @@ public class IntegratedBlogCrawlingService {
                         imageSuccess++;
                         log.debug("이미지 저장 성공: {} (seq: {}, isLast: {})", 
                             img.getImageUrl(), sourceSeq, isLastImage);
+                        
+                        // 마지막 이미지인 경우 OCR 처리 트리거
+                        if (Boolean.TRUE.equals(isLastImage)) {
+                            caseOcrService.processLastImage(caseId);
+                            log.info("마지막 이미지 OCR 처리 트리거: caseId={}", caseId);
+                        }
                     } catch (Exception e) {
                         imageFail++;
                         log.error("이미지 저장 실패: {} - {}", img.getImageUrl(), e.getMessage());

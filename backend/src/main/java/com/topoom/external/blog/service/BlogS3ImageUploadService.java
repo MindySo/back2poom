@@ -72,7 +72,7 @@ public class BlogS3ImageUploadService {
             
             CaseFile caseFile = CaseFile.builder()
                     .ioRole(CaseFile.IoRole.INPUT)
-                    .purpose(CaseFile.Purpose.BEFORE)
+                    .purpose(CaseFile.Purpose.BEFORE)  // 크롤링된 원본 이미지는 BEFORE로 저장
                     .contentKind(CaseFile.ContentKind.IMAGE)
                     .s3Key(s3Key)
                     .s3Bucket(bucketName)

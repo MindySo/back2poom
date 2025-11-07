@@ -47,6 +47,15 @@ public class OcrService {
                 .doOnSuccess(result -> log.info("첫 번째 이미지 OCR 완료"));
     }
 
+    public Mono<String> performOcrOnDirectS3Key(String s3Key) {
+        return downloadImageFromS3(s3Key)
+                .flatMap(this::resizeImage)
+                .flatMap(this::convertToBase64)
+                .flatMap(gmsApiClient::performOcr)
+                .doOnSuccess(result -> log.info("직접 S3 키 OCR 완료 - S3 Key: {}, 결과: {}", s3Key, result))
+                .doOnError(error -> log.error("직접 S3 키 OCR 실패 - S3 Key: {}", s3Key, error));
+    }
+
     private Mono<byte[]> downloadImageFromS3(String s3Key) {
         return Mono.fromCallable(() -> {
             try {
