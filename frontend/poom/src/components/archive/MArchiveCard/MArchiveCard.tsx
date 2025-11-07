@@ -54,6 +54,7 @@ const MArchiveCard: React.FC<MArchiveCardProps> = ({ personId }) => {
     clothingDesc,
     inputImages,
     outputImages,
+    aiSupport,
   } = displayData;
   
   const elapsedTime = useElapsedTime(crawledAt);
@@ -148,44 +149,84 @@ const MArchiveCard: React.FC<MArchiveCardProps> = ({ personId }) => {
                 </div>
               )}
               
-              {/* 상세정보와 AI 이미지 - 좌우로 나뉨 */}
-              <div className={styles['m-archive-card__detailSection']}>
-                {/* 왼편: 상세정보 */}
-                <div className={styles['m-archive-card__detailInfo']}>
-                  <Text as="div" size="xs" weight="bold" className={styles['m-archive-card__detailTitle']}>상세정보</Text>
-                  <div className={styles['m-archive-card__detailList']}>
-                    <div className={styles['m-archive-card__detailItem']}>
-                      <Text as="div" size="xs" color="gray">신체정보</Text>
-                      <Text as="div" size="xs">{heightCm ? `${heightCm}cm` : '-'} / {weightKg ? `${weightKg}kg` : '-'}</Text>
-                    </div>
-                    <div className={styles['m-archive-card__detailItem']}>
-                      <Text as="div" size="xs" color="gray">체형</Text>
-                      <Text as="div" size="xs">{bodyType || '-'}</Text>
-                    </div>
-                    <div className={styles['m-archive-card__detailItem']}>
-                      <Text as="div" size="xs" color="gray">얼굴형</Text>
-                      <Text as="div" size="xs">{faceShape || '-'}</Text>
-                    </div>
-                    <div className={styles['m-archive-card__detailItem']}>
-                      <Text as="div" size="xs" color="gray">두발 형태</Text>
-                      <Text as="div" size="xs">{hairColor || '-'} / {hairStyle || '-'}</Text>
-                    </div>
-                    <div className={styles['m-archive-card__detailItem']}>
-                      <Text as="div" size="xs" color="gray">복장</Text>
-                      <Text as="div" size="xs">{clothingDesc || '-'}</Text>
-                    </div>
+              {/* 상세정보 - 한 행으로 배치 */}
+              <div className={styles['m-archive-card__detailInfo']}>
+                <Text as="div" size="xs" weight="bold" className={styles['m-archive-card__detailTitle']}>상세정보</Text>
+                <div className={styles['m-archive-card__detailList']}>
+                  <div className={styles['m-archive-card__detailItem']}>
+                    <Text as="div" size="xs" color="gray">신체정보</Text>
+                    <Text as="div" size="xs">{heightCm ? `${heightCm}cm` : '-'} / {weightKg ? `${weightKg}kg` : '-'}</Text>
+                  </div>
+                  <div className={styles['m-archive-card__detailItem']}>
+                    <Text as="div" size="xs" color="gray">체형</Text>
+                    <Text as="div" size="xs">{bodyType || '-'}</Text>
+                  </div>
+                  <div className={styles['m-archive-card__detailItem']}>
+                    <Text as="div" size="xs" color="gray">얼굴형</Text>
+                    <Text as="div" size="xs">{faceShape || '-'}</Text>
+                  </div>
+                  <div className={styles['m-archive-card__detailItem']}>
+                    <Text as="div" size="xs" color="gray">두발 형태</Text>
+                    <Text as="div" size="xs">{hairColor || '-'} / {hairStyle || '-'}</Text>
+                  </div>
+                  <div className={styles['m-archive-card__detailItem']}>
+                    <Text as="div" size="xs" color="gray">복장</Text>
+                    <Text as="div" size="xs">{clothingDesc || '-'}</Text>
                   </div>
                 </div>
-                
-                {/* 오른편: AI 이미지 */}
-                <div className={styles['m-archive-card__aiImage']}>
-                  <Text as="div" size="xs" weight="bold" className={styles['m-archive-card__detailTitle']}>AI 서포트</Text>
+              </div>
+              
+              {/* AI 이미지와 AI 서포트 정보 */}
+              <div className={styles['m-archive-card__aiSection']}>
+                <Text as="div" size="xs" weight="bold" className={styles['m-archive-card__detailTitle']}>AI 서포트</Text>
+                <div className={styles['m-archive-card__aiContent']}>
+                  {/* 왼쪽: AI 이미지 */}
                   <div className={styles['m-archive-card__aiImageWrapperOuter']}>
                     <div className={styles['m-archive-card__aiImageWrapper']}>
                       <img src={aiImageUrl} alt="AI 생성 이미지" />
                     </div>
                   </div>
+                  
+                  {/* 오른쪽: 우선순위와 미상 정보 */}
+                  <div className={styles['m-archive-card__aiInfoWrapper']}>
+                    <div className={styles['m-archive-card__aiInfo']}>
+                      {aiSupport && (
+                        <>
+                          <div className={styles['m-archive-card__aiInfoSection']}>
+                            <Text as="div" size="xs" weight="bold" className={styles['m-archive-card__aiInfoLabel']}>미상 정보</Text>
+                            {aiSupport.infoItems?.map((item, index) => (
+                              <div key={index} className={styles['m-archive-card__aiInfoItem']}>
+                                <Text as="div" size="xs" color="gray">{item.label}</Text>
+                                <Text as="div" size="xs">{item.value}</Text>
+                              </div>
+                            ))}
+                          </div>
+                          
+                          <div className={styles['m-archive-card__aiInfoSection']}>
+                            <Text as="div" size="xs" weight="bold" className={styles['m-archive-card__aiInfoLabel']}>우선순위</Text>
+                            <div className={styles['m-archive-card__aiInfoItem']}>
+                              <Text as="div" size="xs" color="gray">1순위</Text>
+                              <Text as="div" size="xs">{aiSupport.top1Desc || '-'}</Text>
+                            </div>
+                            <div className={styles['m-archive-card__aiInfoItem']}>
+                              <Text as="div" size="xs" color="gray">2순위</Text>
+                              <Text as="div" size="xs">{aiSupport.top2Desc || '-'}</Text>
+                            </div>
+                          </div>
+                        </>
+                      )}
+                      {!aiSupport && (
+                        <div className={styles['m-archive-card__aiInfoSection']}>
+                          <Text as="div" size="xs" color="gray">AI 정보가 없습니다.</Text>
+                        </div>
+                      )}
+                    </div>
+                  </div>
                 </div>
+                <Text as="div" size="xs" color="gray" className={styles['m-archive-card__aiCaption']}>
+                  ① AI 서포트 정보는 AI를 기반으로 정보를 제공합니다.
+                  제공되는 정보는 참고용이며, 사실과 다를 수 있습니다.
+                </Text>
               </div>
             </>
           ) : null}

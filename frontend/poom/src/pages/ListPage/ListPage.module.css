@@ -175,9 +175,9 @@
 }
 
 /* 작은 화면에서는 1열로 */
-@media (max-width: 610px) {
+@media (max-width: 620px) {
   .mobile-grid {
-    grid-template-columns: 1fr; /* 610px 이하에서는 1열 */
+    grid-template-columns: 1fr; /* 620px 이하에서는 1열 */
   }
 }
 
