@@ -6,6 +6,18 @@
   padding: 0 0 48px; /* full-bleed hero, no side padding, 상단 padding 제거 */
 }
 
+/* 히어로 섹션 + 탭을 함께 감싸는 wrapper */
+.sticky-wrapper {
+  position: relative;
+}
+
+.sticky-wrapper--sticky {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
 /* Hero banner containing the header and search */
 .list-hero {
   position: relative;
@@ -14,13 +26,26 @@
   border-radius: 0; /* edge-to-edge */
   overflow: hidden;
   height: 300px;
-  margin: 0; /* stick to tabs below */
+  margin: 0;
+  transition: height 0.05s linear; /* 매우 짧은 transition으로 부드럽게 */
+  will-change: height;
+  transform: translateZ(0); /* GPU 가속 */
+  backface-visibility: hidden; /* 렌더링 최적화 */
+}
+
+.list-hero--sticky {
+  /* sticky 상태에서는 wrapper가 처리하므로 여기서는 스타일만 */
 }
 
 .list-hero__overlay {
   position: absolute;
   inset: 0;
   background: rgba(47, 56, 70, 0.65); /* dark overlay */
+  transition: background 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.list-hero--sticky .list-hero__overlay {
+  background: rgba(47, 56, 70, 0.85); /* 더 진한 overlay for sticky */
 }
 
 .list-header {
@@ -37,6 +62,18 @@
   padding: 0 24px;
   color: #fff;
   text-align: center;
+  transition: gap 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.list-header--sticky {
+  flex-direction: row;
+  justify-content: center;
+  gap: 20px;
+  padding: 0 24px;
+}
+
+.list-header--sticky h2 {
+  display: none;
 }
 
 .list-header h2 {
