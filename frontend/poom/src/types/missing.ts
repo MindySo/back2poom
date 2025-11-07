@@ -32,6 +32,8 @@ export interface MissingPerson {
   occurredAt: string; // ISO string - 실종 발생 시각
   crawledAt: string; // ISO string - 크롤링된 시각 (경과시간 계산에 사용)
   occurredLocation: string;
+  latitude?: number,
+  longitude?: number,
   heightCm?: number;
   weightKg?: number;
   bodyType?: string;
@@ -47,6 +49,13 @@ export interface MissingPerson {
   outputImages?: ImageFile[];
   caseContact?: CaseContact;
   aiSupport?: AISupportInfo;
+}
+
+// 실종자 통계
+export interface MissingStats {
+  total_reports: number;  // 금일 실종
+  total_tips: number;     // 제보 건수
+  total_resolved: number; // 해결 건수
 }
 
 // 하위 호환성을 위한 타입 (기존 코드에서 occuredAt 사용)

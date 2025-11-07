@@ -3,14 +3,35 @@ import { theme } from '../../../theme';
 import Text from '../../common/atoms/Text';
 import StatusBoard from '../StatusBoard/StatusBoard';
 import RecentMissing from '../RecentMissing/RecentMissing';
+import { useRecentMissing } from '../../../hooks';
 import styles from './SideBar.module.css';
 
 export interface SideBarProps {
   className?: string;
-  onMissingCardClick?: () => void;
+  onMissingCardClick?: (id: number) => void;
 }
 
+// 실종 경과 시간 계산 함수
+const getElapsedTime = (crawledAt: string): string => {
+  const now = new Date();
+  const crawled = new Date(crawledAt);
+  const diffMs = now.getTime() - crawled.getTime();
+  const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
+  const diffDays = Math.floor(diffHours / 24);
+
+  if (diffDays > 0) {
+    return `${diffDays}일 전`;
+  } else if (diffHours > 0) {
+    return `${diffHours}시간 전`;
+  } else {
+    return '1시간 이내';
+  }
+};
+
 const SideBar: React.FC<SideBarProps> = ({ className = '', onMissingCardClick }) => {
+  // 최근 72시간 내 실종자 데이터 가져오기
+  const hours = 72;
+  const { data: recentList, isLoading } = useRecentMissing(hours);
   return (
     <aside
       className={`${styles.sideBar} ${className}`}
@@ -20,13 +41,7 @@ const SideBar: React.FC<SideBarProps> = ({ className = '', onMissingCardClick })
       }}
     >
       {/* 현황판 */}
-      <StatusBoard
-        data={[
-          { label: '금일 신고', value: 0 },
-          { label: '제보 접수', value: 0 },
-          { label: '해결 건수', value: 0 },
-        ]}
-      />
+      <StatusBoard />
 
       {/* 최신 실종자 */}
       <div className={styles.recentMissingHeader}>
@@ -36,70 +51,46 @@ const SideBar: React.FC<SideBarProps> = ({ className = '', onMissingCardClick })
           weight="bold"
           color="darkMain"
         >
-          최신 실종자
+          최근 실종자
         </Text>
       </div>
 
       {/* 최신 실종자 목록 */}
       <div className={styles.recentMissingList}>
-        <RecentMissing
-          image="https://via.placeholder.com/120"
-          badges={[
-            { text: "실종 후 08:20:29", variant: "time" },
-            { text: "장애", variant: "feature" },
-          ]}
-          name="왕봉준"
-          gender="남성"
-          age={26}
-          location="서울특별시 강남구"
-          onClick={onMissingCardClick}
-        />
-        <RecentMissing
-          image="https://via.placeholder.com/120"
-          badges={[
-            { text: "실종 후 12:45:10", variant: "time" },
-            { text: "아동", variant: "feature" },
-          ]}
-          name="김민지"
-          gender="여성"
-          age={10}
-          location="서울특별시 서초구"
-          onClick={onMissingCardClick}
-        />
-        <RecentMissing
-          image="https://via.placeholder.com/120"
-          badges={[
-            { text: "실종 해결됨", variant: "solved" },
-          ]}
-          name="이준호"
-          gender="남성"
-          age={28}
-          location="서울특별시 송파구"
-          onClick={onMissingCardClick}
-        />
-        <RecentMissing
-          image="https://via.placeholder.com/120"
-          badges={[
-            { text: "실종 후 16:30:00", variant: "time" }
-          ]}
-          name="김민선"
-          gender="여성"
-          age={27}
-          location="서울특별시 노원구"
-          onClick={onMissingCardClick}
-        />
-        <RecentMissing
-          image="https://via.placeholder.com/120"
-          badges={[
-            { text: "실종 후 18:01:00", variant: "time" },
-            { text: "직장인", variant: "alert" },
-          ]}
-          name="집보내줘"
-          gender="여성"
-          age={26}
-          location="경기도 안양시"
-          onClick={onMissingCardClick}
-        />
+        {isLoading ? (
+          <div className={styles.emptyMessage}>
+            <Text size="md" color="gray">로딩 중...</Text>
+          </div>
+        ) : recentList && recentList.length > 0 ? (
+          recentList.map((person) => {
+            // Badge 데이터 생성
+            const badges: { text: string; variant?: 'time' | 'feature' | 'solved' | 'alert' | 'ai' }[] = [
+              { text: getElapsedTime(person.crawledAt), variant: 'time' },
+            ];
+
+            // targetType이 있으면 추가
+            if (person.targetType) {
+              badges.push({ text: person.targetType, variant: 'feature' });
+            }
+
+            return (
+              <RecentMissing
+                key={person.id}
+                image={person.mainImage?.url || 'https://via.placeholder.com/120'}
+                badges={badges}
+                name={person.personName}
+                gender={person.gender}
+                age={person.ageAtTime}
+                location={person.occurredLocation}
+                onClick={() => onMissingCardClick?.(person.id)}
+              />
+            );
+          })
+        ) : (
+          <div className={styles.emptyMessage}>
+            <Text size="md" color="gray">최근 {hours}시간 내 실종자가 없습니다.</Text>
+          </div>
+        )}
       </div>
     </aside>
   );

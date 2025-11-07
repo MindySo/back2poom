@@ -2,185 +2,14 @@ import React, { useEffect, useRef, useState } from 'react';
 import SideBar from '../../components/map/SideBar/SideBar';
 import useKakaoMap from '../../hooks/useKakaoMap';
 import Dashboard from '../../components/map/Dashboard/Dashboard';
-import { useIsMobile } from '../../hooks/useMediaQuery';
+import { useIsMobile, useRecentMissing } from '../../hooks';
 import MyLocationButton from '../../components/map/MyLocationButton/MyLocationButton';
 import MyLocationMarker from '../../components/map/MyLocationMarker/MyLocationMarker';
 import MobileStatusBoard from '../../components/map/MobileStatusBoard/MobileStatusBoard';
 import Marker from '../../components/map/Marker/Marker';
-import type { MissingPerson } from '../../types/missing';
 import styles from './MapPage.module.css';
 
 const API_KEY = import.meta.env.VITE_KAKAO_JAVASCRIPT_KEY;
-
-// 지도에 표시할 실종자 데이터 (위치 정보 포함)
-export interface MissingPersonWithLocation extends MissingPerson {
-  latitude: number;
-  longitude: number;
-}
-
-// 더미 데이터
-const DUMMY_MISSING_PERSONS: MissingPersonWithLocation[] = [
-  {
-    id: 1,
-    personName: '김철수',
-    ageAtTime: 8,
-    currentAge: 10,
-    gender: '남',
-    nationality: '대한민국',
-    occurredAt: '2023-03-15T14:30:00Z',
-    occurredLocation: '서울특별시 종로구 청계천로',
-    latitude: 37.5696,
-    longitude: 126.9784,
-    heightCm: 130,
-    weightKg: 30,
-    bodyType: '마른편',
-    hairColor: '검정',
-    hairStyle: '짧은 머리',
-    clothingDesc: '파란색 후드티, 검정색 바지',
-    progressStatus: '수색중',
-    etcFeatures: '왼쪽 팔에 작은 점이 있음',
-  },
-  {
-    id: 2,
-    personName: '이영희',
-    ageAtTime: 65,
-    currentAge: 67,
-    gender: '여',
-    nationality: '대한민국',
-    occurredAt: '2023-06-20T09:15:00Z',
-    occurredLocation: '서울특별시 강남구 테헤란로',
-    latitude: 37.5048,
-    longitude: 127.0489,
-    heightCm: 155,
-    weightKg: 52,
-    bodyType: '보통',
-    hairColor: '흰색',
-    hairStyle: '단발머리',
-    clothingDesc: '베이지색 재킷, 회색 치마',
-    progressStatus: '수색중',
-    etcFeatures: '안경 착용',
-  },
-  {
-    id: 3,
-    personName: '박민수',
-    ageAtTime: 15,
-    currentAge: 16,
-    gender: '남',
-    nationality: '대한민국',
-    occurredAt: '2023-09-05T18:45:00Z',
-    occurredLocation: '서울특별시 마포구 홍대입구역',
-    latitude: 37.5572,
-    longitude: 126.9239,
-    heightCm: 168,
-    weightKg: 58,
-    bodyType: '보통',
-    hairColor: '검정',
-    hairStyle: '중간 길이',
-    clothingDesc: '회색 맨투맨, 청바지',
-    progressStatus: '발견',
-    etcFeatures: '오른쪽 귀에 피어싱',
-  },
-  {
-    id: 4,
-    personName: '최수진',
-    ageAtTime: 32,
-    currentAge: 33,
-    gender: '여',
-    nationality: '대한민국',
-    occurredAt: '2023-11-12T21:00:00Z',
-    occurredLocation: '서울특별시 송파구 잠실역',
-    latitude: 37.5133,
-    longitude: 127.1003,
-    heightCm: 162,
-    weightKg: 50,
-    bodyType: '마른편',
-    hairColor: '갈색',
-    hairStyle: '긴 생머리',
-    clothingDesc: '검정색 롱코트, 흰색 원피스',
-    progressStatus: '수색중',
-    etcFeatures: '목에 십자가 목걸이',
-  },
-  {
-    id: 5,
-    personName: '정대호',
-    ageAtTime: 45,
-    currentAge: 46,
-    gender: '남',
-    nationality: '대한민국',
-    occurredAt: '2024-01-08T07:30:00Z',
-    occurredLocation: '서울특별시 영등포구 여의도',
-    latitude: 37.5219,
-    longitude: 126.9245,
-    heightCm: 175,
-    weightKg: 72,
-    bodyType: '보통',
-    hairColor: '검정',
-    hairStyle: '짧은 머리',
-    clothingDesc: '검정색 정장, 회색 넥타이',
-    progressStatus: '해결',
-    etcFeatures: '안경 착용, 왼손에 결혼반지',
-  },
-  {
-    id: 6,
-    personName: '강지은',
-    ageAtTime: 12,
-    currentAge: 13,
-    gender: '여',
-    nationality: '대한민국',
-    occurredAt: '2024-02-14T16:20:00Z',
-    occurredLocation: '서울특별시 서초구 강남역',
-    latitude: 37.4979,
-    longitude: 127.0276,
-    heightCm: 150,
-    weightKg: 42,
-    bodyType: '마른편',
-    hairColor: '검정',
-    hairStyle: '긴 생머리',
-    clothingDesc: '분홍색 패딩, 청바지',
-    progressStatus: '수색중',
-    etcFeatures: '노란색 백팩 소지',
-  },
-  {
-    id: 7,
-    personName: '한준호',
-    ageAtTime: 28,
-    currentAge: 28,
-    gender: '남',
-    nationality: '대한민국',
-    occurredAt: '2024-03-01T13:50:00Z',
-    occurredLocation: '서울특별시 용산구 이태원',
-    latitude: 37.5345,
-    longitude: 126.9944,
-    heightCm: 180,
-    weightKg: 75,
-    bodyType: '근육질',
-    hairColor: '검정',
-    hairStyle: '짧은 스포츠머리',
-    clothingDesc: '검정색 가죽자켓, 청바지',
-    progressStatus: '수색중',
-    etcFeatures: '오른쪽 팔에 타투',
-  },
-  {
-    id: 8,
-    personName: '윤서아',
-    ageAtTime: 55,
-    currentAge: 56,
-    gender: '여',
-    nationality: '대한민국',
-    occurredAt: '2024-03-10T10:30:00Z',
-    occurredLocation: '서울특별시 성북구 성신여대입구역',
-    latitude: 37.5925,
-    longitude: 127.0167,
-    heightCm: 158,
-    weightKg: 55,
-    bodyType: '보통',
-    hairColor: '검정',
-    hairStyle: '단발 파마',
-    clothingDesc: '초록색 점퍼, 검정색 바지',
-    progressStatus: '발견',
-    etcFeatures: '지팡이 사용',
-  },
-];
 
 const MapPage: React.FC = () => {
   const isMobile = useIsMobile(1024);
@@ -189,8 +18,15 @@ const MapPage: React.FC = () => {
   const mapRef = useRef<HTMLDivElement | null>(null);
   const [map, setMap] = useState<kakao.maps.Map | null>(null);
   const [isDashboardOpen, setIsDashboardOpen] = useState(false);
+  const [selectedMissingId, setSelectedMissingId] = useState<number | null>(null);
   const [myLocation, setMyLocation] = useState<{ lat: number; lng: number } | null>(null);
   const [isLoadingLocation, setIsLoadingLocation] = useState(false);
+
+  // 최근 72시간 내 실종자 데이터 가져오기 (SideBar용)
+  const { data: recentMissingList } = useRecentMissing(72);
+
+  // 최근 24시간 내 실종자 데이터 가져오기 (Marker용)
+  const { data: markerMissingList } = useRecentMissing(24);
 
   useEffect(() => {
     if (!isLoaded || !mapRef.current) return;
@@ -205,12 +41,86 @@ const MapPage: React.FC = () => {
     setMap(mapInstance);
   }, [isLoaded]);
 
-  const handleOpenDashboard = () => {
-    setIsDashboardOpen(true);
+  const handleMissingCardClick = (id: number) => {
+    // 같은 카드를 클릭하면 토글 (닫기)
+    if (selectedMissingId === id && isDashboardOpen) {
+      setIsDashboardOpen(false);
+      setSelectedMissingId(null);
+    } else {
+      // 다른 카드를 클릭하면 해당 ID로 Dashboard 열기
+      setSelectedMissingId(id);
+      setIsDashboardOpen(true);
+
+      // 해당 실종자의 위치로 지도 이동
+      if (map) {
+        // 24시간 리스트와 72시간 리스트에서 모두 찾기
+        const person = markerMissingList?.find((p) => p.id === id) || recentMissingList?.find((p) => p.id === id);
+        if (person && person.latitude && person.longitude) {
+          // 실제 보이는 지도 영역의 중앙으로 이동
+          moveMapToVisibleCenter(person.latitude, person.longitude);
+        }
+      }
+    }
+  };
+
+  const moveMapToVisibleCenter = (lat: number, lng: number) => {
+    if (!map) return;
+
+    // 화면 크기 가져오기
+    const mapContainer = mapRef.current;
+    if (!mapContainer) return;
+
+    const mapWidth = mapContainer.offsetWidth;
+    const mapHeight = mapContainer.offsetHeight;
+
+    // TopBar 높이: 90px
+    // SideBar 너비: 380px
+    // Dashboard 너비: 40vw
+    const topBarHeight = 90;
+    const sideBarWidth = 380;
+    const dashboardWidth = window.innerWidth * 0.4; // 40vw
+
+    // 실제 보이는 지도 영역 계산
+    const visibleLeft = sideBarWidth + dashboardWidth;
+    const visibleTop = topBarHeight;
+    const visibleWidth = mapWidth - visibleLeft;
+    const visibleHeight = mapHeight - visibleTop;
+
+    // 보이는 영역의 중앙 픽셀 좌표
+    const centerX = visibleLeft + visibleWidth / 2;
+    const centerY = visibleTop + visibleHeight / 2;
+
+    // 지도 컨테이너의 중앙 픽셀 좌표
+    const mapCenterX = mapWidth / 2;
+    const mapCenterY = mapHeight / 2;
+
+    // 오프셋 계산 (보이는 중앙 - 지도 중앙)
+    const offsetX = centerX - mapCenterX;
+    const offsetY = centerY - mapCenterY;
+
+    // 목표 좌표
+    const targetLatLng = new kakao.maps.LatLng(lat, lng);
+
+    // Projection을 사용하여 위도/경도를 픽셀 좌표로 변환
+    const proj = map.getProjection();
+    const targetPoint = proj.pointFromCoords(targetLatLng);
+
+    // 오프셋만큼 이동한 픽셀 좌표
+    const adjustedPoint = new kakao.maps.Point(
+      targetPoint.x - offsetX,
+      targetPoint.y - offsetY
+    );
+
+    // 픽셀 좌표를 다시 위도/경도로 변환
+    const adjustedLatLng = proj.coordsFromPoint(adjustedPoint);
+
+    // 지도 중심을 조정된 좌표로 이동 (부드럽게)
+    map.panTo(adjustedLatLng);
   };
 
   const handleCloseDashboard = () => {
     setIsDashboardOpen(false);
+    setSelectedMissingId(null);
   };
 
   const handleMyLocation = () => {
@@ -256,7 +166,7 @@ const MapPage: React.FC = () => {
 
   return (
     <>
-      {!isMobile && <SideBar onMissingCardClick={handleOpenDashboard} />}
+      {!isMobile && <SideBar onMissingCardClick={handleMissingCardClick} />}
       <div className={styles.mapContainer}>
         {!isLoaded && <p className={styles.loadingText}>지도를 불러오는 중...</p>}
         <div ref={mapRef} className={styles.mapElement} />
@@ -269,14 +179,22 @@ const MapPage: React.FC = () => {
         )}
 
         {/* 실종자 마커 */}
-        {map && (
-          <Marker
-            map={map}
-            position={{ lat: DUMMY_MISSING_PERSONS[0].latitude, lng: DUMMY_MISSING_PERSONS[0].longitude }}
-            size="medium"
-            onClick={() => console.log('마커 클릭:', DUMMY_MISSING_PERSONS[0].personName)}
-          />
-        )}
+        {map && recentMissingList && recentMissingList.map((person) => {
+          // latitude와 longitude가 있는 경우만 마커 렌더링
+          if (person.latitude && person.longitude) {
+            return (
+              <Marker
+                key={person.id}
+                map={map}
+                position={{ lat: person.latitude, lng: person.longitude }}
+                imageUrl={person.mainImage?.url}
+                size="medium"
+                onClick={() => handleMissingCardClick(person.id)}
+              />
+            );
+          }
+          return null;
+        })}
 
         {/* 내 위치 마커 */}
         {map && myLocation && (
@@ -295,7 +213,11 @@ const MapPage: React.FC = () => {
         )}
       </div>
 
-      <Dashboard isOpen={isDashboardOpen} onClose={handleCloseDashboard} />
+      <Dashboard
+        isOpen={isDashboardOpen}
+        onClose={handleCloseDashboard}
+        missingId={selectedMissingId}
+      />
     </>
   );
 };

@@ -2,6 +2,7 @@ import React from 'react';
 import { theme } from '../../../theme';
 import Text from '../../common/atoms/Text';
 import styles from './StatusBoard.module.css';
+import { useMissingStats } from '../../../hooks';
 
 export interface StatusData {
   label: string;
@@ -9,7 +10,6 @@ export interface StatusData {
 }
 
 export interface StatusBoardProps {
-  data: [StatusData, StatusData, StatusData];
   className?: string;
   textColor?: keyof typeof theme.colors;
   borderColor?: string;
@@ -17,12 +17,20 @@ export interface StatusBoardProps {
 }
 
 const StatusBoard: React.FC<StatusBoardProps> = ({
-  data,
   className = '',
   textColor = 'darkMain',
   borderColor = '#2B3A55',
   padding = '2.25rem 1.5rem 1.5rem',
 }) => {
+  // 커스텀 훅 사용
+  const { data: stats, isLoading } = useMissingStats();
+
+  // 데이터 매핑
+  const data: [StatusData, StatusData, StatusData] = [
+    { label: '금일 실종', value: stats?.total_reports ?? 0 },
+    { label: '제보 건수', value: stats?.total_tips ?? 0 },
+    { label: '해결 건수', value: stats?.total_resolved ?? 0 },
+  ];
   const getFormattedDate = () => {
     const now = new Date();
     const year = now.getFullYear();
@@ -67,24 +75,47 @@ const StatusBoard: React.FC<StatusBoardProps> = ({
 
       {/* 데이터 영역 */}
       <div className={styles.dataContainer}>
-        {data.map((item, index) => (
-          <div key={index} className={styles.dataItem}>
-            <Text
-              size="md"
-              weight="regular"
-              color={textColor}
-            >
-              {item.label}
-            </Text>
-            <Text
-              size="display"
-              weight="semiBold"
-              color={textColor}
-            >
-              {item.value}
-            </Text>
-          </div>
-        ))}
+        {isLoading ? (
+          // 로딩 중일 때
+          data.map((item, index) => (
+            <div key={index} className={styles.dataItem}>
+              <Text
+                size="md"
+                weight="regular"
+                color={textColor}
+              >
+                {item.label}
+              </Text>
+              <Text
+                size="display"
+                weight="semiBold"
+                color={textColor}
+              >
+                -
+              </Text>
+            </div>
+          ))
+        ) : (
+          // 데이터 로드 완료 후
+          data.map((item, index) => (
+            <div key={index} className={styles.dataItem}>
+              <Text
+                size="md"
+                weight="regular"
+                color={textColor}
+              >
+                {item.label}
+              </Text>
+              <Text
+                size="display"
+                weight="semiBold"
+                color={textColor}
+              >
+                {item.value}
+              </Text>
+            </div>
+          ))
+        )}
       </div>
     </div>
   );

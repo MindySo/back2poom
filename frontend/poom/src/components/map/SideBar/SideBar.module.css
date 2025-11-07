@@ -57,3 +57,18 @@
 .recentMissingList:hover {
   scrollbar-color: rgba(43, 58, 85, 0.3) transparent;
 }
+
+/* 빈 상태 메시지 */
+.emptyMessage {
+  display: flex;
+  justify-content: center;
+  padding: 2rem 0;
+  flex: 1;
+}
+
+/* 1024px 이하 (모바일/태블릿)에서는 숨기기 */
+@media (max-width: 1024px) {
+  .sideBar {
+    display: none;
+  }
+}
