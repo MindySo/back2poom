@@ -13,4 +13,6 @@ public interface CaseFileRepository extends JpaRepository<CaseFile, Long> {
     List<CaseFile> findByMissingCaseIdAndIoRole(Long caseId, CaseFile.IoRole ioRole);
 
     Optional<CaseFile> findByMissingCase(MissingCase missingCase);
+    
+    Optional<CaseFile> findByMissingCaseIdAndIsLastImage(Long caseId, Boolean isLastImage);
 }

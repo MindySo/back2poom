@@ -80,6 +80,33 @@ public class OcrController {
         ));
     }
 
+    @PostMapping("/s3-direct")
+    public Mono<ResponseEntity<Map<String, Object>>> performOcrOnDirectS3Key(
+            @RequestBody Map<String, String> request) {
+        
+        String s3Key = request.get("s3Key");
+        log.info("직접 S3 키 OCR 요청 - S3 Key: {}", s3Key);
+        
+        return ocrService.performOcrOnDirectS3Key(s3Key)
+                .map(result -> {
+                    Map<String, Object> response = Map.of(
+                            "success", true,
+                            "s3Key", s3Key,
+                            "extractedText", result
+                    );
+                    return ResponseEntity.ok(response);
+                })
+                .onErrorResume(error -> {
+                    log.error("직접 S3 키 OCR 처리 실패", error);
+                    Map<String, Object> errorResponse = Map.of(
+                            "success", false,
+                            "s3Key", s3Key,
+                            "error", error.getMessage()
+                    );
+                    return Mono.just(ResponseEntity.badRequest().body(errorResponse));
+                });
+    }
+
     @PostMapping("/test-gms")
     public Mono<ResponseEntity<Map<String, Object>>> testGmsApi(@RequestParam(defaultValue = "hello world!!") String message) {
         log.info("GMS API 테스트 요청 - 메시지: {}", message);

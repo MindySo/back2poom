@@ -69,7 +69,7 @@ public class CaseFile extends BaseTimeEntity {
 
     public enum IoRole { INPUT, OUTPUT }
     public enum Purpose {
-        SAFE, OCR, FACE, FULL_BODY, ENHANCED
+        SAFE, BEFORE, OCR, FACE, FULL_BODY, ENHANCED
     }
     public enum ContentKind { IMAGE, JSON }
 }

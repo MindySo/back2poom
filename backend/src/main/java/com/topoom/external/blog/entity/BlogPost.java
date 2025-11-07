@@ -1,4 +1,4 @@
-package com.topoom.missingcase.entity;
+package com.topoom.external.blog.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
@@ -34,7 +34,10 @@ public class BlogPost {
 
     @Column(name = "last_seen_at", nullable = false)
     private LocalDateTime lastSeenAt;
-
+    
+    @Column(name = "deleted_at")
     private LocalDateTime deletedAt;
+    
+    @Column(name = "created_at", nullable = false)
     private LocalDateTime createdAt;
 }

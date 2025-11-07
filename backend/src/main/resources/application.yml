@@ -49,6 +49,11 @@ spring:
     serialization:
       write-dates-as-timestamps: false
 
+webdriver:
+  type: chrome        # chrome | firefox
+  headless: true      # 서버/CI면 true 권장, 로컬 디버깅 시 false
+  timeout: 15         # 암묵적/페이지로드 타임아웃(초)
+
 safe182:
   api:
     url: ${SAFE182_API_URL}
@@ -66,3 +71,4 @@ logging:
   level:
     root: INFO
     com.topoom: INFO
+
