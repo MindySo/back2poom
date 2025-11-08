@@ -31,7 +31,7 @@ public class Safe182Response {
         private String alldressingDscd;
         private Integer ageNow;
         private Integer age;
-        private String writingTrgetDscd;
+        private String writngTrgetDscd;
         private String sexdstnDscd;
         private String occrAdres;
         private String nm;

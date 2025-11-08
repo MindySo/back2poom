@@ -53,12 +53,14 @@ public class MissingCaseService {
                 .personName(mc.getPersonName())
                 .targetType(mc.getTargetType())
                 .ageAtTime((int) mc.getAgeAtTime())
+                .currentAge((int) mc.getCurrentAge())
                 .gender(mc.getGender())
                 .occurredAt(mc.getOccurredAt().atZone(ZoneOffset.UTC))
                 .occurredLocation(mc.getOccurredLocation())
                 .latitude(mc.getLatitude())
                 .longitude(mc.getLongitude())
                 .crawledAt(mc.getCrawledAt().atZone(ZoneOffset.UTC))
+                .phoneNumber(mc.getContact() != null ? mc.getContact().getPhoneNumber() : "182")
                 .mainImage(mainImage)
                 .build();
     }
@@ -88,12 +90,17 @@ public class MissingCaseService {
                 .stream()
                 .map(this::toImageItem)
                 .collect(Collectors.toList());
-        
+
         MissingCaseDetailResponse.CaseContact caseContact = null;
         if (mc.getContact() != null) {
             caseContact = MissingCaseDetailResponse.CaseContact.builder()
                     .organization(mc.getContact().getOrganization())
                     .phoneNumber(mc.getContact().getPhoneNumber())
+                    .build();
+        } else {
+            caseContact = MissingCaseDetailResponse.CaseContact.builder()
+                    .organization("실종아동찾기센터")
+                    .phoneNumber("182")
                     .build();
         }
 
@@ -157,7 +164,14 @@ public class MissingCaseService {
     }
 
     public MissingCaseStatsResponse getStats() {
-        return null;
+        Object result = missingCaseRepository.getTodayStats();
+        Object[] row = (Object[]) result;
+
+        Long totalCases = ((Number) row[0]).longValue();
+        Long totalReports = ((Number) row[1]).longValue();
+        Long totalResolved = ((Number) row[2]).longValue();
+
+        return new MissingCaseStatsResponse(totalCases, totalReports, totalResolved);
     }
 
     public List<MissingCaseListResponse> getRecentCases(int hours) {
@@ -167,5 +181,24 @@ public class MissingCaseService {
                 .stream()
                 .map(this::toDto)
                 .collect(Collectors.toList());
+    }
+
+    /**
+     * 초기 데이터용: 모든 MissingCase의 crawled_at을 occurred_at으로 일괄 업데이트
+     * 최초 한 번만 실행하는 일회성 메서드
+     */
+    @Transactional
+    public int updateCrawledAtToOccurredAt() {
+        List<MissingCase> allCases = missingCaseRepository.findAll();
+        int updatedCount = 0;
+
+        for (MissingCase missingCase : allCases) {
+            if (missingCase.getOccurredAt() != null) {
+                missingCase.setCrawledAt(missingCase.getOccurredAt());
+                updatedCount++;
+            }
+        }
+
+        return updatedCount;
     }
 }
