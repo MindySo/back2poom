@@ -54,12 +54,13 @@ const confidenceLevelAnswers: AnswerOption[] = [
 ];
 
 // 각 단계 컴포넌트를 별도로 정의하여 무한 루프 방지
-const MethodStep: React.FC<{ context: any; history: any; personName: string }> = React.memo(({ context, history, personName }) => {
+const MethodStep: React.FC<{ context: any; history: any; personName: string; phoneNumber?: string }> = React.memo(({ context, history, personName, phoneNumber }) => {
   const handleAnswerSelect = useCallback(
     (answerId: string) => {
       // 전화로 신고하기를 선택한 경우 바로 전화 걸기
       if (answerId === 'phone') {
-        window.location.href = 'tel:182';
+        const phone = phoneNumber || '182';
+        window.location.href = `tel:${phone}`;
         return;
       }
       
@@ -69,7 +70,7 @@ const MethodStep: React.FC<{ context: any; history: any; personName: string }> =
         selectedMethod: answerId,
       }));
     },
-    [history]
+    [history, phoneNumber]
   );
 
   const handleMethodNext = useCallback(() => {
@@ -82,6 +83,11 @@ const MethodStep: React.FC<{ context: any; history: any; personName: string }> =
     }
   }, [history, context.selectedMethod]);
 
+  // phoneNumber가 '182'이면 문자하기 옵션 제거
+  const availableAnswers = phoneNumber === '182' 
+    ? reportMethodAnswers.filter(answer => answer.id !== 'message')
+    : reportMethodAnswers;
+
   return (
     <div className={styles.stepWrapper}>
       <div className={styles.stepContent}>
@@ -90,7 +96,7 @@ const MethodStep: React.FC<{ context: any; history: any; personName: string }> =
         </Text>
         <ReportQuestionStep
           question="신고 방법을 선택해주세요."
-          answers={reportMethodAnswers}
+          answers={availableAnswers}
           selectedAnswerId={context.selectedMethod}
           onAnswerSelect={handleAnswerSelect}
           hideButtons={true}
@@ -348,7 +354,7 @@ const TimeStep: React.FC<{ context: any; history: any; personName: string }> = R
 
 TimeStep.displayName = 'TimeStep';
 
-const DetailStep: React.FC<{ context: any; history: any; personName: string }> = React.memo(({ context, history, personName }) => {
+const DetailStep: React.FC<{ context: any; history: any; personName: string; phoneNumber?: string }> = React.memo(({ context, history, personName, phoneNumber }) => {
   const [detail, setDetail] = React.useState(() => context.detail || '');
 
   const handleSubmit = () => {
@@ -367,9 +373,10 @@ const DetailStep: React.FC<{ context: any; history: any; personName: string }> =
         `추가 정보: ${detail.trim()}`,
       ].join('\n');
 
-      // SMS 전송
+      // SMS 전송 - phoneNumber가 있으면 그 번호로, 없으면 기본값 182
+      const phone = phoneNumber || '182';
       const encodedBody = encodeURIComponent(smsBody);
-      window.location.href = `sms:182?body=${encodedBody}`;
+      window.location.href = `sms:${phone}?body=${encodedBody}`;
     }
   };
 
@@ -467,7 +474,7 @@ const ReportPage: React.FC = () => {
     <div className={styles.container}>
       <funnel.Render
         method={({ context, history }) => (
-          <MethodStep context={context} history={history} personName={personName} />
+          <MethodStep context={context} history={history} personName={personName} phoneNumber={reportPhoneNumber} />
         )}
         level={({ context, history }) => (
           <LevelStep context={context} history={history} personName={personName} />
@@ -479,7 +486,7 @@ const ReportPage: React.FC = () => {
           <TimeStep context={context} history={history} personName={personName} />
         )}
         detail={({ context, history }) => (
-          <DetailStep context={context} history={history} personName={personName} />
+          <DetailStep context={context} history={history} personName={personName} phoneNumber={reportPhoneNumber} />
         )}
       />
     </div>
