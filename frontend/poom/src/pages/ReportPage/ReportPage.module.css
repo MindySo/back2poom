@@ -30,16 +30,31 @@
   overflow: hidden;
 }
 
+.stepContentWithSpaceBetween {
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
 .nextButtonContainer {
   margin-top: auto;
   padding-top: 20px;
   position: sticky;
   bottom: 0;
   background-color: white;
+}
+
+.nextButtonContainerStatic {
+  padding-top: 20px;
+  position: relative;
   padding-bottom: 20px;
 }
 
-.nextButtonContainer button {
+.nextButtonContainer button,
+.nextButtonContainerStatic button {
   min-height: 45px;
   padding: 15px 20px;
   font-size: 16px;

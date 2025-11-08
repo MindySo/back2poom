@@ -390,52 +390,54 @@ const DetailStep: React.FC<{ context: any; history: any; personName: string }> =
       >
         <img src={backIcon} alt="back" />
       </button>
-      <div className={styles.stepContent}>
-        <Text size="md" color="black" className={styles.context}>
-          {personName}님을 제보하시는 군요
-        </Text>
-        {/* 현재 단계 */}
-        <ReportDetailInput 
-          context={context}
-          history={history} 
-          hideButtons={true}
-          detail={detail}
-          onDetailChange={setDetail}
-        />
-        {/* 이전 단계들 */}
-        <div style={{ marginTop: '20px' }}>
-          <ReportTimeInput context={context} history={history} readOnly={true} />
-        </div>
-        <div style={{ marginTop: '20px' }}>
-          <ReportLocationInput context={context} history={history} readOnly={true} />
-        </div>
-        <div style={{ marginTop: '20px' }}>
-          <ReportQuestionStep
-            question="확신도를 선택해주세요."
-            answers={confidenceLevelAnswers}
-            selectedAnswerId={context.confidenceLevel}
-            readOnly={true}
+      <div className={styles.stepContentWithSpaceBetween}>
+        <div>
+          <Text size="md" color="black" className={styles.context}>
+            {personName}님을 제보하시는 군요
+          </Text>
+          {/* 현재 단계 */}
+          <ReportDetailInput 
+            context={context}
+            history={history} 
+            hideButtons={true}
+            detail={detail}
+            onDetailChange={setDetail}
           />
+          {/* 이전 단계들 */}
+          <div style={{ marginTop: '20px' }}>
+            <ReportTimeInput context={context} history={history} readOnly={true} />
+          </div>
+          <div style={{ marginTop: '20px' }}>
+            <ReportLocationInput context={context} history={history} readOnly={true} />
+          </div>
+          <div style={{ marginTop: '20px' }}>
+            <ReportQuestionStep
+              question="확신도를 선택해주세요."
+              answers={confidenceLevelAnswers}
+              selectedAnswerId={context.confidenceLevel}
+              readOnly={true}
+            />
+          </div>
+          <div style={{ marginTop: '20px' }}>
+            <ReportQuestionStep
+              question="신고 방법을 선택해주세요."
+              answers={reportMethodAnswers}
+              selectedAnswerId={context.selectedMethod}
+              readOnly={true}
+            />
+          </div>
         </div>
-        <div style={{ marginTop: '20px' }}>
-          <ReportQuestionStep
-            question="신고 방법을 선택해주세요."
-            answers={reportMethodAnswers}
-            selectedAnswerId={context.selectedMethod}
-            readOnly={true}
-          />
+        {/* 버튼을 콘텐츠 끝에 배치 */}
+        <div className={styles.nextButtonContainerStatic}>
+          <Button
+            variant="darkPrimary"
+            fullWidth
+            onClick={handleSubmit}
+            disabled={!detail.trim()}
+          >
+            제출
+          </Button>
         </div>
-      </div>
-      {/* 버튼 고정 */}
-      <div className={styles.nextButtonContainer}>
-        <Button
-          variant="darkPrimary"
-          fullWidth
-          onClick={handleSubmit}
-          disabled={!detail.trim()}
-        >
-          제출
-        </Button>
       </div>
     </div>
   );
