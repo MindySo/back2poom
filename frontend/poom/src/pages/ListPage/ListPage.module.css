@@ -12,6 +12,9 @@
   top: 0;
   z-index: 100;
   background: #f7f7f8;
+  width: 100%;
+  flex-shrink: 0; /* 레이아웃 재계산 시 크기 고정 */
+  align-self: flex-start; /* flex 컨텍스트에서 위치 고정 */
 }
 
 /* Hero banner containing the header and search */
@@ -21,14 +24,15 @@
   background-position: center;
   border-radius: 0; /* edge-to-edge */
   overflow: hidden;
-  height: 300px;
+  height: 300px; /* 기본 높이, 인라인 스타일로 덮어씀 */
   margin: 0; /* stick to tabs below */
+  transition: height 0.5s cubic-bezier(0.4, 0, 0.2, 1); /* 더 부드럽고 자연스러운 높이 변화 */
+  will-change: height; /* GPU 가속 힌트 */
 }
 
 .list-hero__overlay {
   position: absolute;
   inset: 0;
-  background: rgba(47, 56, 70, 0.65); /* dark overlay */
 }
 
 .list-header {
@@ -38,20 +42,41 @@
   flex-direction: column; /* title on top, search below (same column) */
   align-items: center;
   justify-content: center;
-  gap: 14px;
+  gap: 24px;
   max-width: 980px;
   margin: 0 auto;
   height: 100%;
   padding: 0 24px;
   color: #fff;
   text-align: center;
+  transition: justify-content 0.3s ease-out, padding-top 0.3s ease-out;
+}
+
+/* hero 섹션이 줄어들었을 때 (sticky 상태) */
+.list-header-compact {
+  justify-content: center;
+  padding-top: 0;
+  gap: 0;
 }
 
 .list-header h2 {
   margin: 0;
-  font-size: 20px;
+  font-size: 23px;
+  font-weight: 500;
+  color: #767676;
+}
+
+.hero-title {
+  margin: 0;
   font-weight: 700;
-  color: #ffffff;
+  line-height: 1.4;
+  text-align: center;
+  transition: opacity 0.3s ease-out, transform 0.3s ease-out, font-size 0.3s ease-out, margin 0.3s ease-out;
+}
+
+/* hero 섹션이 줄어들었을 때 텍스트 숨기기 */
+.list-header-compact .hero-title {
+  display: none;
 }
 
 .search-bar {
@@ -87,8 +112,8 @@
   display: flex;
   justify-content: center;
   gap: 50px;
-  background: #2f3846; /* dark strip behind tabs */
-  color: #cfd6df;
+  background: #F6F4EF; /* dark strip behind tabs */
+  color: #9fa8b3;
   padding: 10px 0;
   margin: 0;
 }
@@ -104,7 +129,7 @@
 }
 
 .list-tabs button:global(.active) {
-  color: #ffffff;
+  color: #333333;
 }
 
 .list-tabs button:global(.active)::after {
@@ -115,7 +140,7 @@
   bottom: -10px;
   width: 36px;
   height: 3px;
-  background: #f39c4a; /* orange underline like screenshot */
+  background: #E89A59; /* orange underline like screenshot */
   border-radius: 2px;
 }
 
