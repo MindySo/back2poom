@@ -2,65 +2,36 @@
 #  NETWORKS & VOLUMES
 #############################
 networks:
-  topoom-network:
+  topoom-scheduling-network:
     driver: bridge
     name: topoom-scheduling-network
 
 volumes:
-  redis-queue-data:
-    name: topoom-scheduling-redis-data
+  rabbitmq-data:
+    name: topoom-scheduling-rabbitmq-data
 
 #############################
 #  SERVICES
 #############################
 services:
-  # Redis Queue
-  redis:
-    image: redis:7.2
-    container_name: topoom-scheduling-redis
+  # RabbitMQ Message Broker
+  rabbitmq:
+    image: rabbitmq:3.12-management
+    container_name: topoom-rabbitmq
     restart: always
     environment:
       - TZ=Asia/Seoul
-      - REDIS_PASSWORD=${REDIS_PASSWORD}
+      - RABBITMQ_DEFAULT_USER=${RABBITMQ_USERNAME}
+      - RABBITMQ_DEFAULT_PASS=${RABBITMQ_PASSWORD}
     volumes:
-      - redis-queue-data:/data
-      - ./redis/redis.conf:/usr/local/etc/redis/redis.conf:ro
-    command: >
-      sh -c "redis-server /usr/local/etc/redis/redis.conf --requirepass $${REDIS_PASSWORD}"
+      - rabbitmq-data:/var/lib/rabbitmq
     ports:
-      - "6379:6379"
+      - "5672:5672"   # AMQP 프로토콜
+      - "15672:15672" # Management UI
     networks:
       - topoom-scheduling-network
-
-  # Backend Scheduler (Spring Boot Scheduling Server)
-  # TODO: backend-scheduling 프로젝트 생성 후 활성화
-  # scheduler:
-  #   image: ${REGISTRY}/topoom-scheduler:latest
-  #   container_name: topoom-scheduling-scheduler
-  #   restart: always
-  #   environment:
-  #     - TZ=Asia/Seoul
-  #     - SPRING_PROFILES_ACTIVE=${SPRING_PROFILES_ACTIVE:-prod}
-  #   env_file:
-  #     - .env
-  #   depends_on:
-  #     - redis
-  #   networks:
-  #     - topoom-scheduling-network
-
-  # Backend OCR (OCR Processing Server)
-  ocr:
-    image: ${REGISTRY}/topoom-ocr:latest
-    container_name: topoom-ocr
-    restart: always
-    environment:
-      - TZ=Asia/Seoul
-      - SPRING_PROFILES_ACTIVE=${SPRING_PROFILES_ACTIVE:-prod}
-    env_file:
-      - .env
-    depends_on:
-      - redis
-    expose:
-      - "8081"
-    networks:
-      - topoom-scheduling-network
+    healthcheck:
+      test: rabbitmq-diagnostics -q ping
+      interval: 10s
+      timeout: 5s
+      retries: 5

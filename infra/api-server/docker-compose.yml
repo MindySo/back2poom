@@ -85,6 +85,7 @@ services:
       - topoom-network
 
   # Spring Boot
+  # Backend-main
   spring:
     image: ${REGISTRY}/topoom-spring:latest
     container_name: topoom-spring
@@ -92,6 +93,10 @@ services:
     environment:
       - TZ=Asia/Seoul
       - SPRING_PROFILES_ACTIVE=${SPRING_PROFILES_ACTIVE:-prod}
+      - RABBITMQ_HOST=${RABBITMQ_HOST}
+      - RABBITMQ_PORT=${RABBITMQ_PORT}
+      - RABBITMQ_USERNAME=${RABBITMQ_USERNAME}
+      - RABBITMQ_PASSWORD=${RABBITMQ_PASSWORD}
     env_file:
       - .env
     depends_on:
@@ -101,6 +106,23 @@ services:
       - "8080"
     networks:
       - topoom-network
+
+  # Backend-OCR
+  ocr:
+    image: ${REGISTRY}/topoom-ocr:latest
+    container_name: topoom-ocr
+    restart: always
+    environment:
+      - TZ=Asia/Seoul
+    env_file:
+      - .env
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+    expose:
+      - "8081"
+    networks:
+      - topoom-scheduling-network
 
   # Jenkins
   jenkins:
