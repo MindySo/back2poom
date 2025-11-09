@@ -34,12 +34,26 @@ public class GmsApiClient {
                 .messages(List.of(
                         ChatMessage.builder()
                                 .role("developer")
-                                .content("You are an OCR assistant that extracts text from images.")
+                                .content("당신은 한국 경찰청 실종자 신고서에서 한글 텍스트를 정확히 추출하는 전문 OCR 도우미입니다.")
                                 .build(),
                         ChatMessage.builder()
                                 .role("user")
                                 .content(List.of(
-                                        ContentItem.text("Please extract all text from this image and return only the text content."),
+                                        ContentItem.text("이 이미지는 한국 경찰청의 실종자 신고서입니다. 다음과 같은 형식으로 정확히 추출해주세요:\n\n" +
+                                                "첫 줄: [분류] [이름(나이세)] [성별] (예: 아동 박지연(15세) 여자)\n" +
+                                                "당시나이 XX세 (현재나이 : XX세)\n" +
+                                                "국적 내국인\n" +
+                                                "발생일시 YYYY년 MM월 DD일\n" +
+                                                "발생장소 [상세주소]\n" +
+                                                "키 XXXcm\n" +
+                                                "몸무게 XXkg\n" +
+                                                "체격 [체격정보]\n" +
+                                                "얼굴형 [얼굴형]\n" +
+                                                "두발색상 [색상]\n" +
+                                                "두발형태 [형태]\n" +
+                                                "착의의상 [의상정보]\n" +
+                                                "진행상태 [상태]\n\n" +
+                                                "한글을 정확히 인식하고, 줄바꿈과 띄어쓰기를 포함하여 모든 텍스트를 원본 그대로 추출해주세요. 빠뜨리는 정보가 없도록 주의깊게 추출해주세요."),
                                         ContentItem.imageUrl("data:image/jpeg;base64," + base64Image)
                                 ))
                                 .build()

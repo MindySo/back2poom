@@ -48,3 +48,7 @@ out/
 ### VS Code ###
 .vscode/
 /.metadata/
+
+### Logs ###
+logs/
+*.log

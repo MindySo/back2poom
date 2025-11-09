@@ -9,7 +9,6 @@ import com.topoom.missingcase.entity.CaseFile;
 import com.topoom.missingcase.entity.MissingCase;
 import com.topoom.missingcase.repository.CaseContactRepository;
 import com.topoom.missingcase.repository.MissingCaseRepository;
-import com.topoom.missingcase.service.CaseOcrService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.openqa.selenium.By;
@@ -37,7 +36,6 @@ public class IntegratedBlogCrawlingService {
     private final CaseContactRepository caseContactRepository;
     private final BlogPostRepository blogPostRepository;
     private final MissingCaseRepository missingCaseRepository;
-    private final CaseOcrService caseOcrService;
 
     private static final int WAIT_TIMEOUT_SECONDS = 10;
     private static final int MAX_PAGES = 50;
@@ -47,34 +45,11 @@ public class IntegratedBlogCrawlingService {
             "(\\d{2,3}[-\\s\\.\\u2010-\\u2015]*\\d{3,4}[-\\s\\.\\u2010-\\u2015]*\\d{4})"
     );
     private static final Pattern ORGANIZATION_PATTERN = Pattern.compile(
-            "([가-힣]+(?:경찰서|서)|[가-힣]*실종수사팀|[가-힣]*수사팀)"
+            "([가-힣]+\\s*[가-힣]*경찰서|[가-힣]+청\\s+[가-힣]+경찰서|[가-힣]+\\s+[가-힣]+경찰서|[가-힣]*실종수사팀|[가-힣]*수사팀)"
     );
 
     // ────────────────────────── Public APIs ──────────────────────────
 
-    /** 블로그 목록 → DB 저장까지 한 번에 */
-    public Map<String, Object> crawlAndProcessAllPosts(String blogId, String categoryNo) {
-        return withDriver(driver -> {
-            String categoryUrl = String.format(
-                    "https://blog.naver.com/PostList.naver?blogId=%s&categoryNo=%s",
-                    blogId, categoryNo);
-            log.info("전체 크롤링 시작: {}", categoryUrl);
-
-            driver.get(categoryUrl);
-            waitFor(driver, By.id("postBottomTitleListBody"));
-
-            List<BlogPostInfo> blogPosts = crawlBlogPostList(driver, blogId, categoryNo);
-            List<BlogPost> savedPosts = saveBlogPostsToDatabase(blogPosts);
-
-            Map<String, Object> result = new HashMap<>();
-            result.put("blogPosts", blogPosts);
-            result.put("savedPosts", savedPosts);
-            result.put("totalCount", blogPosts.size());
-            result.put("savedCount", savedPosts.size());
-            log.info("크롤링 완료: total={}, saved={}", blogPosts.size(), savedPosts.size());
-            return result;
-        });
-    }
 
     /** 카테고리 목록만 크롤링 & 저장 */
     public List<BlogPostInfo> crawlCategoryPostsWithSelenium(String blogId, String categoryNo) {
@@ -107,23 +82,33 @@ public class IntegratedBlogCrawlingService {
             int imageSuccess = 0, imageFail = 0;
             List<CaseFile> uploadedFiles = new ArrayList<>();
 
-            for (ExtractedImageInfo img : extractedImages) {
+            for (int i = 0; i < extractedImages.size(); i++) {
+                ExtractedImageInfo img = extractedImages.get(i);
                 try {
+                    String sourceTitle = driver.getTitle(); // 페이지 제목 가져오기
+                    Integer sourceSeq = i + 1; // 이미지 순서 (1부터 시작)
+                    Boolean isLastImage = (i == extractedImages.size() - 1); // 마지막 이미지 여부
+                    
                     CaseFile saved = blogS3ImageUploadService
-                            .downloadAndUploadImage(img.getImageUrl(), postUrl, caseId);
+                            .downloadAndUploadImage(img.getImageUrl(), postUrl, caseId, 
+                                    sourceTitle, sourceSeq, isLastImage);
                     uploadedFiles.add(saved);
                     imageSuccess++;
+                    log.info("이미지 업로드 성공: seq={}, isLast={}, url={}", sourceSeq, isLastImage, img.getImageUrl());
                 } catch (Exception e) {
                     imageFail++;
                     log.error("이미지 업로드 실패: {} - {}", img.getImageUrl(), e.getMessage());
                 }
             }
 
+            // 연락처 크롤링
+            log.info("🔍 연락처 크롤링 시작 - postUrl: {}, caseId: {}", postUrl, caseId);
             List<CaseContact> contacts = new ArrayList<>();
             try {
-                contacts = extractAndSaveContacts(driver, postUrl, caseId);
+                contacts = extractAndSaveContactsFromHtml(driver, postUrl, caseId);
+                log.info("✅ 연락처 크롤링 완료 - 추출된 개수: {}", contacts.size());
             } catch (Exception e) {
-                log.error("연락처 추출 실패: {}", e.getMessage());
+                log.error("❌ 연락처 크롤링 실패: {}", e.getMessage(), e);
             }
 
             Map<String, Object> result = new HashMap<>();
@@ -298,70 +283,214 @@ public class IntegratedBlogCrawlingService {
                 && imageUrl.contains("postfiles.pstatic.net");
     }
 
-    /** 페이지 텍스트에서 연락처 추출 & 저장 */
-    private List<CaseContact> extractAndSaveContacts(WebDriver driver, String postUrl, Long caseId) {
+    /** HTML 구조 기반 연락처 추출 & 저장 */
+    private List<CaseContact> extractAndSaveContactsFromHtml(WebDriver driver, String postUrl, Long caseId) {
         String sourceTitle = driver.getTitle();
-        String content = getPageContent(driver);
-
         List<CaseContact> contacts = new ArrayList<>();
-        Matcher m = PHONE_PATTERN.matcher(content);
 
-        while (m.find()) {
-            String raw = m.group(1);
-            String norm = raw.replaceAll("[^0-9]", "");
-            if (norm.length() < 8 || norm.length() > 15) continue;
+        try {
+            // 1단계: tel: 링크에서 전화번호 직접 추출
+            List<WebElement> phoneLinks = driver.findElements(By.cssSelector("a[href^='tel:']"));
+            
+            for (WebElement link : phoneLinks) {
+                String phoneNumber = link.getAttribute("href").replace("tel:", "").trim();
+                if (isValidPhoneNumber(phoneNumber)) {
+                    String organization = extractOrganizationFromElement(link);
+                    CaseContact contact = createCaseContact(organization, phoneNumber, postUrl, sourceTitle, caseId);
+                    if (contact != null) contacts.add(contact);
+                    log.info("전화번호 링크에서 추출: {} - {}", organization, phoneNumber);
+                }
+            }
 
-            String org = extractOrganizationNearPhone(content, m.start(), m.end());
+            // 2단계: 네이버 블로그 본문 구조에 맞는 상세 검색
+            // 실제 HTML 구조: .se-main-container > .se-component > .se-component-content > .se-section > .se-module > .se-text-paragraph
+            String[] detailedSelectors = {
+                ".se-main-container .se-text-paragraph",
+                ".se-component-content .se-text-paragraph", 
+                ".se-section-text .se-text-paragraph",
+                ".se-module-text .se-text-paragraph",
+                ".post-view .se-text-paragraph",
+                ".wrap_rabbit .se-text-paragraph"
+            };
+            
+            Set<WebElement> processedParagraphs = new HashSet<>();
+            
+            for (String selector : detailedSelectors) {
+                List<WebElement> paragraphs = driver.findElements(By.cssSelector(selector));
+                for (WebElement paragraph : paragraphs) {
+                    if (processedParagraphs.contains(paragraph)) continue;
+                    processedParagraphs.add(paragraph);
+                    
+                    try {
+                        String text = paragraph.getText();
+                        if (text == null || text.trim().isEmpty()) continue;
 
+                        Matcher matcher = PHONE_PATTERN.matcher(text);
+                        while (matcher.find()) {
+                            String phoneNumber = matcher.group(1);
+                            if (isValidPhoneNumber(phoneNumber)) {
+                                // 이미 추출된 전화번호인지 확인
+                                boolean alreadyExtracted = contacts.stream()
+                                        .anyMatch(c -> normalizePhoneNumber(c.getPhoneNumber())
+                                                .equals(normalizePhoneNumber(phoneNumber)));
+                                
+                                if (!alreadyExtracted) {
+                                    String organization = extractOrganizationFromText(text);
+                                    CaseContact contact = createCaseContact(organization, phoneNumber, postUrl, sourceTitle, caseId);
+                                    if (contact != null) contacts.add(contact);
+                                    log.info("텍스트에서 추출: {} - {}", organization, phoneNumber);
+                                }
+                            }
+                        }
+                    } catch (Exception e) {
+                        log.debug("단락 처리 실패: {}", e.getMessage());
+                    }
+                }
+            }
+
+            // 3단계: fallback - 전체 페이지에서 전화번호 패턴 검색
+            if (contacts.isEmpty()) {
+                try {
+                    String fullPageText = driver.findElement(By.tagName("body")).getText();
+                    Matcher matcher = PHONE_PATTERN.matcher(fullPageText);
+                    while (matcher.find()) {
+                        String phoneNumber = matcher.group(1);
+                        if (isValidPhoneNumber(phoneNumber)) {
+                            String organization = extractOrganizationFromText(fullPageText);
+                            CaseContact contact = createCaseContact(organization, phoneNumber, postUrl, sourceTitle, caseId);
+                            if (contact != null) contacts.add(contact);
+                            log.info("페이지 전체에서 추출: {} - {}", organization, phoneNumber);
+                            break; // 첫 번째 유효한 번호만 추출
+                        }
+                    }
+                } catch (Exception e) {
+                    log.debug("전체 페이지 검색 실패: {}", e.getMessage());
+                }
+            }
+
+        } catch (Exception e) {
+            log.error("HTML 연락처 추출 실패: {}", e.getMessage());
+        }
+
+        return contacts;
+    }
+
+    /** HTML 요소에서 조직명 추출 */
+    private String extractOrganizationFromElement(WebElement phoneElement) {
+        try {
+            // 1단계: 같은 <p> 태그 내에서 이전 <span> 요소들에서 조직명 찾기
+            WebElement paragraph = phoneElement.findElement(By.xpath("./ancestor::p[@class='se-text-paragraph'][1]"));
+            
+            // 전화번호 링크가 포함된 span의 이전 span들에서 조직명 검색
+            List<WebElement> spans = paragraph.findElements(By.tagName("span"));
+            for (WebElement span : spans) {
+                String spanText = span.getText();
+                if (spanText != null && !spanText.trim().isEmpty() && !spanText.contains("010") && !spanText.contains("02")) {
+                    String organization = extractOrganizationFromText(spanText);
+                    if (!"알 수 없음".equals(organization)) {
+                        return organization;
+                    }
+                }
+            }
+            
+            // 2단계: 전체 paragraph 텍스트에서 조직명 추출
+            String fullText = paragraph.getText();
+            return extractOrganizationFromText(fullText);
+            
+        } catch (Exception e) {
+            // 3단계: fallback - 조상 요소에서 조직명 찾기
+            try {
+                WebElement ancestor = phoneElement.findElement(By.xpath("./ancestor::*[contains(@class, 'se-text-paragraph') or contains(@class, 'se-component-content')][1]"));
+                String text = ancestor.getText();
+                return extractOrganizationFromText(text);
+            } catch (Exception ex) {
+                // 4단계: 부모 요소에서 찾기
+                try {
+                    WebElement parent = phoneElement.findElement(By.xpath(".."));
+                    String text = parent.getText();
+                    return extractOrganizationFromText(text);
+                } catch (Exception ex2) {
+                    return "알 수 없음";
+                }
+            }
+        }
+    }
+
+    /** 텍스트에서 조직명 추출 */
+    private String extractOrganizationFromText(String text) {
+        // 1차: 정규식으로 정확한 조직명 매칭
+        Matcher orgMatcher = ORGANIZATION_PATTERN.matcher(text);
+        if (orgMatcher.find()) {
+            String matched = orgMatcher.group(1).trim();
+            log.debug("정규식으로 조직명 추출: {}", matched);
+            return matched;
+        }
+
+        // 2차: 더 구체적인 패턴 매칭 
+        // "부산청 부산수영경찰서" 형태
+        if (text.contains("청") && text.contains("경찰서")) {
+            Pattern fullPattern = Pattern.compile("([가-힣]+청\\s+[가-힣]+경찰서)");
+            Matcher fullMatcher = fullPattern.matcher(text);
+            if (fullMatcher.find()) {
+                String result = fullMatcher.group(1).trim();
+                log.debug("청+경찰서 패턴으로 추출: {}", result);
+                return result;
+            }
+        }
+        
+        // "경기남부 분당경찰서" 형태
+        if (text.contains("경찰서")) {
+            Pattern policePattern = Pattern.compile("([가-힣]+\\s+[가-힣]+경찰서|[가-힣]+경찰서)");
+            Matcher policeMatcher = policePattern.matcher(text);
+            if (policeMatcher.find()) {
+                String result = policeMatcher.group(1).trim();
+                log.debug("경찰서 패턴으로 추출: {}", result);
+                return result;
+            }
+        }
+
+        // 3차: 키워드 기반 간단한 조직명 추출
+        if (text.contains("실종수사팀")) return "실종수사팀";
+        if (text.contains("수사팀")) return "수사팀";
+        if (text.contains("파출소")) return "파출소";
+        
+        return "연락처";
+    }
+
+    /** 전화번호 유효성 검사 */
+    private boolean isValidPhoneNumber(String phoneNumber) {
+        if (phoneNumber == null) return false;
+        String normalized = normalizePhoneNumber(phoneNumber);
+        return normalized.length() >= 8 && normalized.length() <= 15;
+    }
+
+    /** 전화번호 정규화 (숫자만 추출) */
+    private String normalizePhoneNumber(String phoneNumber) {
+        return phoneNumber.replaceAll("[^0-9]", "");
+    }
+
+    /** CaseContact 생성 및 저장 */
+    private CaseContact createCaseContact(String organization, String phoneNumber, String sourceUrl, String sourceTitle, Long caseId) {
+        try {
             CaseContact contact = CaseContact.builder()
-                    .organization(org)
-                    .phoneNumber(raw)
-                    .sourceUrl(postUrl)
+                    .organization(organization)
+                    .phoneNumber(phoneNumber)
+                    .sourceUrl(sourceUrl)
                     .sourceTitle(sourceTitle)
                     .crawledAt(LocalDateTime.now())
                     .build();
 
             if (caseId != null) {
-                // MissingCase를 설정하려면 caseId로 조회해야 하지만 여기서는 단순히 저장
-                contacts.add(caseContactRepository.save(contact));
+                MissingCase missingCase = missingCaseRepository.findById(caseId)
+                        .orElseThrow(() -> new RuntimeException("MissingCase not found: " + caseId));
+                contact.setMissingCase(missingCase);
+                return caseContactRepository.save(contact);
             }
-        }
-        return contacts;
-    }
-
-    private String getPageContent(WebDriver driver) {
-        try {
-            return driver.findElement(By.className("se-main-container")).getText();
+            return contact;
         } catch (Exception e) {
-            return driver.findElement(By.tagName("body")).getText();
+            log.error("CaseContact 생성 실패: org={}, phone={}", organization, phoneNumber, e);
+            return null;
         }
-    }
-
-    private String extractOrganizationNearPhone(String content, int start, int end) {
-        int s = Math.max(0, start - 50);
-        int e = Math.min(content.length(), end + 50);
-        String area = content.substring(s, e);
-
-        Matcher org = ORGANIZATION_PATTERN.matcher(area);
-        if (org.find()) return org.group(1);
-
-        for (String kw : List.of("경찰서", "실종수사팀", "수사팀", "파출소")) {
-            if (area.contains(kw)) {
-                String[] words = area.split("\\s+");
-                for (int i = 0; i < words.length; i++) {
-                    if (words[i].contains(kw)) {
-                        StringBuilder b = new StringBuilder();
-                        int from = Math.max(0, i - 2);
-                        for (int j = from; j <= i; j++) {
-                            if (j > from) b.append(" ");
-                            b.append(words[j]);
-                        }
-                        return b.toString().trim();
-                    }
-                }
-            }
-        }
-        return "알 수 없음";
     }
 
     /** BlogPost 저장 (URL 기준 중복 방지) 및 새 게시글 처리 */
@@ -443,64 +572,15 @@ public class IntegratedBlogCrawlingService {
         }
     }
     
-    /** 새 게시글의 이미지 크롤링 및 저장 */
+    /** 새 게시글의 연락처 + 이미지 크롤링 및 저장 */
     private void crawlImagesForNewPost(String postUrl, Long caseId) {
-        withDriver(driver -> {
-            try {
-                log.info("새 게시글 이미지 크롤링 시작: {}", postUrl);
-                driver.get(postUrl);
-                
-                try { 
-                    waitFor(driver, By.className("se-main-container")); 
-                } catch (Exception ignored) { 
-                    // fallback 가능 
-                }
-                
-                // 게시글 제목 추출
-                String sourceTitle = null;
-                try {
-                    WebElement titleElement = driver.findElement(By.cssSelector(".se-title-text, .pcol1"));
-                    sourceTitle = titleElement.getText().trim();
-                } catch (Exception e) {
-                    log.warn("게시글 제목 추출 실패, fallback 사용: {}", e.getMessage());
-                    sourceTitle = driver.getTitle();
-                }
-                
-                List<ExtractedImageInfo> extractedImages = extractImagesFromWebDriver(driver, postUrl);
-                int totalImages = extractedImages.size();
-                int imageSuccess = 0, imageFail = 0;
-                
-                for (int i = 0; i < extractedImages.size(); i++) {
-                    ExtractedImageInfo img = extractedImages.get(i);
-                    try {
-                        Integer sourceSeq = i + 1; // 1부터 시작하는 순서
-                        Boolean isLastImage = (i == totalImages - 1); // 마지막 이미지 여부
-                        
-                        CaseFile saved = blogS3ImageUploadService.downloadAndUploadImage(
-                            img.getImageUrl(), postUrl, caseId, sourceTitle, sourceSeq, isLastImage);
-                        imageSuccess++;
-                        log.debug("이미지 저장 성공: {} (seq: {}, isLast: {})", 
-                            img.getImageUrl(), sourceSeq, isLastImage);
-                        
-                        // 마지막 이미지인 경우 OCR 처리 트리거
-                        if (Boolean.TRUE.equals(isLastImage)) {
-                            caseOcrService.processLastImage(caseId);
-                            log.info("마지막 이미지 OCR 처리 트리거: caseId={}", caseId);
-                        }
-                    } catch (Exception e) {
-                        imageFail++;
-                        log.error("이미지 저장 실패: {} - {}", img.getImageUrl(), e.getMessage());
-                    }
-                }
-                
-                log.info("이미지 크롤링 완료: postUrl={}, caseId={}, success={}, fail={}, total={}", 
-                    postUrl, caseId, imageSuccess, imageFail, totalImages);
-                
-            } catch (Exception e) {
-                log.error("이미지 크롤링 실패: postUrl={}, caseId={}", postUrl, caseId, e);
-            }
-            return null;
-        });
+        // extractAndUploadImagesWithContacts를 재사용
+        try {
+            extractAndUploadImagesWithContacts(postUrl, caseId);
+            log.info("새 게시글 크롤링 완료: postUrl={}, caseId={}", postUrl, caseId);
+        } catch (Exception e) {
+            log.error("새 게시글 크롤링 실패: postUrl={}, caseId={}", postUrl, caseId, e);
+        }
     }
 
     private void sleep(long ms) {
