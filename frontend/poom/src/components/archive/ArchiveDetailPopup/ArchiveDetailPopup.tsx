@@ -54,6 +54,8 @@ const ArchiveDetailPopup: React.FC<ArchiveDetailPopupProps> = ({ personId, initi
   }
 
   const {
+    id,
+    phoneNumber,
     personName,
     ageAtTime,
     gender,
@@ -71,7 +73,11 @@ const ArchiveDetailPopup: React.FC<ArchiveDetailPopupProps> = ({ personId, initi
     inputImages,
     outputImages,
     aiSupport,
+    caseContact,
   } = person;
+  
+  // phoneNumber는 직접 필드 또는 caseContact에서 가져오기
+  const actualPhoneNumber = phoneNumber || (caseContact as { phoneNumber?: string } | undefined)?.phoneNumber;
   
   // 발생일 포맷팅 (안전하게 처리)
   const formatDate = (dateString: string | undefined): string => {
@@ -244,7 +250,12 @@ const ArchiveDetailPopup: React.FC<ArchiveDetailPopupProps> = ({ personId, initi
             fullWidth 
             onClick={() => {
               onClose();
-              navigate(`/report?name=${encodeURIComponent(personName)}`);
+              navigate(`/report?name=${encodeURIComponent(personName)}`, {
+                state: {
+                  ...(id && { id }),
+                  phoneNumber: actualPhoneNumber || '182',
+                },
+              });
             }}
           >
             제보하기
