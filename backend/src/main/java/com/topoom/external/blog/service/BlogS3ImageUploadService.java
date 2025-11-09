@@ -32,6 +32,7 @@ public class BlogS3ImageUploadService {
     private final CaseFileRepository caseFileRepository;
     private final MissingCaseRepository missingCaseRepository;
     private final ApplicationEventPublisher eventPublisher;
+    private final com.topoom.missingcase.service.CaseOcrService caseOcrService;
     
     @Value("${spring.cloud.aws.s3.bucket}")
     private String bucketName;
@@ -98,10 +99,10 @@ public class BlogS3ImageUploadService {
             log.info("CaseFile 저장 OK -> id={}, bucket={}, key={}", 
                     saved.getId(), saved.getS3Bucket(), saved.getS3Key());
             
-            // 마지막 이미지인 경우 OCR 이벤트 발행 (트랜잭션 커밋 후 처리)
+            // 마지막 이미지인 경우 바로 OCR 처리 시작
             if (Boolean.TRUE.equals(isLastImage) && caseId != null) {
-                log.info("마지막 이미지 업로드 완료, OCR 이벤트 발행: caseId={}", caseId);
-                eventPublisher.publishEvent(new LastImageOcrEvent(caseId));
+                log.info("마지막 이미지 업로드 완료, OCR 처리 시작: caseId={}", caseId);
+                caseOcrService.processLastImage(caseId);
             }
             
             return saved;

@@ -65,7 +65,8 @@ public class CaseOcrService {
     /**
      * 마지막 이미지 OCR 처리 (비동기)
      */
-    private void processLastImage(Long caseId) {
+    @Async
+    public void processLastImage(Long caseId) {
         try {
             log.info("마지막 이미지 OCR 처리 시작: caseId={}", caseId);
             
