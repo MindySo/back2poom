@@ -25,18 +25,19 @@ public class CaseContact extends BaseTimeEntity {
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "case_id", foreignKey = @ForeignKey(name = "fk_case_file_case"))
+    @JoinColumn(name = "case_id", foreignKey = @ForeignKey(name = "fk_case_contact_case"))
     private MissingCase missingCase;
 
+    @Column
     private String organization;
 
-    @Column(name = "phone_number", nullable = false)
+    @Column(name = "phone_number")
     private String phoneNumber;
 
-    @Column(name = "source_url", columnDefinition = "TEXT", nullable = false)
+    @Column(name = "source_url", columnDefinition = "TEXT")
     private String sourceUrl;
 
-    @Column(name = "source_title", length = 300, nullable = false)
+    @Column(name = "source_title", length = 300)
     private String sourceTitle;
 
     @Column(name = "crawled_at", nullable = false)

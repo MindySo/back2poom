@@ -83,6 +83,7 @@ public class MissingCaseDetailResponse {
     public static class AiSupport {
         private String top1Desc;
         private String top2Desc;
+        private BigDecimal speed;
         private Object infoItems; // JSON 그대로 반환
     }
 }
