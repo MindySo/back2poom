@@ -114,4 +114,57 @@ public class MissingCase extends BaseTimeEntity {
     @OneToMany(mappedBy = "missingCase", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<CaseReport> reports;
 
+    /**
+     * MissingCase와 모든 연관 엔티티를 soft delete 처리
+     */
+    @Override
+    public void softDelete() {
+        // MissingCase 자체 삭제
+        super.softDelete();
+        this.isDeleted = true;
+
+        // 연관 엔티티들도 함께 soft delete
+        if (files != null && !files.isEmpty()) {
+            files.forEach(CaseFile::softDelete);
+        }
+
+        if (contacts != null && !contacts.isEmpty()) {
+            contacts.forEach(CaseContact::softDelete);
+        }
+
+        if (aiSupport != null) {
+            aiSupport.softDelete();
+        }
+
+        if (reports != null && !reports.isEmpty()) {
+            reports.forEach(CaseReport::softDelete);
+        }
+    }
+
+    /**
+     * MissingCase와 모든 연관 엔티티의 soft delete 복구 (오검 대응)
+     */
+    @Override
+    public void undoSoftDelete() {
+        // MissingCase 자체 복구
+        super.undoSoftDelete();
+        this.isDeleted = false;
+
+        // 연관 엔티티들도 함께 복구
+        if (files != null && !files.isEmpty()) {
+            files.forEach(CaseFile::undoSoftDelete);
+        }
+
+        if (contacts != null && !contacts.isEmpty()) {
+            contacts.forEach(CaseContact::undoSoftDelete);
+        }
+
+        if (aiSupport != null) {
+            aiSupport.undoSoftDelete();
+        }
+
+        if (reports != null && !reports.isEmpty()) {
+            reports.forEach(CaseReport::undoSoftDelete);
+        }
+    }
 }

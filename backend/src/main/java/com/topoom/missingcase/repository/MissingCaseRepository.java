@@ -42,10 +42,16 @@ public interface MissingCaseRepository extends JpaRepository<MissingCase, Long> 
     List<MissingCase> findByCrawledAtBefore(LocalDateTime cutoffDate);
 
     @Query(value = """
-        SELECT 
+        SELECT
             (SELECT COUNT(*) FROM missing_case mc1 WHERE DATE(mc1.occurred_at) = CURDATE()) AS totalCases,
             (SELECT COUNT(*) FROM case_report r WHERE DATE(r.created_at) = CURDATE()) AS totalReports,
             (SELECT COUNT(*) FROM missing_case mc2 WHERE mc2.is_deleted = TRUE AND DATE(mc2.updated_at) = CURDATE()) AS totalResolved
         """, nativeQuery = true)
     Object getTodayStats();
+
+    // sourceUrl로 MissingCase 조회 (삭제되지 않은 것만)
+    Optional<MissingCase> findBySourceUrlAndIsDeletedFalse(String sourceUrl);
+
+    // sourceUrl로 MissingCase 조회 (삭제 여부 무관)
+    Optional<MissingCase> findBySourceUrl(String sourceUrl);
 }

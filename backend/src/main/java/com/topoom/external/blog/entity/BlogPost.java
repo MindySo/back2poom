@@ -1,5 +1,6 @@
 package com.topoom.external.blog.entity;
 
+import com.topoom.common.BaseTimeEntity;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -17,7 +18,7 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class BlogPost {
+public class BlogPost extends BaseTimeEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -34,10 +35,4 @@ public class BlogPost {
 
     @Column(name = "last_seen_at", nullable = false)
     private LocalDateTime lastSeenAt;
-    
-    @Column(name = "deleted_at")
-    private LocalDateTime deletedAt;
-    
-    @Column(name = "created_at", nullable = false)
-    private LocalDateTime createdAt;
 }
