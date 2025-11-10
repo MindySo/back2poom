@@ -4,6 +4,7 @@ import lombok.*;
 
 import java.math.BigDecimal;
 import java.time.ZonedDateTime;
+import java.util.List;
 
 @Getter
 @Setter
@@ -23,7 +24,7 @@ public class MissingCaseListResponse {
     private BigDecimal latitude;
     private BigDecimal longitude;
     private ZonedDateTime crawledAt;
-    private String phoneNumber;
+    private List<String> phoneNumber;
 
     private MainImage mainImage;
 

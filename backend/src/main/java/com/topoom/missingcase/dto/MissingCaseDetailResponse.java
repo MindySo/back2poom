@@ -38,7 +38,7 @@ public class MissingCaseDetailResponse {
     private MainImage mainImage;
     private List<ImageItem> inputImages;
     private List<ImageItem> outputImages;
-    private CaseContact caseContact;
+    private List<CaseContact> caseContacts;
     private AiSupport aiSupport;
 
     @Getter

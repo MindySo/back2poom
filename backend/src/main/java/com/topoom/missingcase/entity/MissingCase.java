@@ -101,8 +101,8 @@ public class MissingCase extends BaseTimeEntity {
     @OneToMany(mappedBy = "missingCase", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<CaseFile> files;
 
-    @OneToOne(mappedBy = "missingCase", cascade = CascadeType.ALL, orphanRemoval = true)
-    private CaseContact contact;
+    @OneToMany(mappedBy = "missingCase", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<CaseContact> contacts;
 
     @OneToOne(mappedBy = "missingCase", cascade = CascadeType.ALL, orphanRemoval = true)
     private CaseAiSupport aiSupport;
