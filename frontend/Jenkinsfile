@@ -70,15 +70,15 @@ pipeline {
                     dir('frontend/poom') {
                         sh """
                             # S3 버킷에 빌드 파일 업로드
-                            aws s3 sync dist/ s3://\${S3_BUCKET}/ \\
-                                --region \${AWS_REGION} \\
+                            aws s3 sync dist/ s3://\${S3_PROD_BUCKET}/ \\
+                                --region \${AWS_PROD_REGION} \\
                                 --delete \\
                                 --cache-control 'public,max-age=31536000,immutable' \\
                                 --exclude 'index.html'
 
                             # index.html은 캐시 없이 업로드
-                            aws s3 cp dist/index.html s3://\${S3_BUCKET}/index.html \\
-                                --region \${AWS_REGION} \\
+                            aws s3 cp dist/index.html s3://\${S3_PROD_BUCKET}/index.html \\
+                                --region \${AWS_PROD_REGION} \\
                                 --cache-control 'public,max-age=0,must-revalidate'
                         """
                     }
@@ -96,7 +96,7 @@ pipeline {
                         aws cloudfront create-invalidation \\
                             --distribution-id \${CLOUDFRONT_DISTRIBUTION_ID} \\
                             --paths '/*' \\
-                            --region \${AWS_REGION}
+                            --region \${AWS_PROD_REGION}
                     """
                 }
             }

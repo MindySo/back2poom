@@ -16,6 +16,30 @@ spring:
       port: 6379
       password: ${REDIS_PASSWORD}
 
+  # RabbitMQ 설정
+  rabbitmq:
+    host: ${RABBITMQ_HOST}
+    port: ${RABBITMQ_PORT}
+    username: ${RABBITMQ_USERNAME}
+    password: ${RABBITMQ_PASSWORD}
+    listener:
+      simple:
+        acknowledge-mode: auto
+        retry:
+          enabled: true
+          initial-interval: 2000
+          max-attempts: 3
+          multiplier: 2.0
+          max-interval: 10000
+        default-requeue-rejected: false
+        concurrency: 3
+        max-concurrency: 10
+    template:
+      retry:
+        enabled: true
+        initial-interval: 1000
+        max-attempts: 3
+
   cloud:
     aws:
       credentials:
