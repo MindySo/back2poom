@@ -163,6 +163,36 @@ const MapPage: React.FC = () => {
   }, [isMobile, mobileModalState]);
 
   const handleMissingCardClick = (id: number) => {
+    // 모바일 환경에서는 모달 열기
+    if (isMobile) {
+      // 같은 마커를 클릭하면 토글
+      if (selectedMissingId === id && isTestModalOpen) {
+        setIsTestModalOpen(false);
+        setSelectedMissingId(null);
+        setSelectedRadiusPosition(null);
+        setSelectedRadiusValue(0);
+      } else {
+        // 다른 마커를 클릭하면 모달 열기
+        setSelectedMissingId(id);
+        setIsTestModalOpen(true);
+
+        // 해당 실종자의 위치로 지도 이동 (선택사항)
+        if (map) {
+          const person = markerMissingList?.find((p) => p.id === id);
+          if (person && person.latitude && person.longitude) {
+            const moveLatLon = new kakao.maps.LatLng(person.latitude, person.longitude);
+            map.panTo(moveLatLon);
+
+            // 반경 표시
+            setSelectedRadiusPosition({ lat: person.latitude, lng: person.longitude });
+            setSelectedRadiusValue(1000);
+          }
+        }
+      }
+      return;
+    }
+
+    // 데스크톱 환경에서는 Dashboard 열기 (기존 로직)
     // 같은 카드를 클릭하면 토글 (닫기)
     if (selectedMissingId === id && isDashboardOpen) {
       setIsDashboardOpen(false);
@@ -396,48 +426,15 @@ const MapPage: React.FC = () => {
         <MobileModal
           ref={mobileModalRef}
           isOpen={isTestModalOpen}
-          onClose={() => setIsTestModalOpen(false)}
+          personId={selectedMissingId}
+          onClose={() => {
+            setIsTestModalOpen(false);
+            setSelectedMissingId(null);
+            setSelectedRadiusPosition(null);
+            setSelectedRadiusValue(0);
+          }}
           onStateChange={setMobileModalState}
-        >
-          <div style={{ padding: '16px' }}>
-            <h2 style={{ marginTop: 0 }}>테스트 모달</h2>
-            <p>MobileModal이 잘 동작하는지 테스트합니다.</p>
-            <p>손잡이를 잡고 드래그하거나 손잡이를 클릭해서 크기를 조절할 수 있습니다.</p>
-            <p>손잡이를 잡고 드래그하거나 손잡이를 클릭해서 크기를 조절할 수 있습니다.</p>
-            <p>손잡이를 잡고 드래그하거나 손잡이를 클릭해서 크기를 조절할 수 있습니다.</p>
-            <p>손잡이를 잡고 드래그하거나 손잡이를 클릭해서 크기를 조절할 수 있습니다.</p>
-            <p>손잡이를 잡고 드래그하거나 손잡이를 클릭해서 크기를 조절할 수 있습니다.</p>
-            <p>손잡이를 잡고 드래그하거나 손잡이를 클릭해서 크기를 조절할 수 있습니다.</p>
-            <p>손잡이를 잡고 드래그하거나 손잡이를 클릭해서 크기를 조절할 수 있습니다.</p>
-            <p>손잡이를 잡고 드래그하거나 손잡이를 클릭해서 크기를 조절할 수 있습니다.</p>
-            <p>손잡이를 잡고 드래그하거나 손잡이를 클릭해서 크기를 조절할 수 있습니다.</p>
-            <p>손잡이를 잡고 드래그하거나 손잡이를 클릭해서 크기를 조절할 수 있습니다.</p>
-            <p>손잡이를 잡고 드래그하거나 손잡이를 클릭해서 크기를 조절할 수 있습니다.</p>
-            <p>손잡이를 잡고 드래그하거나 손잡이를 클릭해서 크기를 조절할 수 있습니다.</p>
-            <p>손잡이를 잡고 드래그하거나 손잡이를 클릭해서 크기를 조절할 수 있습니다.</p>
-            <p>손잡이를 잡고 드래그하거나 손잡이를 클릭해서 크기를 조절할 수 있습니다.</p>
-            <p>손잡이를 잡고 드래그하거나 손잡이를 클릭해서 크기를 조절할 수 있습니다.</p>
-            <p>손잡이를 잡고 드래그하거나 손잡이를 클릭해서 크기를 조절할 수 있습니다.</p>
-            <p>손잡이를 잡고 드래그하거나 손잡이를 클릭해서 크기를 조절할 수 있습니다.</p>
-            <p>손잡이를 잡고 드래그하거나 손잡이를 클릭해서 크기를 조절할 수 있습니다.</p>
-            <p>손잡이를 잡고 드래그하거나 손잡이를 클릭해서 크기를 조절할 수 있습니다.</p>
-            <button
-              onClick={() => setIsTestModalOpen(false)}
-              style={{
-                width: '100%',
-                padding: '12px',
-                backgroundColor: '#0B72E7',
-                color: 'white',
-                border: 'none',
-                borderRadius: '8px',
-                cursor: 'pointer',
-                fontSize: '16px',
-              }}
-            >
-              모달 닫기
-            </button>
-          </div>
-        </MobileModal>
+        />
       )}
     </>
   );
