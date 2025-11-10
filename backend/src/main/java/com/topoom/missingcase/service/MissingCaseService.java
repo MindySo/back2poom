@@ -2,6 +2,7 @@ package com.topoom.missingcase.service;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.topoom.missingcase.entity.CaseContact;
 import com.topoom.missingcase.entity.CaseFile;
 import com.topoom.missingcase.entity.MissingCase;
 import com.topoom.missingcase.dto.MissingCaseDetailResponse;
@@ -60,7 +61,9 @@ public class MissingCaseService {
                 .latitude(mc.getLatitude())
                 .longitude(mc.getLongitude())
                 .crawledAt(mc.getCrawledAt().atZone(ZoneOffset.UTC))
-                .phoneNumber(mc.getContact() != null ? mc.getContact().getPhoneNumber() : "182")
+                .phoneNumber(mc.getContacts().stream()
+                        .map(CaseContact::getPhoneNumber)
+                        .toList())
                 .mainImage(mainImage)
                 .build();
     }
@@ -91,17 +94,23 @@ public class MissingCaseService {
                 .map(this::toImageItem)
                 .collect(Collectors.toList());
 
-        MissingCaseDetailResponse.CaseContact caseContact = null;
-        if (mc.getContact() != null) {
-            caseContact = MissingCaseDetailResponse.CaseContact.builder()
-                    .organization(mc.getContact().getOrganization())
-                    .phoneNumber(mc.getContact().getPhoneNumber())
-                    .build();
+        List<MissingCaseDetailResponse.CaseContact> caseContacts;
+
+        if (mc.getContacts() != null && !mc.getContacts().isEmpty()) {
+            caseContacts = mc.getContacts().stream()
+                    .map(c -> MissingCaseDetailResponse.CaseContact.builder()
+                            .organization(c.getOrganization())
+                            .phoneNumber(c.getPhoneNumber())
+                            .build()
+                    )
+                    .collect(Collectors.toList());
         } else {
-            caseContact = MissingCaseDetailResponse.CaseContact.builder()
-                    .organization("실종아동찾기센터")
-                    .phoneNumber("182")
-                    .build();
+            caseContacts = List.of(
+                    MissingCaseDetailResponse.CaseContact.builder()
+                            .organization("실종아동찾기센터")
+                            .phoneNumber("182")
+                            .build()
+            );
         }
 
         MissingCaseDetailResponse.AiSupport aiSupport = null;
@@ -138,7 +147,7 @@ public class MissingCaseService {
                 .mainImage(mainImage)
                 .inputImages(inputImages)
                 .outputImages(outputImages)
-                .caseContact(caseContact)
+                .caseContacts(caseContacts)
                 .aiSupport(aiSupport)
                 .build();
     }

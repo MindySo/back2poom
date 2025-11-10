@@ -28,7 +28,7 @@ public interface MissingCaseRepository extends JpaRepository<MissingCase, Long> 
         FROM MissingCase mc
         LEFT JOIN FETCH mc.mainFile mf
         LEFT JOIN FETCH mc.files f
-        LEFT JOIN FETCH mc.contact c
+        LEFT JOIN FETCH mc.contacts c
         LEFT JOIN FETCH mc.aiSupport ai
         WHERE mc.id = :id AND mc.isDeleted = false
     """)
