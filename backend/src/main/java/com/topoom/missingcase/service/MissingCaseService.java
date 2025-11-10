@@ -14,6 +14,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.util.List;
@@ -118,7 +119,15 @@ public class MissingCaseService {
             aiSupport = MissingCaseDetailResponse.AiSupport.builder()
                     .top1Desc(mc.getAiSupport().getTop1Desc())
                     .top2Desc(mc.getAiSupport().getTop2Desc())
+                    .speed(mc.getAiSupport().getSpeed()) // 임시
                     .infoItems(parseJson(mc.getAiSupport().getInfoItems()))
+                    .build();
+        } else {
+            aiSupport = MissingCaseDetailResponse.AiSupport.builder()
+                    .top1Desc("임시1")
+                    .top2Desc("임시2")
+                    .speed(new BigDecimal("3.14")) // 임시
+                    .infoItems("임시")
                     .build();
         }
 

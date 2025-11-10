@@ -3,10 +3,13 @@ package com.topoom.missingcase.entity;
 import com.topoom.common.BaseTimeEntity;
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.Fetch;
+import org.hibernate.annotations.FetchMode;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Set;
 
 @Entity
 @Table(name = "missing_case")
@@ -21,28 +24,28 @@ public class MissingCase extends BaseTimeEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "person_name", nullable = false)
+    @Column(name = "person_name")
     private String personName;
 
-    @Column(name = "target_type", nullable = false)
+    @Column(name = "target_type")
     private String targetType;
 
-    @Column(name = "age_at_time", nullable = false)
+    @Column(name = "age_at_time")
     private Short ageAtTime;
 
-    @Column(name = "current_age", nullable = false)
+    @Column(name = "current_age")
     private Short currentAge;
 
-    @Column(nullable = false)
+    @Column
     private String gender;
 
     @Column
     private String nationality;
 
-    @Column(name = "occurred_at", nullable = false)
+    @Column(name = "occurred_at")
     private LocalDateTime occurredAt;
 
-    @Column(name = "occurred_location", columnDefinition = "TEXT", nullable = false)
+    @Column(name = "occurred_location", columnDefinition = "TEXT")
     private String occurredLocation;
 
     @Column(precision = 9, scale = 6)
@@ -51,22 +54,22 @@ public class MissingCase extends BaseTimeEntity {
     @Column(precision = 9, scale = 6)
     private BigDecimal longitude;
 
-    @Column(name = "height_cm", nullable = false)
+    @Column(name = "height_cm")
     private Short heightCm;
 
-    @Column(name = "weight_kg", nullable = false)
+    @Column(name = "weight_kg")
     private Short weightKg;
 
-    @Column(name = "body_type", nullable = false)
+    @Column(name = "body_type")
     private String bodyType;
 
-    @Column(name = "face_shape", nullable = false)
+    @Column(name = "face_shape")
     private String faceShape;
 
-    @Column(name = "hair_color", nullable = false)
+    @Column(name = "hair_color")
     private String hairColor;
 
-    @Column(name = "hair_style", nullable = false)
+    @Column(name = "hair_style")
     private String hairStyle;
 
     @Column(name = "clothing_desc")
@@ -99,15 +102,16 @@ public class MissingCase extends BaseTimeEntity {
     private boolean isDeleted = false;
 
     @OneToMany(mappedBy = "missingCase", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<CaseFile> files;
+    @Fetch(FetchMode.SUBSELECT)
+    private Set<CaseFile> files;
 
     @OneToMany(mappedBy = "missingCase", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<CaseContact> contacts;
+    private Set<CaseContact> contacts;
 
     @OneToOne(mappedBy = "missingCase", cascade = CascadeType.ALL, orphanRemoval = true)
     private CaseAiSupport aiSupport;
 
     @OneToMany(mappedBy = "missingCase", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<CaseReport> reports;
+    private Set<CaseReport> reports;
 
 }

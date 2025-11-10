@@ -55,7 +55,7 @@ public class CaseFile extends BaseTimeEntity {
     @Column(name = "source_url", columnDefinition = "TEXT")
     private String sourceUrl;
 
-    @Column(name = "source_title", nullable = false)
+    @Column(name = "source_title")
     private String sourceTitle;
 
     @Column(name = "source_seq", nullable = false)
