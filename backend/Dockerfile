@@ -4,7 +4,19 @@ WORKDIR /app
 
 ENV TZ=Asia/Seoul
 
-RUN apk add --no-cache curl
+# Install dependencies for Chrome/Chromium
+RUN apk add --no-cache \
+    curl \
+    chromium \
+    chromium-chromedriver \
+    font-noto \
+    font-noto-cjk \
+    && rm -rf /var/cache/apk/*
+
+# Set Chrome/Chromium environment variables
+ENV CHROME_BIN=/usr/bin/chromium-browser \
+    CHROME_PATH=/usr/lib/chromium/ \
+    CHROMIUM_FLAGS="--no-sandbox --disable-dev-shm-usage --disable-gpu"
 
 COPY build/libs/*-SNAPSHOT.jar app.jar
 
