@@ -1,3 +1,4 @@
+import { useGAPageView } from './hooks/useGAPageView';
 import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom';
 import TopBar from './components/common/molecules/TopBar/TopBar';
 import MobileTopBar from './components/common/molecules/MobileTopBar/MobileTopBar';
@@ -12,6 +13,7 @@ function AppContent() {
   const isMobile = useIsMobile(1024);
   const location = useLocation();
   const isReportPage = location.pathname === '/report';
+  useGAPageView(); 
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', height: '100dvh', width: '100%', overflow: 'hidden' }}>
