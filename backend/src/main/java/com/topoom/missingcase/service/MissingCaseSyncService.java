@@ -70,8 +70,8 @@ public class MissingCaseSyncService {
                 missingCase.setPersonName(item.getNm());
                 missingCase.setGender(item.getSexdstnDscd());
                 missingCase.setNationality(item.getNltyDscd());
-                if (item.getAge() != null) missingCase.setAgeAtTime(item.getAge().shortValue());
-                if (item.getAgeNow() != null) missingCase.setCurrentAge(item.getAgeNow().shortValue());
+                if (item.getAge() != null) missingCase.setAgeAtTime(item.getAge());
+                if (item.getAgeNow() != null) missingCase.setCurrentAge(item.getAgeNow());
                 missingCase.setOccurredLocation(item.getOccrAdres());
 
                 if (item.getOccrde() != null && item.getOccrde().matches("\\d{8}")) {
@@ -88,8 +88,6 @@ public class MissingCaseSyncService {
                             missingCase.setLongitude(BigDecimal.valueOf(coords[1]));
                         });
 
-                if (item.getHeight() != null) missingCase.setHeightCm(item.getHeight().shortValue());
-                if (item.getBdwgh() != null) missingCase.setWeightKg(item.getBdwgh().shortValue());
                 missingCase.setHairColor(item.getHaircolrDscd());
                 missingCase.setFaceShape(item.getFaceshpeDscd());
                 missingCase.setBodyType(item.getFrmDscd());
