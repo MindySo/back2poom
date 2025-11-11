@@ -63,13 +63,14 @@ public class FinalizeConsumer {
                 CaseFile caseFile = CaseFile.builder()
                     .missingCase(savedCase)
                     .s3Key(img.getS3Key())
-                    .s3Url(img.getS3Url())
-                    .fileType(mapImageTypeToCaseFileType(img.getType()))
+                    .ioRole(CaseFile.IoRole.INPUT)
+                    .purpose(mapImageTypeToPurpose(img.getType()))
+                    .contentKind(CaseFile.ContentKind.IMAGE)
                     .sourceUrl(message.getBlogUrl())
                     .sourceTitle(message.getTitle())
                     .sourceSeq(i + 1)
                     .isLastImage(img.getType() == ImageInfo.ImageType.TEXT_CAPTURE)
-                    .uploadedAt(LocalDateTime.now())
+                    .crawledAt(LocalDateTime.now())
                     .build();
 
                 caseFileRepository.save(caseFile);
@@ -189,16 +190,16 @@ public class FinalizeConsumer {
     }
 
     /**
-     * ImageType을 CaseFile의 fileType으로 매핑
+     * ImageType을 CaseFile의 Purpose로 매핑
      */
-    private String mapImageTypeToCaseFileType(ImageInfo.ImageType imageType) {
+    private CaseFile.Purpose mapImageTypeToPurpose(ImageInfo.ImageType imageType) {
         if (imageType == null) {
-            return "UNKNOWN";
+            return CaseFile.Purpose.SAFE;
         }
         return switch (imageType) {
-            case FACE -> "FACE";
-            case BODY -> "BODY";
-            case TEXT_CAPTURE -> "TEXT_CAPTURE";
+            case FACE -> CaseFile.Purpose.FACE;
+            case BODY -> CaseFile.Purpose.FULL_BODY;
+            case TEXT_CAPTURE -> CaseFile.Purpose.OCR;
         };
     }
 

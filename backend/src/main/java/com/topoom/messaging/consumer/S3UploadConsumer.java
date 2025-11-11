@@ -8,6 +8,7 @@ import com.topoom.missingcase.entity.CaseFile;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import java.nio.file.Files;
@@ -28,6 +29,9 @@ public class S3UploadConsumer {
 
     private final MessageProducer messageProducer;
     private final BlogS3ImageUploadService blogS3ImageUploadService;
+
+    @Value("${spring.cloud.aws.s3.bucket}")
+    private String bucketName;
 
     @RabbitListener(queues = RabbitMQConfig.S3_UPLOAD_QUEUE, concurrency = "3-5")
     public void consumeS3Upload(ClassificationMessage message) {
@@ -53,10 +57,14 @@ public class S3UploadConsumer {
                         img.getType() == ClassifiedImage.ImageType.TEXT_CAPTURE
                     );
 
+                    // S3 URL 생성 (bucket + key)
+                    String s3Url = String.format("https://%s.s3.amazonaws.com/%s",
+                        bucketName, uploaded.getS3Key());
+
                     uploadedImages.add(ImageInfo.builder()
                         .type(mapClassifiedImageTypeToImageInfoType(img.getType()))
                         .s3Key(uploaded.getS3Key())
-                        .s3Url(uploaded.getS3Url())
+                        .s3Url(s3Url)
                         .build());
 
                     // 마지막 이미지 (TEXT_CAPTURE) 확인
