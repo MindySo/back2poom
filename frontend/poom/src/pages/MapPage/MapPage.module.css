@@ -21,3 +21,11 @@
   left: 1rem;
   pointer-events: none;
 }
+
+.myLocationButtonWrapper {
+  position: fixed;
+  bottom: 340px;
+  right: 1rem;
+  z-index: 1000;
+  pointer-events: auto;
+}

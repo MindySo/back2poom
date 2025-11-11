@@ -83,7 +83,33 @@ interface KakaoInfoWindowConstructor {
   new (options?: KakaoInfoWindowOptions): KakaoInfoWindow;
 }
 
+interface KakaoCircle {
+  setMap(map: KakaoMap | null): void;
+  setCenter(latlng: KakaoLatLng): void;
+  setRadius(radius: number): void;
+  setStrokeColor(color: string): void;
+  setStrokeOpacity(opacity: number): void;
+  setStrokeWeight(weight: number): void;
+  setFillColor(color: string): void;
+  setFillOpacity(opacity: number): void;
+}
+
+interface KakaoCircleOptions {
+  center: KakaoLatLng;
+  radius: number;
+  strokeColor?: string;
+  strokeOpacity?: number;
+  strokeWeight?: number;
+  fillColor?: string;
+  fillOpacity?: number;
+}
+
+interface KakaoCircleConstructor {
+  new (options: KakaoCircleOptions): KakaoCircle;
+}
+
 interface KakaoMaps {
+  Point: any;
   load(callback: () => void): void;
   Map: KakaoMapConstructor;
   LatLng: KakaoLatLngConstructor;
@@ -91,6 +117,7 @@ interface KakaoMaps {
   Size: KakaoSizeConstructor;
   MarkerImage: KakaoMarkerImageConstructor;
   InfoWindow: KakaoInfoWindowConstructor;
+  Circle: KakaoCircleConstructor;
   event: {
     addListener(target: any, type: string, callback: (...args: any[]) => void): void;
     removeListener(target: any, type: string, callback: (...args: any[]) => void): void;

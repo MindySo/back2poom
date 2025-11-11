@@ -1,6 +1,7 @@
 import React from 'react';
 import Text from '../../common/atoms/Text';
 import Badge from '../../common/atoms/Badge';
+import { useElapsedTime } from '../../../hooks';
 import styles from './RecentMissing.module.css';
 
 export interface Badge {
@@ -15,6 +16,8 @@ export interface RecentMissingProps {
   gender: string;
   age: number;
   location: string;
+  occurredAt: string;
+  targetType?: string;
   className?: string;
   onClick?: () => void;
 }
@@ -26,9 +29,13 @@ const RecentMissing: React.FC<RecentMissingProps> = ({
   gender,
   age,
   location,
+  occurredAt,
+  targetType,
   className = '',
   onClick,
 }) => {
+  // 실종 경과 시간을 실시간으로 업데이트
+  const elapsedTime = useElapsedTime(occurredAt);
   return (
     <div
       className={`${styles.card} ${className}`}
@@ -48,10 +55,24 @@ const RecentMissing: React.FC<RecentMissingProps> = ({
       <div className={styles.infoSection}>
         {/* 라벨 */}
         <div className={styles.labelContainer}>
-          {badges.map((badge, index) => (
+          <Badge
+            variant="time"
+            size="small"
+          >
+            {elapsedTime}
+          </Badge>
+          {targetType && (
+            <Badge
+              variant="feature"
+              size="small"
+            >
+              {targetType}
+            </Badge>
+          )}
+          {badges.slice(1).map((badge, index) => (
             <Badge
               key={index}
-              variant={badge.variant || 'time'}
+              variant={badge.variant || 'feature'}
               size="small"
             >
               {badge.text}

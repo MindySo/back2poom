@@ -6,6 +6,7 @@ interface MobileStatusBoardProps extends Omit<StatusBoardProps, 'className' | 'd
   data?: StatusBoardProps['data'];
   textColor?: StatusBoardProps['textColor'];
   borderColor?: StatusBoardProps['borderColor'];
+  visible?: boolean;
 }
 
 // 기본 데이터
@@ -23,6 +24,7 @@ const MobileStatusBoard: React.FC<MobileStatusBoardProps> = ({
   textColor = 'white',
   borderColor = 'transparent',
   padding = '1.5rem 0 1.5rem 2.5rem',
+  visible = true,
 }) => {
   const [scale, setScale] = useState(MIN_SCALE);
   const [isResizing, setIsResizing] = useState(false);
@@ -97,10 +99,10 @@ const MobileStatusBoard: React.FC<MobileStatusBoardProps> = ({
   return (
     <div
       ref={containerRef}
-      className={styles.container}
+      className={`${styles.container} ${!visible ? styles.hidden : ''}`}
       style={{
-        transform: `scale(${scale})`,
-        opacity: isResizing ? 0.8 : 1,
+        transform: visible ? `scale(${scale})` : `translate(-100%, -100%) scale(${scale * 0.8})`,
+        opacity: visible ? (isResizing ? 0.8 : 1) : 0,
       }}
     >
       {/* 콘텐츠 */}
