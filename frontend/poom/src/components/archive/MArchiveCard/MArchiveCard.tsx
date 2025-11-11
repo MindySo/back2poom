@@ -209,33 +209,21 @@ const MArchiveCard: React.FC<MArchiveCardProps> = ({ personId }) => {
                     </div>
                   </div>
                   
-                  {/* 오른쪽: 우선순위와 미상 정보 */}
+                  {/* 오른쪽: 우선순위 */}
                   <div className={styles['m-archive-card__aiInfoWrapper']}>
                     <div className={styles['m-archive-card__aiInfo']}>
                       {aiSupport && (
-                        <>
-                          <div className={styles['m-archive-card__aiInfoSection']}>
-                            <Text as="div" size="xs" weight="bold" className={styles['m-archive-card__aiInfoLabel']}>미상 정보</Text>
-                            {aiSupport.infoItems?.map((item, index) => (
-                              <div key={index} className={styles['m-archive-card__aiInfoItem']}>
-                                <Text as="div" size="xs" color="gray">{item.label}</Text>
-                                <Text as="div" size="xs">{item.value}</Text>
-                              </div>
-                            ))}
+                        <div className={styles['m-archive-card__aiInfoSection']}>
+                          <Text as="div" size="xs" weight="bold" className={styles['m-archive-card__aiInfoLabel']}>우선순위</Text>
+                          <div className={styles['m-archive-card__aiInfoItem']}>
+                            <Text as="div" size="xs" color="gray">1순위</Text>
+                            <Text as="div" size="xs">{aiSupport.top1Desc || '-'}</Text>
                           </div>
-                          
-                          <div className={styles['m-archive-card__aiInfoSection']}>
-                            <Text as="div" size="xs" weight="bold" className={styles['m-archive-card__aiInfoLabel']}>우선순위</Text>
-                            <div className={styles['m-archive-card__aiInfoItem']}>
-                              <Text as="div" size="xs" color="gray">1순위</Text>
-                              <Text as="div" size="xs">{aiSupport.top1Desc || '-'}</Text>
-                            </div>
-                            <div className={styles['m-archive-card__aiInfoItem']}>
-                              <Text as="div" size="xs" color="gray">2순위</Text>
-                              <Text as="div" size="xs">{aiSupport.top2Desc || '-'}</Text>
-                            </div>
+                          <div className={styles['m-archive-card__aiInfoItem']}>
+                            <Text as="div" size="xs" color="gray">2순위</Text>
+                            <Text as="div" size="xs">{aiSupport.top2Desc || '-'}</Text>
                           </div>
-                        </>
+                        </div>
                       )}
                       {!aiSupport && (
                         <div className={styles['m-archive-card__aiInfoSection']}>

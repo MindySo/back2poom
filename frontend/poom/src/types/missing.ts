@@ -14,6 +14,7 @@ export interface AISupportInfo {
     label: string;
     value: string;
   }>;
+  
 }
 
 export interface CaseContact {

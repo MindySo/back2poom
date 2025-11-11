@@ -204,29 +204,17 @@ const ArchiveDetailPopup: React.FC<ArchiveDetailPopupProps> = ({ personId, initi
             <div className={styles['popup-ai-card']}>
             <div className={styles['popup-ai-info']}>
               {aiSupport && (
-                <>
-                  <div className={styles['popup-ai-info-section']}>
-                    <Text as="div" size="sm" weight="bold" className={styles['popup-ai-info-label']}>미상 정보</Text>
-                    {aiSupport.infoItems?.map((item, index) => (
-                      <div key={index} className={styles['popup-ai-info-item']}>
-                        <Text as="div" size="xs" color="gray">{item.label}</Text>
-                        <Text as="div" size="sm">{item.value}</Text>
-                      </div>
-                    ))}
+                <div className={styles['popup-ai-info-section']}>
+                  <Text as="div" size="sm" weight="bold" className={styles['popup-ai-info-label']}>우선순위</Text>
+                  <div className={styles['popup-ai-info-item']}>
+                    <Text as="div" size="xs" color="gray">1순위</Text>
+                    <Text as="div" size="sm">{aiSupport.top1Desc || '-'}</Text>
                   </div>
-                  
-                  <div className={styles['popup-ai-info-section']}>
-                    <Text as="div" size="sm" weight="bold" className={styles['popup-ai-info-label']}>우선순위</Text>
-                    <div className={styles['popup-ai-info-item']}>
-                      <Text as="div" size="xs" color="gray">1순위</Text>
-                      <Text as="div" size="sm">{aiSupport.top1Desc || '-'}</Text>
-                    </div>
-                    <div className={styles['popup-ai-info-item']}>
-                      <Text as="div" size="xs" color="gray">2순위</Text>
-                      <Text as="div" size="sm">{aiSupport.top2Desc || '-'}</Text>
-                    </div>
+                  <div className={styles['popup-ai-info-item']}>
+                    <Text as="div" size="xs" color="gray">2순위</Text>
+                    <Text as="div" size="sm">{aiSupport.top2Desc || '-'}</Text>
                   </div>
-                </>
+                </div>
               )}
               {!aiSupport && (
                 <div className={styles['popup-ai-info-section']}>
