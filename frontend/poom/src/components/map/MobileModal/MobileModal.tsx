@@ -29,6 +29,7 @@ const MobileModal = forwardRef<MobileModalRef, MobileModalProps>(({ isOpen, onCl
   const modalRef = useRef<HTMLDivElement>(null);
   const handleRef = useRef<HTMLDivElement>(null);
   const contentRef = useRef<HTMLDivElement>(null);
+  const [isOverlayClickable, setIsOverlayClickable] = useState(true);
 
   // 실종자 상세 정보 가져오기
   const { data: detailData, isLoading: isDetailLoading } = useMissingDetail(personId || null);
@@ -60,6 +61,7 @@ const MobileModal = forwardRef<MobileModalRef, MobileModalProps>(({ isOpen, onCl
     snapToNearestState,
     cycleModalState,
     collapseToInitial: collapseModalToInitial,
+    expandToHalf,
     expandToFull,
     startClosing,
   } = useModalStateManagement({
@@ -84,7 +86,7 @@ const MobileModal = forwardRef<MobileModalRef, MobileModalProps>(({ isOpen, onCl
   // 모달 열기/닫기 애니메이션
   useEffect(() => {
     if (isOpen) {
-      setExpandedHeight(HALF_HEIGHT);
+      expandToHalf(); // 모달 열릴 때 half 상태로
     } else if (!isOpen && expandedHeight > INITIAL_HEIGHT) {
       // 닫기 애니메이션 시작
       startClosing();
@@ -95,6 +97,16 @@ const MobileModal = forwardRef<MobileModalRef, MobileModalProps>(({ isOpen, onCl
   useEffect(() => {
     onStateChange?.(modalState);
   }, [modalState, onStateChange]);
+
+  // modalState가 변경될 때 오버레이 클릭 임시 비활성화
+  useEffect(() => {
+    // 상태 변경 시 일시적으로 클릭 비활성화하여 의도치 않은 중복 클릭 방지
+    setIsOverlayClickable(false);
+    const timer = setTimeout(() => {
+      setIsOverlayClickable(true);
+    }, 300); // 300ms 후 클릭 가능 (애니메이션 시간 고려)
+    return () => clearTimeout(timer);
+  }, [modalState]);
 
   // ref를 통해 외부에서 호출 가능한 함수 expose
   useImperativeHandle(ref, () => ({
@@ -109,15 +121,26 @@ const MobileModal = forwardRef<MobileModalRef, MobileModalProps>(({ isOpen, onCl
     }, 300);
   };
 
-  // 배경 클릭 시 닫기
-  const handleBackdropClick = () => {
-    closeModalCompletely();
+  // 배경 클릭 시 initial로 축소
+  const handleBackdropClick = (e: React.MouseEvent) => {
+    e.stopPropagation(); // 이벤트 전파 방지
+    if (!isOverlayClickable) return;
+
+    // full 상태에서 배경 클릭 시 initial로 축소
+    if (modalState === 'full') {
+      collapseModalToInitial();
+      onOverlayClick?.();
+    }
   };
 
-  // 손잡이만 보일 때 지도 클릭 시 완전히 닫기
-  const handleOverlayClick = () => {
-    if (modalState === 'initial') {
-      closeModalCompletely();
+  // 오버레이 클릭 시 동작 (full 상태에서만 호출됨)
+  const handleOverlayClick = (e: React.MouseEvent) => {
+    e.stopPropagation(); // 이벤트 전파 방지
+    if (!isOverlayClickable) return;
+
+    // full 상태에서 지도 클릭 시 initial로 축소
+    if (modalState === 'full') {
+      collapseModalToInitial();
       onOverlayClick?.();
     }
   };
@@ -136,11 +159,18 @@ const MobileModal = forwardRef<MobileModalRef, MobileModalProps>(({ isOpen, onCl
 
   return (
     <>
-      {/* 오버레이 (손잡이만 보일 때 지도 클릭 감지) */}
-      {isOpen && modalState === 'initial' && (
+      {/* 오버레이 (full 상태에서만 렌더링) */}
+      {isOpen && modalState === 'full' && (
         <div
           className={styles.overlay}
           onClick={handleOverlayClick}
+          onTouchEnd={(e) => {
+            e.stopPropagation(); // 터치 이벤트 전파 방지
+            handleOverlayClick(e as any);
+          }}
+          style={{
+            pointerEvents: isOverlayClickable ? 'auto' : 'none',
+          }}
         />
       )}
 
@@ -148,6 +178,10 @@ const MobileModal = forwardRef<MobileModalRef, MobileModalProps>(({ isOpen, onCl
       <div
         className={`${styles.backdrop} ${isClosing ? styles.backdropClose : ''}`}
         onClick={handleBackdropClick}
+        onTouchEnd={(e) => {
+          e.stopPropagation(); // 터치 이벤트 전파 방지
+          handleBackdropClick(e as any);
+        }}
         style={{
           opacity: modalState === 'full' ? 0.5 : 0,
           pointerEvents: modalState === 'full' ? 'auto' : 'none',
@@ -162,7 +196,7 @@ const MobileModal = forwardRef<MobileModalRef, MobileModalProps>(({ isOpen, onCl
           style={{
             height: expandedHeight,
             transform: `translateY(${currentTranslate}px)`,
-            transition: isDragging ? 'none' : 'height 0.3s ease, transform 0.3s ease',
+            transition: (isDragging && currentTranslate !== 0) ? 'none' : 'height 0.3s ease, transform 0.3s ease',
           }}
         >
         {/* 손잡이 */}

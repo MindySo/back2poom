@@ -53,6 +53,12 @@ export const useModalStateManagement = ({
     setModalState('initial');
   };
 
+  // 중간 높이로 확장
+  const expandToHalf = () => {
+    setExpandedHeight(halfHeight);
+    setModalState('half');
+  };
+
   // 최대 높이로 확장
   const expandToFull = () => {
     setExpandedHeight(fullHeight);
@@ -76,6 +82,7 @@ export const useModalStateManagement = ({
     snapToNearestState,
     cycleModalState,
     collapseToInitial,
+    expandToHalf,
     expandToFull,
     startClosing,
   };

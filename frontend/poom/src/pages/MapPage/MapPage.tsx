@@ -85,17 +85,15 @@ const MapPage: React.FC = () => {
     setMap(mapInstance);
   }, [isLoaded]);
 
-  // 모바일에서 지도 탭 감지하여 모달 내리기
+  // 모바일에서 지도 탭 감지 (initial/half 상태일 때)
   useEffect(() => {
     if (!isMobile || !mapRef.current) return;
-    if (mobileModalState === 'initial') return; // 이미 내려가있으면 무시
+    // full 상태에서는 MobileModal의 오버레이가 처리하므로 여기서는 제외
+    if (mobileModalState === 'full') return;
 
     const mapElement = mapRef.current;
 
     const handleTouchStart = (e: TouchEvent) => {
-      // 모달이 올라와있을 때만 동작
-      if (mobileModalState !== 'half' && mobileModalState !== 'full') return;
-
       tapStartRef.current = {
         x: e.touches[0].clientX,
         y: e.touches[0].clientY,
@@ -104,9 +102,14 @@ const MapPage: React.FC = () => {
     };
 
     const handleTouchEnd = (e: TouchEvent) => {
-      // 모달이 올라와있을 때만 동작
-      if (mobileModalState !== 'half' && mobileModalState !== 'full') return;
       if (!tapStartRef.current) return;
+
+      // 이벤트 타겟이 모달 컨테이너면 무시
+      const target = e.target as HTMLElement;
+      if (target.closest('[class*="modalContainer"]')) {
+        tapStartRef.current = null;
+        return;
+      }
 
       const touchEnd = e.changedTouches[0];
       const deltaX = Math.abs(touchEnd.clientX - tapStartRef.current.x);
@@ -115,16 +118,22 @@ const MapPage: React.FC = () => {
 
       // 탭으로 판단 (이동 거리 10px 미만, 시간 300ms 미만)
       if (deltaX < 10 && deltaY < 10 && deltaTime < 300) {
-        mobileModalRef.current?.collapseToInitial(); // 모달을 initial 상태로
+        if (mobileModalState === 'half') {
+          // half 상태에서는 initial로
+          mobileModalRef.current?.collapseToInitial();
+        } else if (mobileModalState === 'initial') {
+          // initial 상태에서는 완전히 닫기
+          setIsTestModalOpen(false);
+          setSelectedMissingId(null);
+          setSelectedRadiusPosition(null);
+          setSelectedRadiusValue(0);
+        }
       }
 
       tapStartRef.current = null;
     };
 
     const handleMouseDown = (e: MouseEvent) => {
-      // 모달이 올라와있을 때만 동작
-      if (mobileModalState !== 'half' && mobileModalState !== 'full') return;
-
       tapStartRef.current = {
         x: e.clientX,
         y: e.clientY,
@@ -133,9 +142,14 @@ const MapPage: React.FC = () => {
     };
 
     const handleMouseUp = (e: MouseEvent) => {
-      // 모달이 올라와있을 때만 동작
-      if (mobileModalState !== 'half' && mobileModalState !== 'full') return;
       if (!tapStartRef.current) return;
+
+      // 이벤트 타겟이 모달 컨테이너면 무시
+      const target = e.target as HTMLElement;
+      if (target.closest('[class*="modalContainer"]')) {
+        tapStartRef.current = null;
+        return;
+      }
 
       const deltaX = Math.abs(e.clientX - tapStartRef.current.x);
       const deltaY = Math.abs(e.clientY - tapStartRef.current.y);
@@ -143,7 +157,16 @@ const MapPage: React.FC = () => {
 
       // 탭으로 판단 (이동 거리 10px 미만, 시간 300ms 미만)
       if (deltaX < 10 && deltaY < 10 && deltaTime < 300) {
-        mobileModalRef.current?.collapseToInitial(); // 모달을 initial 상태로
+        if (mobileModalState === 'half') {
+          // half 상태에서는 initial로
+          mobileModalRef.current?.collapseToInitial();
+        } else if (mobileModalState === 'initial') {
+          // initial 상태에서는 완전히 닫기
+          setIsTestModalOpen(false);
+          setSelectedMissingId(null);
+          setSelectedRadiusPosition(null);
+          setSelectedRadiusValue(0);
+        }
       }
 
       tapStartRef.current = null;
