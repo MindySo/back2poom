@@ -507,7 +507,6 @@ public class IntegratedBlogCrawlingService {
                             .sourceUrl(info.getPostUrl())
                             .urlHash(urlHash)
                             .lastSeenAt(info.getCrawledAt())
-                            .createdAt(LocalDateTime.now())
                             .build();
                     BlogPost savedPost = blogPostRepository.save(entity);
                     saved.add(savedPost);

@@ -147,7 +147,7 @@ public class CaseOcrService {
 
                 // age 추출
                 if (missingCase.getCurrentAge() == null || missingCase.getCurrentAge() == 0) {
-                    short age = Short.parseShort(firstLineMatcher.group(3));
+                    int age = Integer.parseInt(firstLineMatcher.group(3));
                     missingCase.setCurrentAge(age);
                     missingCase.setAgeAtTime(age);
                     updated = true;
@@ -174,7 +174,7 @@ public class CaseOcrService {
             // 나이 추출
             Matcher ageMatcher = AGE_PATTERN.matcher(ocrText);
             if (ageMatcher.find() && (missingCase.getCurrentAge() == null || missingCase.getCurrentAge() == 0)) {
-                short age = Short.parseShort(ageMatcher.group(1));
+                int age = Integer.parseInt(ageMatcher.group(1));
                 missingCase.setCurrentAge(age);
                 missingCase.setAgeAtTime(age); // 실종 당시 나이도 동일하게 설정
                 updated = true;
@@ -217,7 +217,7 @@ public class CaseOcrService {
             // 신장 추출
             Matcher heightMatcher = HEIGHT_PATTERN.matcher(ocrText);
             if (heightMatcher.find() && (missingCase.getHeightCm() == null || missingCase.getHeightCm() == 0)) {
-                short height = Short.parseShort(heightMatcher.group(1));
+                int height = Integer.parseInt(heightMatcher.group(1));
                 missingCase.setHeightCm(height);
                 updated = true;
                 log.info("신장 업데이트: caseId={}, height={}cm", caseId, height);
@@ -226,7 +226,7 @@ public class CaseOcrService {
             // 체중 추출
             Matcher weightMatcher = WEIGHT_PATTERN.matcher(ocrText);
             if (weightMatcher.find() && (missingCase.getWeightKg() == null || missingCase.getWeightKg() == 0)) {
-                short weight = Short.parseShort(weightMatcher.group(1));
+                int weight = Integer.parseInt(weightMatcher.group(1));
                 missingCase.setWeightKg(weight);
                 updated = true;
                 log.info("체중 업데이트: caseId={}, weight={}kg", caseId, weight);

@@ -31,10 +31,10 @@ public class MissingCase extends BaseTimeEntity {
     private String targetType;
 
     @Column(name = "age_at_time")
-    private Short ageAtTime;
+    private Integer ageAtTime;
 
     @Column(name = "current_age")
-    private Short currentAge;
+    private Integer currentAge;
 
     @Column
     private String gender;
@@ -55,10 +55,10 @@ public class MissingCase extends BaseTimeEntity {
     private BigDecimal longitude;
 
     @Column(name = "height_cm")
-    private Short heightCm;
+    private Integer heightCm;
 
     @Column(name = "weight_kg")
-    private Short weightKg;
+    private Integer weightKg;
 
     @Column(name = "body_type")
     private String bodyType;
