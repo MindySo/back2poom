@@ -3,6 +3,7 @@ package com.topoom.missingcase.dto;
 import lombok.*;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.time.ZonedDateTime;
 import java.util.List;
 
@@ -19,11 +20,11 @@ public class MissingCaseListResponse {
     private Integer ageAtTime;
     private Integer currentAge;
     private String gender;
-    private ZonedDateTime occurredAt;     // ISO 8601 (UTC 표준)
+    private LocalDateTime occurredAt;     // ISO 8601 (UTC 표준)
     private String occurredLocation;
     private BigDecimal latitude;
     private BigDecimal longitude;
-    private ZonedDateTime crawledAt;
+    private LocalDateTime crawledAt;
     private List<String> phoneNumber;
 
     private MainImage mainImage;

@@ -19,9 +19,9 @@ public interface MissingCaseRepository extends JpaRepository<MissingCase, Long> 
         FROM MissingCase mc
         LEFT JOIN FETCH mc.mainFile mf
         WHERE mc.isDeleted = false
-        AND mc.aiSupport IS NOT NULL
         ORDER BY mc.occurredAt DESC
     """)
+        /* AND mc.aiSupport IS NOT NULL */
     List<MissingCase> findAllWithMainFile();
 
     @Query("""
