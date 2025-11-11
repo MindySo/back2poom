@@ -1,6 +1,7 @@
 package com.topoom.config;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.MediaType;
@@ -11,7 +12,10 @@ import org.springframework.web.reactive.function.client.WebClient;
 
 @Configuration
 public class WebClientConfig {
-    
+
+    @Value("${ocr.server.url}")
+    private String ocrServerUrl;
+
     @Bean
     public WebClient webClient(ObjectMapper objectMapper) {
         ExchangeStrategies strategies = ExchangeStrategies.builder()
@@ -32,11 +36,11 @@ public class WebClientConfig {
                 .exchangeStrategies(strategies)
                 .build();
     }
-    
+
     @Bean("ocrWebClient")
     public WebClient ocrWebClient() {
         return WebClient.builder()
-                .baseUrl("http://localhost:8081/api/ocr")
+                .baseUrl(ocrServerUrl + "/api/ocr")
                 .build();
     }
 }
