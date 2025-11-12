@@ -6,6 +6,8 @@ import styles from './ArchiveDetailPopup.module.css';
 import Badge from '../../common/atoms/Badge';
 import Text from '../../common/atoms/Text';
 import Button from '../../common/atoms/Button';
+import ImageCarousel from '../../common/molecules/ImageCarousel/ImageCarousel';
+import type { ImageFile } from '../../../types/missing';
 import tempImg from '../../../assets/TempImg.png';
 import poomLogo from '../../../assets/poom_logo.png';
 
@@ -18,6 +20,8 @@ export interface ArchiveDetailPopupProps {
 const ArchiveDetailPopup: React.FC<ArchiveDetailPopupProps> = ({ personId, initialElapsedTime, onClose }) => {
   const navigate = useNavigate();
   const { data: person, isLoading, error } = useMissingDetail(personId);
+  const [carouselOpen, setCarouselOpen] = React.useState(false);
+  const [initialImageIndex, setInitialImageIndex] = React.useState(0);
   
   // API 데이터로 경과 시간 계산 (person.crawledAt이 있을 때만 유효한 값 계산)
   const calculatedElapsedTime = useElapsedTime(person?.crawledAt || '');
@@ -92,6 +96,43 @@ const ArchiveDetailPopup: React.FC<ArchiveDetailPopupProps> = ({ personId, initi
   const aiImageUrl = outputImages && outputImages.length > 0 ? outputImages[0].url : tempImg;
   const thumbnailImages = inputImages?.slice(0, 4) || [];
 
+  // 모든 이미지를 배열로 수집
+  const getAllImages = (): ImageFile[] => {
+    const images: ImageFile[] = [];
+    
+    // 메인 이미지
+    if (mainImage) {
+      images.push(mainImage);
+    }
+    
+    // 추가 등록 사진들
+    if (inputImages && inputImages.length > 0) {
+      images.push(...inputImages);
+    }
+    
+    // AI 서포트 이미지들
+    if (outputImages && outputImages.length > 0) {
+      images.push(...outputImages);
+    }
+    
+    return images;
+  };
+
+  // 이미지 클릭 핸들러 - 이미지 URL로 인덱스 찾기
+  const handleImageClick = (imageUrl: string) => {
+    const allImages = getAllImages();
+    const index = allImages.findIndex(img => img.url === imageUrl);
+    if (index !== -1) {
+      setInitialImageIndex(index);
+      setCarouselOpen(true);
+    }
+  };
+
+  // 캐러셀 닫기 핸들러
+  const handleCloseCarousel = () => {
+    setCarouselOpen(false);
+  };
+
   // 배경 클릭 시 닫기
   const handleOverlayClick = (e: React.MouseEvent<HTMLDivElement>) => {
     if (e.target === e.currentTarget) {
@@ -120,11 +161,20 @@ const ArchiveDetailPopup: React.FC<ArchiveDetailPopupProps> = ({ personId, initi
           {/* 왼쪽: 이미지 섹션 */}
           <div className={styles['popup-images']}>
             <div className={styles['popup-main-image']}>
-              <img src={mainImageUrl} alt={personName} />
+              <img 
+                src={mainImageUrl} 
+                alt={personName}
+                onClick={() => mainImage && handleImageClick(mainImage.url)}
+                style={{ cursor: 'pointer' }}
+              />
             </div>
             <div className={styles['popup-thumbnails']}>
               {thumbnailImages.map((img, index) => (
-                <div key={img.fileId || index} className={styles['popup-thumbnail']}>
+                <div 
+                  key={img.fileId || index} 
+                  className={styles['popup-thumbnail']}
+                  onClick={() => img.url && handleImageClick(img.url)}
+                >
                   <img src={img.url || tempImg} alt={`썸네일 ${index + 1}`} />
                 </div>
               ))}
@@ -188,7 +238,12 @@ const ArchiveDetailPopup: React.FC<ArchiveDetailPopupProps> = ({ personId, initi
             <div className={styles['popup-ai-card-wrapper']}>
             <div className={styles['popup-ai-card']}>
               <div className={styles['popup-ai-image']}>
-                <img src={aiImageUrl} alt="AI 생성 이미지" />
+                <img 
+                  src={aiImageUrl} 
+                  alt="AI 생성 이미지"
+                  onClick={() => outputImages && outputImages.length > 0 && handleImageClick(outputImages[0].url)}
+                  style={{ cursor: 'pointer' }}
+                />
               </div>
               <Text as="div" size="xs" color="gray" className={styles['popup-ai-caption']}>
                 ① CCTV 이미지 및 실종자 데이터 기반으로 AI가 예측한 이미지입니다.
@@ -250,6 +305,15 @@ const ArchiveDetailPopup: React.FC<ArchiveDetailPopupProps> = ({ personId, initi
           </Button>
         </div>
       </div>
+
+      {/* 이미지 캐러셀 */}
+      {carouselOpen && person && (
+        <ImageCarousel
+          images={getAllImages()}
+          initialIndex={initialImageIndex}
+          onClose={handleCloseCarousel}
+        />
+      )}
     </div>
   );
 };

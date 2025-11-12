@@ -7,6 +7,8 @@ import logo from '../../../assets/poom_logo.png';
 import { useNavigate } from 'react-router-dom';
 import Text from '../../common/atoms/Text';
 import Badge from '../../common/atoms/Badge';
+import ImageCarousel from '../../common/molecules/ImageCarousel/ImageCarousel';
+import type { ImageFile } from '../../../types/missing';
 
 export interface DashboardProps {
   isOpen: boolean;
@@ -18,6 +20,8 @@ const Dashboard: React.FC<DashboardProps> = ({ isOpen, onClose, missingId }) => 
   const navigate = useNavigate();
   const [isClosing, setIsClosing] = React.useState(false);
   const [shouldRender, setShouldRender] = React.useState(false);
+  const [carouselOpen, setCarouselOpen] = React.useState(false);
+  const [initialImageIndex, setInitialImageIndex] = React.useState(0);
 
   // missingId가 있을 때만 API 호출
   const { data: missingDetail, isLoading } = useMissingDetail(missingId);
@@ -51,17 +55,57 @@ const Dashboard: React.FC<DashboardProps> = ({ isOpen, onClose, missingId }) => 
     onClose();
   };
 
-  if (!shouldRender) return null;
+  // 모든 이미지를 배열로 수집
+  const getAllImages = (): ImageFile[] => {
+    if (!missingDetail) return [];
+    const images: ImageFile[] = [];
+    
+    // 메인 이미지
+    if (missingDetail.mainImage) {
+      images.push(missingDetail.mainImage);
+    }
+    
+    // 추가 등록 사진들
+    if (missingDetail.inputImages && missingDetail.inputImages.length > 0) {
+      images.push(...missingDetail.inputImages);
+    }
+    
+    // AI 서포트 이미지들
+    if (missingDetail.outputImages && missingDetail.outputImages.length > 0) {
+      images.push(...missingDetail.outputImages);
+    }
+    
+    return images;
+  };
+
+  // 이미지 클릭 핸들러 - 이미지 URL로 인덱스 찾기
+  const handleImageClick = (imageUrl: string) => {
+    const allImages = getAllImages();
+    const index = allImages.findIndex(img => img.url === imageUrl);
+    if (index !== -1) {
+      setInitialImageIndex(index);
+      setCarouselOpen(true);
+    }
+  };
+
+  // 캐러셀 닫기 핸들러
+  const handleCloseCarousel = () => {
+    setCarouselOpen(false);
+  };
+
+  if (!shouldRender && !carouselOpen) return null;
 
   return (
-    <div className={styles.dashboardOverlay}>
-      <div
-        className={`${styles.dashboard} ${isClosing ? styles.slideOut : ''}`}
-        style={{
-          backgroundColor: `${theme.colors.beige}CC`, // beige + 투명
-          boxShadow: '0 4px 12px rgba(0, 0, 0, 0.15)',
-        }}
-      >
+    <>
+      {shouldRender && (
+        <div className={styles.dashboardOverlay}>
+          <div
+            className={`${styles.dashboard} ${isClosing ? styles.slideOut : ''}`}
+            style={{
+              backgroundColor: `${theme.colors.beige}CC`, // beige + 투명
+              boxShadow: '0 4px 12px rgba(0, 0, 0, 0.15)',
+            }}
+          >
         {/* Header */}
         <div className={styles.header}>
           <button
@@ -114,6 +158,8 @@ const Dashboard: React.FC<DashboardProps> = ({ isOpen, onClose, missingId }) => 
                           src={missingDetail.mainImage.url}
                           alt={missingDetail.personName}
                           className={styles.mainImage}
+                          onClick={() => missingDetail.mainImage && handleImageClick(missingDetail.mainImage.url)}
+                          style={{ cursor: 'pointer' }}
                         />
                       )}
                     </div>
@@ -122,7 +168,11 @@ const Dashboard: React.FC<DashboardProps> = ({ isOpen, onClose, missingId }) => 
                     <div className={styles.thumbnailScroll}>
                       {missingDetail.inputImages && missingDetail.inputImages.length > 0 && (
                         missingDetail.inputImages.map((img, index) => (
-                          <div key={img.fileId || index} className={styles.thumbnailItem}>
+                          <div 
+                            key={img.fileId || index} 
+                            className={styles.thumbnailItem}
+                            onClick={() => handleImageClick(img.url)}
+                          >
                             <img src={img.url} alt={`추가 사진 ${index + 1}`} />
                           </div>
                         ))
@@ -147,6 +197,8 @@ const Dashboard: React.FC<DashboardProps> = ({ isOpen, onClose, missingId }) => 
                           src={missingDetail.outputImages[0].url}
                           alt="AI 서포트 이미지"
                           className={styles.aiImage}
+                          onClick={() => missingDetail.outputImages && missingDetail.outputImages.length > 0 && handleImageClick(missingDetail.outputImages[0].url)}
+                          style={{ cursor: 'pointer' }}
                         />
                       )}
                     </div>
@@ -261,8 +313,19 @@ const Dashboard: React.FC<DashboardProps> = ({ isOpen, onClose, missingId }) => 
             </button>
           </div>
         )}
+        </div>
       </div>
-    </div>
+      )}
+
+      {/* 이미지 캐러셀 */}
+      {carouselOpen && missingDetail && (
+        <ImageCarousel
+          images={getAllImages()}
+          initialIndex={initialImageIndex}
+          onClose={handleCloseCarousel}
+        />
+      )}
+    </>
   );
 };
 
