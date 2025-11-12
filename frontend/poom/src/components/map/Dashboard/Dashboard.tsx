@@ -192,15 +192,9 @@ const Dashboard: React.FC<DashboardProps> = ({ isOpen, onClose, missingId }) => 
                   <div className={styles.sectionContentAI}>
                     <Text as="div" size="sm" weight="bold" className={styles.aiTitle}>AI 서포트 이미지</Text>
                     <div className={styles.aiImageWrapper}>
-                      {missingDetail.outputImages && missingDetail.outputImages.length > 0 && (
-                        <img
-                          src={missingDetail.outputImages[0].url}
-                          alt="AI 서포트 이미지"
-                          className={styles.aiImage}
-                          onClick={() => missingDetail.outputImages && missingDetail.outputImages.length > 0 && handleImageClick(missingDetail.outputImages[0].url)}
-                          style={{ cursor: 'pointer' }}
-                        />
-                      )}
+                      <Text as="div" size="sm" color="gray" style={{ textAlign: 'center', padding: '2rem' }}>
+                        안전한 정보 활용을 위해 이미지 고도화 기능은 현재 준비 중입니다.
+                      </Text>
                     </div>
                   </div>
                 </div>
@@ -272,13 +266,17 @@ const Dashboard: React.FC<DashboardProps> = ({ isOpen, onClose, missingId }) => 
                           <div className={styles.aiInfoSection}>
                             <Text as="div" size="sm" weight="bold" className={styles.aiSubtitle}>우선순위</Text>
                             <div className={styles.aiInfoItem}>
-                              <Text as="div" size="xs" color="gray">1순위</Text>
-                              <Text as="div" size="sm">{missingDetail.aiSupport.top1Desc || '-'}</Text>
+                              <Text as="span" size="xs" color="gray">1순위</Text>
+                              <Text as="span" size="sm">{missingDetail.aiSupport.top1Desc || '-'}</Text>
                             </div>
                             <div className={styles.aiInfoItem}>
-                              <Text as="div" size="xs" color="gray">2순위</Text>
-                              <Text as="div" size="sm">{missingDetail.aiSupport.top2Desc || '-'}</Text>
+                              <Text as="span" size="xs" color="gray">2순위</Text>
+                              <Text as="span" size="sm">{missingDetail.aiSupport.top2Desc || '-'}</Text>
                             </div>
+                            <Text as="div" size="xs" color="gray" style={{ marginTop: '0.2rem', textAlign: 'center', fontSize: '0.7rem' }}>
+                  ① AI 분석을 주요 정보를 우선적으로 정리한 내용으로, 
+                 <br/> 참고용으로 활용해주시기 바랍니다.
+                </Text>
                           </div>
                         </>
                       ) : (
@@ -287,6 +285,7 @@ const Dashboard: React.FC<DashboardProps> = ({ isOpen, onClose, missingId }) => 
                     </div>
                   </div>
                 </div>
+                
               </div>
             </>
           ) : (

@@ -215,8 +215,9 @@
 
 .popup-ai-info-item {
   display: flex;
-  flex-direction: column;
-  gap: 4px;
+  flex-direction: row;
+  align-items: center;
+  gap: 8px;
 }
 
 .popup-ai-caption {

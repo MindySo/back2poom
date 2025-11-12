@@ -346,8 +346,9 @@
 
 .m-archive-card__aiInfoItem {
   display: flex;
-  flex-direction: column;
-  gap: 2px;
+  flex-direction: row;
+  align-items: center;
+  gap: 8px;
 }
 
 .m-archive-card__aiCaption {

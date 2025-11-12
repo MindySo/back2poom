@@ -257,12 +257,9 @@ const MArchiveCard: React.FC<MArchiveCardProps> = ({ personId }) => {
                   {/* 왼쪽: AI 이미지 */}
                   <div className={styles['m-archive-card__aiImageWrapperOuter']}>
                     <div className={styles['m-archive-card__aiImageWrapper']}>
-                      <img 
-                        src={aiImageUrl} 
-                        alt="AI 생성 이미지"
-                        onClick={() => outputImages && outputImages.length > 0 && handleImageClick(outputImages[0].url)}
-                        style={{ cursor: 'pointer' }}
-                      />
+                      <Text as="div" size="xs" color="gray" style={{ textAlign: 'center', padding: '1rem', display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%' }}>
+                        안전한 정보 활용을 위해 이미지 고도화 기능은 현재 준비 중입니다.
+                      </Text>
                     </div>
                   </div>
                   
@@ -273,12 +270,12 @@ const MArchiveCard: React.FC<MArchiveCardProps> = ({ personId }) => {
                         <div className={styles['m-archive-card__aiInfoSection']}>
                           <Text as="div" size="xs" weight="bold" className={styles['m-archive-card__aiInfoLabel']}>우선순위</Text>
                           <div className={styles['m-archive-card__aiInfoItem']}>
-                            <Text as="div" size="xs" color="gray">1순위</Text>
-                            <Text as="div" size="xs">{aiSupport.top1Desc || '-'}</Text>
+                            <Text as="span" size="xs" color="gray">1순위</Text>
+                            <Text as="span" size="xs">{aiSupport.top1Desc || '-'}</Text>
                           </div>
                           <div className={styles['m-archive-card__aiInfoItem']}>
-                            <Text as="div" size="xs" color="gray">2순위</Text>
-                            <Text as="div" size="xs">{aiSupport.top2Desc || '-'}</Text>
+                            <Text as="span" size="xs" color="gray">2순위</Text>
+                            <Text as="span" size="xs">{aiSupport.top2Desc || '-'}</Text>
                           </div>
                         </div>
                       )}
@@ -291,8 +288,7 @@ const MArchiveCard: React.FC<MArchiveCardProps> = ({ personId }) => {
                   </div>
                 </div>
                 <Text as="div" size="xs" color="gray" className={styles['m-archive-card__aiCaption']}>
-                  ① AI 서포트 정보는 AI를 기반으로 정보를 제공합니다.
-                  제공되는 정보는 참고용이며, 사실과 다를 수 있습니다.
+                  ① AI 분석을 주요 정보를 우선적으로 정리한 내용으로, 참고용으로 활용해주시기 바랍니다.
                 </Text>
               </div>
             </>

@@ -149,6 +149,7 @@
 /* Grid area (cards themselves are external) */
 .list-grid {
   max-width: 1300px;
+  margin: 0 auto; /* 중앙 정렬 */
   display: grid;
   grid-template-columns: repeat(auto-fit, 400px); /* fixed card columns */
   justify-content: center; /* center rows when not full */
