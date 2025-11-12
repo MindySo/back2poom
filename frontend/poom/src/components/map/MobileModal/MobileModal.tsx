@@ -351,7 +351,7 @@ const MobileModal = forwardRef<MobileModalRef, MobileModalProps>(({ isOpen, onCl
                       <div>
                         <Text as="div" size="sm" color="gray" className={cardStyles['m-archive-card__label']}>발생일</Text>
                         <Text as="div" size="sm" className={cardStyles['m-archive-card__value']}>
-                          {formatDate(detailData.crawledAt)}
+                          {formatDate(detailData.occurredAt)}
                         </Text>
                       </div>
                       <div>

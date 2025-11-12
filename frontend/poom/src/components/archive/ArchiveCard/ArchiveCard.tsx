@@ -24,6 +24,7 @@ const ArchiveCard: React.FC<ArchiveCardProps> = ({ person, onClick }) => {
     currentAge,
     gender,
     crawledAt,
+    occurredAt,
     occurredLocation,
     classificationCode,
     targetType,
@@ -81,7 +82,7 @@ const ArchiveCard: React.FC<ArchiveCardProps> = ({ person, onClick }) => {
               </div>
               <div>
                 <Text as="div" size="xs" color="gray" className={styles['archive-card__label']}>발생일</Text>
-                <Text as="div" size="xs" className={styles['archive-card__value']}>{formatDate(crawledAt)}</Text>
+                <Text as="div" size="xs" className={styles['archive-card__value']}>{formatDate(occurredAt)}</Text>
               </div>
               <div>
                 <Text as="div" size="xs" color="gray" className={styles['archive-card__label']}>발생장소</Text>
