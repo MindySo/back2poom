@@ -21,7 +21,22 @@ export function formatElapsed(iso: string): string {
     const hours = Math.floor(totalSeconds / 3600);
     const minutes = Math.floor((totalSeconds % 3600) / 60);
     const seconds = totalSeconds % 60;
-    return `${hours}시간 ${minutes}분 ${seconds}초`;
+
+    const parts: string[] = [];
+
+    if (hours > 0) {
+      parts.push(`${hours}시간`);
+    }
+
+    if (minutes > 0 || hours > 0) {
+      parts.push(`${minutes}분`);
+    }
+
+    if (seconds > 0 || parts.length === 0) {
+      parts.push(`${seconds}초`);
+    }
+
+    return parts.join(' ');
   }
   
   // 한달 이내: 일 시간 형식
