@@ -199,12 +199,12 @@ const MapPage: React.FC = () => {
         setSelectedMissingId(id);
         setIsTestModalOpen(true);
 
-        // 해당 실종자의 위치로 지도 이동 (선택사항)
+        // 해당 실종자의 위치로 지도 이동 (모바일 모달을 고려한 중앙 계산)
         if (map) {
           const person = markerMissingList?.find((p) => p.id === id);
           if (person && person.latitude && person.longitude) {
-            const moveLatLon = new kakao.maps.LatLng(person.latitude, person.longitude);
-            map.panTo(moveLatLon);
+            // 모바일 모달을 제외한 보이는 지도 영역의 중앙으로 이동
+            moveMapToVisibleCenterMobile(person.latitude, person.longitude);
 
             // 반경 표시
             setSelectedRadiusPosition({ lat: person.latitude, lng: person.longitude });
@@ -297,6 +297,55 @@ const MapPage: React.FC = () => {
     map.panTo(adjustedLatLng);
   };
 
+  const moveMapToVisibleCenterMobile = (lat: number, lng: number) => {
+    if (!map) return;
+
+    // 화면 크기 가져오기
+    const mapContainer = mapRef.current;
+    if (!mapContainer) return;
+
+    const mapWidth = mapContainer.offsetWidth;
+    const mapHeight = mapContainer.offsetHeight;
+
+    // 모바일 모달의 half 상태 높이 (MobileModal에서 설정한 동적 높이와 동일하게)
+    // 모달 초기 open height는 window.innerHeight의 약 50%이지만,
+    // 실제 마커 센터링은 모달이 차지하는 공간 아래쪽 중간에 위치하도록 조정
+    const HALF_HEIGHT = window.innerHeight * 0.5;
+
+    // 모달이 차지하는 공간을 고려하여 마커를 약간 더 아래쪽에 위치시키기
+    // (모달 위의 지도 영역 중앙에 마커 배치)
+    const visibleTop = 0;
+    const visibleHeight = mapHeight - HALF_HEIGHT;
+
+    // 보이는 영역의 중앙 Y 좌표 계산
+    const centerY = visibleTop + visibleHeight / 2 + 40; // 40px 아래로 조정
+
+    // 지도 컨테이너의 중앙 픽셀 좌표
+    const mapCenterY = mapHeight / 2;
+
+    // Y축 오프셋 계산 (보이는 중앙 - 지도 중앙)
+    const offsetY = centerY - mapCenterY;
+
+    // 목표 좌표
+    const targetLatLng = new kakao.maps.LatLng(lat, lng);
+
+    // Projection을 사용하여 위도/경도를 픽셀 좌표로 변환
+    const proj = map.getProjection();
+    const targetPoint = proj.pointFromCoords(targetLatLng);
+
+    // 오프셋만큼 이동한 픽셀 좌표 (Y축만 조정, X축은 중앙 유지)
+    const adjustedPoint = new kakao.maps.Point(
+      targetPoint.x,
+      targetPoint.y - offsetY
+    );
+
+    // 픽셀 좌표를 다시 위도/경도로 변환
+    const adjustedLatLng = proj.coordsFromPoint(adjustedPoint);
+
+    // 지도 중심을 조정된 좌표로 부드럽게 이동 (카카오맵의 panTo는 자동으로 애니메이션 적용)
+    map.panTo(adjustedLatLng);
+  };
+
   const handleCloseDashboard = () => {
     setIsDashboardOpen(false);
     setSelectedMissingId(null);
@@ -386,11 +435,12 @@ const MapPage: React.FC = () => {
         )}
 
         {/* 선택된 마커의 이동 반경 표시 */}
-        {map && selectedRadiusPosition && selectedRadiusValue > 0 && (
+        {map && selectedRadiusPosition && selectedRadiusValue > 0 && selectedMissingId && (
           <MovementRadius
             map={map}
             position={selectedRadiusPosition}
             radius={selectedRadiusValue}
+            missingId={selectedMissingId}
           />
         )}
 
@@ -420,28 +470,6 @@ const MapPage: React.FC = () => {
           onClose={handleCloseDashboard}
           missingId={selectedMissingId}
         />
-      )}
-
-      {/* 모바일 모달 테스트 버튼 */}
-      {isMobile && (
-        <button
-          onClick={() => setIsTestModalOpen(!isTestModalOpen)}
-          style={{
-            position: 'fixed',
-            top: 100,
-            left: 16,
-            padding: '8px 16px',
-            backgroundColor: '#0B72E7',
-            color: 'white',
-            border: 'none',
-            borderRadius: '8px',
-            cursor: 'pointer',
-            zIndex: 1002,
-            fontSize: '14px',
-          }}
-        >
-          모달 테스트
-        </button>
       )}
 
       {/* 모바일 모달 */}

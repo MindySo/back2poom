@@ -87,14 +87,14 @@ const RecentMissing: React.FC<RecentMissingProps> = ({
             weight="bold"
             color="darkMain"
           >
-            {name}
+            {name || '-'}
           </Text>
           <Text
             size="sm"
             weight="regular"
             color="gray"
           >
-            {gender} / {age}세
+            {gender} / {age || '- '}세
           </Text>
         </div>
 
@@ -112,7 +112,7 @@ const RecentMissing: React.FC<RecentMissingProps> = ({
             weight="regular"
             color="gray"
           >
-            {location}
+            {location || '-'}
           </Text>
         </div>
       </div>

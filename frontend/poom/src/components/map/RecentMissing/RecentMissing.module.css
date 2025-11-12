@@ -48,3 +48,9 @@
   align-items: baseline;
   gap: 12px;
 }
+
+.locationSection > :first-child {
+  flex-shrink: 0; /* 레이블이 축소되지 않도록 고정 */
+  width: 60px;
+  white-space: nowrap;
+}

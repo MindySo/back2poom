@@ -216,17 +216,6 @@ const Dashboard: React.FC<DashboardProps> = ({ isOpen, onClose, missingId }) => 
                     <div className={styles.aiInfoWrapper}>
                       {missingDetail.aiSupport ? (
                         <>
-                          {/* 미상 정보 */}
-                          <div className={styles.aiInfoSection}>
-                            <Text as="div" size="sm" weight="bold" className={styles.aiSubtitle}>미상 정보</Text>
-                            {missingDetail.aiSupport.infoItems?.map((item, index) => (
-                              <div key={index} className={styles.aiInfoItem}>
-                                <Text as="div" size="xs" color="gray">{item.label}</Text>
-                                <Text as="div" size="sm">{item.value}</Text>
-                              </div>
-                            ))}
-                          </div>
-
                           {/* 우선순위 */}
                           <div className={styles.aiInfoSection}>
                             <Text as="div" size="sm" weight="bold" className={styles.aiSubtitle}>우선순위</Text>

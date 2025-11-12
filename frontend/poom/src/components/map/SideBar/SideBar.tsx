@@ -55,7 +55,7 @@ const SideBar: React.FC<SideBarProps> = ({ className = '', onMissingCardClick })
               gender={person.gender || '미상'}
               age={person.ageAtTime}
               location={person.occurredLocation}
-              occurredAt={person.occurredAt}
+              occurredAt={person.crawledAt}
               targetType={person.targetType}
               onClick={() => onMissingCardClick?.(person.id)}
             />

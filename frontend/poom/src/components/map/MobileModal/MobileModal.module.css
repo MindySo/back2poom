@@ -79,7 +79,7 @@
   display: flex;
   justify-content: center;
   align-items: center;
-  padding: 12px 0;
+  padding: 16px 0 20px;
   cursor: grab;
   user-select: none;
   -webkit-user-select: none;
@@ -123,6 +123,20 @@
 
 .content::-webkit-scrollbar-thumb:hover {
   background-color: rgba(0, 0, 0, 0.2);
+}
+
+/* MobileModal에서만 적용되는 커스텀 스타일 */
+.thumbnailRow {
+  margin-top: 16px;
+  margin-bottom: 16px;
+}
+
+.detailInfo {
+  margin-bottom: 16px;
+}
+
+.aiSection {
+  margin-bottom: 16px;
 }
 
 /* 모바일 화면에서만 표시 */
