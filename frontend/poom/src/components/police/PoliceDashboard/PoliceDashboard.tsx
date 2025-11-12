@@ -204,15 +204,9 @@ const PoliceDashboard: React.FC<PoliceDashboardProps> = ({ isOpen, onClose, miss
                   <div className={styles.sectionContentAI}>
                     <Text as="div" size="sm" weight="bold" color="white" className={styles.aiTitle}>AI 서포트 이미지</Text>
                     <div className={styles.aiImageWrapper}>
-                      {missingDetail.outputImages && missingDetail.outputImages.length > 0 && (
-                        <img
-                          src={missingDetail.outputImages[0].url}
-                          alt="AI 서포트 이미지"
-                          className={styles.aiImage}
-                          onClick={() => missingDetail.outputImages && missingDetail.outputImages.length > 0 && handleImageClick(missingDetail.outputImages[0].url)}
-                          style={{ cursor: 'pointer' }}
-                        />
-                      )}
+                      <Text as="div" size="sm" color="white" style={{ textAlign: 'center', padding: '2rem' }}>
+                        안전한 정보 활용을 위해 이미지 고도화 기능은 현재 준비 중입니다.
+                      </Text>
                     </div>
                   </div>
                 </div>

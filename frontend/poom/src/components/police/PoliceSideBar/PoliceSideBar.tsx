@@ -10,23 +10,6 @@ export interface PoliceSideBarProps {
   onMissingCardClick?: (id: number) => void;
 }
 
-// 실종 경과 시간 계산 함수
-const getElapsedTime = (crawledAt: string): string => {
-  const now = new Date();
-  const crawled = new Date(crawledAt);
-  const diffMs = now.getTime() - crawled.getTime();
-  const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
-  const diffDays = Math.floor(diffHours / 24);
-
-  if (diffDays > 0) {
-    return `${diffDays}일 전`;
-  } else if (diffHours > 0) {
-    return `${diffHours}시간 전`;
-  } else {
-    return '1시간 이내';
-  }
-};
-
 const PoliceSideBar: React.FC<PoliceSideBarProps> = ({ className = '', onMissingCardClick }) => {
   // 최근 72시간 내 실종자 데이터 가져오기
   const hours = 72;
@@ -68,30 +51,20 @@ const PoliceSideBar: React.FC<PoliceSideBarProps> = ({ className = '', onMissing
             <Text size="md" color="gray">로딩 중...</Text>
           </div>
         ) : recentList && recentList.length > 0 ? (
-          recentList.map((person) => {
-            // Badge 데이터 생성
-            const badges: { text: string; variant?: 'time' | 'feature' | 'solved' | 'alert' | 'ai' }[] = [
-              { text: getElapsedTime(person.crawledAt), variant: 'time' },
-            ];
-
-            // targetType이 있으면 추가
-            if (person.targetType) {
-              badges.push({ text: person.targetType, variant: 'feature' });
-            }
-
-            return (
-              <RecentMissing
-                key={person.id}
-                image={person.mainImage?.url || 'https://via.placeholder.com/120'}
-                badges={badges}
-                name={person.personName}
-                gender={person.gender || ''}
-                age={person.ageAtTime}
-                location={person.occurredLocation}
-                onClick={() => onMissingCardClick?.(person.id)}
-              />
-            );
-          })
+          recentList.map((person) => (
+            <RecentMissing
+              key={person.id}
+              image={person.mainImage?.url || 'https://via.placeholder.com/120'}
+              badges={[]}
+              name={person.personName}
+              gender={person.gender || '미상'}
+              age={person.ageAtTime}
+              location={person.occurredLocation}
+              occurredAt={person.crawledAt}
+              targetType={person.targetType}
+              onClick={() => onMissingCardClick?.(person.id)}
+            />
+          ))
         ) : (
           <div className={styles.emptyMessage}>
             <Text size="md" color="gray">최근 {hours}시간 내 실종자가 없습니다.</Text>

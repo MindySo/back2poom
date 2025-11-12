@@ -8,6 +8,8 @@ import { useModalStateManagement } from '../../../hooks/useModalStateManagement'
 import Badge from '../../common/atoms/Badge';
 import Text from '../../common/atoms/Text';
 import Button from '../../common/atoms/Button';
+import ImageCarousel from '../../common/molecules/ImageCarousel/ImageCarousel';
+import type { ImageFile } from '../../../types/missing';
 import tempImg from '../../../assets/TempImg.png';
 import styles from './MobileModal.module.css';
 import cardStyles from '../../archive/MArchiveCard/MArchiveCard.module.css';
@@ -31,6 +33,8 @@ const MobileModal = forwardRef<MobileModalRef, MobileModalProps>(({ isOpen, onCl
   const contentRef = useRef<HTMLDivElement>(null);
   const detailInfoRef = useRef<HTMLDivElement>(null);
   const [isOverlayClickable, setIsOverlayClickable] = useState(true);
+  const [carouselOpen, setCarouselOpen] = useState(false);
+  const [initialImageIndex, setInitialImageIndex] = useState(0);
 
   // 실종자 상세 정보 가져오기
   const { data: detailData, isLoading: isDetailLoading } = useMissingDetail(personId || null);
@@ -45,6 +49,44 @@ const MobileModal = forwardRef<MobileModalRef, MobileModalProps>(({ isOpen, onCl
     const date = new Date(dateString);
     if (isNaN(date.getTime())) return '-';
     return date.toISOString().slice(0, 10);
+  };
+
+  // 모든 이미지를 배열로 수집
+  const getAllImages = (): ImageFile[] => {
+    if (!detailData) return [];
+    const images: ImageFile[] = [];
+    
+    // 메인 이미지
+    if (detailData.mainImage) {
+      images.push(detailData.mainImage);
+    }
+    
+    // 추가 등록 사진들
+    if (detailData.inputImages && detailData.inputImages.length > 0) {
+      images.push(...detailData.inputImages);
+    }
+    
+    // AI 서포트 이미지들
+    if (detailData.outputImages && detailData.outputImages.length > 0) {
+      images.push(...detailData.outputImages);
+    }
+    
+    return images;
+  };
+
+  // 이미지 클릭 핸들러
+  const handleImageClick = (imageUrl: string) => {
+    const allImages = getAllImages();
+    const index = allImages.findIndex(img => img.url === imageUrl);
+    if (index !== -1) {
+      setInitialImageIndex(index);
+      setCarouselOpen(true);
+    }
+  };
+
+  // 캐러셀 닫기 핸들러
+  const handleCloseCarousel = () => {
+    setCarouselOpen(false);
   };
 
   // 손잡이 높이
@@ -277,15 +319,17 @@ const MobileModal = forwardRef<MobileModalRef, MobileModalProps>(({ isOpen, onCl
             <div style={{ padding: '16px', textAlign: 'center' }}>실종자 정보를 찾을 수 없습니다.</div>
           ) : (
             // 정상적으로 데이터가 있을 때
-            <div className={cardStyles['m-archive-card']}>
-              <div className={cardStyles['m-archive-card__content']}>
-                <div className={cardStyles['m-archive-card__imageWrap']}>
-                  <img
-                    src={detailData.mainImage?.url || tempImg}
-                    alt="메인 이미지"
-                    className={cardStyles['m-archive-card__image']}
-                  />
-                </div>
+              <div className={cardStyles['m-archive-card']}>
+                <div className={cardStyles['m-archive-card__content']}>
+                  <div className={cardStyles['m-archive-card__imageWrap']}>
+                    <img
+                      src={detailData.mainImage?.url || tempImg}
+                      alt="메인 이미지"
+                      className={cardStyles['m-archive-card__image']}
+                      onClick={() => detailData.mainImage && handleImageClick(detailData.mainImage.url)}
+                      style={{ cursor: 'pointer' }}
+                    />
+                  </div>
                 <div className={cardStyles['m-archive-card__right']}>
                   <div className={cardStyles['m-archive-card__main']}>
                     <div className={cardStyles['m-archive-card__header']}>
@@ -307,7 +351,7 @@ const MobileModal = forwardRef<MobileModalRef, MobileModalProps>(({ isOpen, onCl
                       <div>
                         <Text as="div" size="sm" color="gray" className={cardStyles['m-archive-card__label']}>발생일</Text>
                         <Text as="div" size="sm" className={cardStyles['m-archive-card__value']}>
-                          {formatDate(detailData.crawledAt)}
+                          {formatDate(detailData.occurredAt)}
                         </Text>
                       </div>
                       <div>
@@ -345,9 +389,6 @@ const MobileModal = forwardRef<MobileModalRef, MobileModalProps>(({ isOpen, onCl
               {/* 스크롤 시 보이는 추가 정보 */}
               {(() => {
                 const thumbnailImages = detailData.inputImages?.slice(0, 4) || [];
-                const aiImageUrl = detailData.outputImages && detailData.outputImages.length > 0
-                  ? detailData.outputImages[0].url
-                  : tempImg;
 
                 return (
                   <>
@@ -355,7 +396,11 @@ const MobileModal = forwardRef<MobileModalRef, MobileModalProps>(({ isOpen, onCl
                     {thumbnailImages.length > 0 && (
                       <div className={`${cardStyles['m-archive-card__thumbnailRow']} ${styles.thumbnailRow}`}>
                         {thumbnailImages.map((img, index) => (
-                          <div key={img.fileId || index} className={cardStyles['m-archive-card__thumbnail']}>
+                          <div 
+                            key={img.fileId || index} 
+                            className={cardStyles['m-archive-card__thumbnail']}
+                            onClick={() => img.url && handleImageClick(img.url)}
+                          >
                             <img src={img.url || tempImg} alt={`추가 사진 ${index + 1}`} />
                           </div>
                         ))}
@@ -404,7 +449,9 @@ const MobileModal = forwardRef<MobileModalRef, MobileModalProps>(({ isOpen, onCl
                         {/* 왼쪽: AI 이미지 */}
                         <div className={cardStyles['m-archive-card__aiImageWrapperOuter']}>
                           <div className={cardStyles['m-archive-card__aiImageWrapper']}>
-                            <img src={aiImageUrl} alt="AI 생성 이미지" />
+                            <Text as="div" size="sm" color="gray" style={{ textAlign: 'center', padding: '1rem', display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%' }}>
+                              안전한 정보 활용을 위해 이미지 고도화 기능은 현재 준비 중입니다.
+                            </Text>
                           </div>
                         </div>
 
@@ -418,12 +465,12 @@ const MobileModal = forwardRef<MobileModalRef, MobileModalProps>(({ isOpen, onCl
                                     우선순위
                                   </Text>
                                   <div className={cardStyles['m-archive-card__aiInfoItem']}>
-                                    <Text as="div" size="sm" color="gray">1순위</Text>
-                                    <Text as="div" size="sm">{detailData.aiSupport.top1Desc || '-'}</Text>
+                                    <Text as="span" size="sm" color="gray">1순위</Text>
+                                    <Text as="span" size="sm">{detailData.aiSupport.top1Desc || '-'}</Text>
                                   </div>
                                   <div className={cardStyles['m-archive-card__aiInfoItem']}>
-                                    <Text as="div" size="sm" color="gray">2순위</Text>
-                                    <Text as="div" size="sm">{detailData.aiSupport.top2Desc || '-'}</Text>
+                                    <Text as="span" size="sm" color="gray">2순위</Text>
+                                    <Text as="span" size="sm">{detailData.aiSupport.top2Desc || '-'}</Text>
                                   </div>
                                 </div>
                               </>
@@ -436,8 +483,7 @@ const MobileModal = forwardRef<MobileModalRef, MobileModalProps>(({ isOpen, onCl
                         </div>
                       </div>
                       <Text as="div" size="sm" color="gray" className={cardStyles['m-archive-card__aiCaption']}>
-                        ① AI 서포트 정보는 AI를 기반으로 정보를 제공합니다.
-                        제공되는 정보는 참고용이며, 사실과 다를 수 있습니다.
+                        ① AI 분석을 주요 정보를 우선적으로 정리한 내용으로, 참고용으로 활용해주시기 바랍니다.
                       </Text>
                     </div>
                   </>
@@ -447,6 +493,15 @@ const MobileModal = forwardRef<MobileModalRef, MobileModalProps>(({ isOpen, onCl
           )}
         </div>
       </div>
+      )}
+
+      {/* 이미지 캐러셀 */}
+      {carouselOpen && detailData && (
+        <ImageCarousel
+          images={getAllImages()}
+          initialIndex={initialImageIndex}
+          onClose={handleCloseCarousel}
+        />
       )}
     </>
   );

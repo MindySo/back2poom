@@ -6,6 +6,8 @@ import styles from './ArchiveDetailPopup.module.css';
 import Badge from '../../common/atoms/Badge';
 import Text from '../../common/atoms/Text';
 import Button from '../../common/atoms/Button';
+import ImageCarousel from '../../common/molecules/ImageCarousel/ImageCarousel';
+import type { ImageFile } from '../../../types/missing';
 import tempImg from '../../../assets/TempImg.png';
 import poomLogo from '../../../assets/poom_logo.png';
 
@@ -18,6 +20,8 @@ export interface ArchiveDetailPopupProps {
 const ArchiveDetailPopup: React.FC<ArchiveDetailPopupProps> = ({ personId, initialElapsedTime, onClose }) => {
   const navigate = useNavigate();
   const { data: person, isLoading, error } = useMissingDetail(personId);
+  const [carouselOpen, setCarouselOpen] = React.useState(false);
+  const [initialImageIndex, setInitialImageIndex] = React.useState(0);
   
   // API 데이터로 경과 시간 계산 (person.crawledAt이 있을 때만 유효한 값 계산)
   const calculatedElapsedTime = useElapsedTime(person?.crawledAt || '');
@@ -29,19 +33,35 @@ const ArchiveDetailPopup: React.FC<ArchiveDetailPopupProps> = ({ personId, initi
     ? initialElapsedTime 
     : calculatedElapsedTime;
 
-  // 로딩 상태 (초기 경과 시간이 없을 때만 로딩 표시)
-  if (isLoading && !initialElapsedTime) {
+  // 로딩 상태
+  if (isLoading) {
     return (
       <div className={styles['popup-overlay']} onClick={onClose}>
         <div className={styles['popup-content']} onClick={(e) => e.stopPropagation()}>
-          <div style={{ padding: '2rem', textAlign: 'center' }}>로딩 중...</div>
+          <div className={styles['loading-container']}>
+            <div className={styles['spinner']}></div>
+            <Text as="div" size="sm" color="gray" style={{ marginTop: '1rem' }}>로딩 중...</Text>
+          </div>
         </div>
       </div>
     );
   }
 
-  // 에러 상태
-  if (error || !person) {
+  // 에러 상태 (로딩이 아닐 때만 에러 표시)
+  if (error && !isLoading) {
+    return (
+      <div className={styles['popup-overlay']} onClick={onClose}>
+        <div className={styles['popup-content']} onClick={(e) => e.stopPropagation()}>
+          <div style={{ padding: '2rem', textAlign: 'center', color: 'red' }}>
+            데이터를 불러오는 중 오류가 발생했습니다.
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // 데이터가 없을 때 (에러도 아니고 로딩도 아닐 때)
+  if (!person) {
     return (
       <div className={styles['popup-overlay']} onClick={onClose}>
         <div className={styles['popup-content']} onClick={(e) => e.stopPropagation()}>
@@ -60,6 +80,7 @@ const ArchiveDetailPopup: React.FC<ArchiveDetailPopupProps> = ({ personId, initi
     ageAtTime,
     gender,
     crawledAt,
+    occurredAt,
     occurredLocation,
     classificationCode,
     heightCm,
@@ -89,8 +110,44 @@ const ArchiveDetailPopup: React.FC<ArchiveDetailPopupProps> = ({ personId, initi
   
   // 이미지 URL 가져오기 (없으면 임시 이미지)
   const mainImageUrl = mainImage?.url || tempImg;
-  const aiImageUrl = outputImages && outputImages.length > 0 ? outputImages[0].url : tempImg;
   const thumbnailImages = inputImages?.slice(0, 4) || [];
+
+  // 모든 이미지를 배열로 수집
+  const getAllImages = (): ImageFile[] => {
+    const images: ImageFile[] = [];
+    
+    // 메인 이미지
+    if (mainImage) {
+      images.push(mainImage);
+    }
+    
+    // 추가 등록 사진들
+    if (inputImages && inputImages.length > 0) {
+      images.push(...inputImages);
+    }
+    
+    // AI 서포트 이미지들
+    if (outputImages && outputImages.length > 0) {
+      images.push(...outputImages);
+    }
+    
+    return images;
+  };
+
+  // 이미지 클릭 핸들러 - 이미지 URL로 인덱스 찾기
+  const handleImageClick = (imageUrl: string) => {
+    const allImages = getAllImages();
+    const index = allImages.findIndex(img => img.url === imageUrl);
+    if (index !== -1) {
+      setInitialImageIndex(index);
+      setCarouselOpen(true);
+    }
+  };
+
+  // 캐러셀 닫기 핸들러
+  const handleCloseCarousel = () => {
+    setCarouselOpen(false);
+  };
 
   // 배경 클릭 시 닫기
   const handleOverlayClick = (e: React.MouseEvent<HTMLDivElement>) => {
@@ -120,11 +177,20 @@ const ArchiveDetailPopup: React.FC<ArchiveDetailPopupProps> = ({ personId, initi
           {/* 왼쪽: 이미지 섹션 */}
           <div className={styles['popup-images']}>
             <div className={styles['popup-main-image']}>
-              <img src={mainImageUrl} alt={personName} />
+              <img 
+                src={mainImageUrl} 
+                alt={personName}
+                onClick={() => mainImage && handleImageClick(mainImage.url)}
+                style={{ cursor: 'pointer' }}
+              />
             </div>
             <div className={styles['popup-thumbnails']}>
               {thumbnailImages.map((img, index) => (
-                <div key={img.fileId || index} className={styles['popup-thumbnail']}>
+                <div 
+                  key={img.fileId || index} 
+                  className={styles['popup-thumbnail']}
+                  onClick={() => img.url && handleImageClick(img.url)}
+                >
                   <img src={img.url || tempImg} alt={`썸네일 ${index + 1}`} />
                 </div>
               ))}
@@ -149,7 +215,7 @@ const ArchiveDetailPopup: React.FC<ArchiveDetailPopupProps> = ({ personId, initi
               
               <Text as="div" size="sm" weight="bold" className={styles['popup-info-label']}>발생일</Text>
               <Text as="div" size="md" className={styles['popup-info-value']}>
-                {formatDate(crawledAt)}
+                {formatDate(occurredAt)}
               </Text>
               
               <Text as="div" size="sm" weight="bold" className={styles['popup-info-label']}>발생장소</Text>
@@ -188,7 +254,9 @@ const ArchiveDetailPopup: React.FC<ArchiveDetailPopupProps> = ({ personId, initi
             <div className={styles['popup-ai-card-wrapper']}>
             <div className={styles['popup-ai-card']}>
               <div className={styles['popup-ai-image']}>
-                <img src={aiImageUrl} alt="AI 생성 이미지" />
+                <Text as="div" size="sm" color="gray" style={{ textAlign: 'center', padding: '2rem', display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%' }}>
+                  안전한 정보 활용을 위해 이미지 고도화 기능은 현재 준비 중입니다.
+                </Text>
               </div>
               <Text as="div" size="xs" color="gray" className={styles['popup-ai-caption']}>
                 ① CCTV 이미지 및 실종자 데이터 기반으로 AI가 예측한 이미지입니다.
@@ -207,12 +275,12 @@ const ArchiveDetailPopup: React.FC<ArchiveDetailPopupProps> = ({ personId, initi
                 <div className={styles['popup-ai-info-section']}>
                   <Text as="div" size="sm" weight="bold" className={styles['popup-ai-info-label']}>우선순위</Text>
                   <div className={styles['popup-ai-info-item']}>
-                    <Text as="div" size="xs" color="gray">1순위</Text>
-                    <Text as="div" size="sm">{aiSupport.top1Desc || '-'}</Text>
+                    <Text as="span" size="xs" color="gray">1순위</Text>
+                    <Text as="span" size="sm">{aiSupport.top1Desc || '-'}</Text>
                   </div>
                   <div className={styles['popup-ai-info-item']}>
-                    <Text as="div" size="xs" color="gray">2순위</Text>
-                    <Text as="div" size="sm">{aiSupport.top2Desc || '-'}</Text>
+                    <Text as="span" size="xs" color="gray">2순위</Text>
+                    <Text as="span" size="sm">{aiSupport.top2Desc || '-'}</Text>
                   </div>
                 </div>
               )}
@@ -223,7 +291,7 @@ const ArchiveDetailPopup: React.FC<ArchiveDetailPopupProps> = ({ personId, initi
               )}
             </div>
             <Text as="div" size="xs" color="gray" className={styles['popup-ai-caption']}>
-              ① 미상인 실종자 정보를 AI가 CCTV 이미지를 기반으로 예측한 데이터입니다.
+              ① AI 분석을 주요 정보를 우선적으로 정리한 내용으로, 참고용으로 활용해주시기 바랍니다.
             </Text>
             </div>
             </div>
@@ -250,6 +318,15 @@ const ArchiveDetailPopup: React.FC<ArchiveDetailPopupProps> = ({ personId, initi
           </Button>
         </div>
       </div>
+
+      {/* 이미지 캐러셀 */}
+      {carouselOpen && person && (
+        <ImageCarousel
+          images={getAllImages()}
+          initialIndex={initialImageIndex}
+          onClose={handleCloseCarousel}
+        />
+      )}
     </div>
   );
 };
