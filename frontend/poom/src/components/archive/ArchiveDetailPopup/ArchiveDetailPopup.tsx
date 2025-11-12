@@ -64,6 +64,7 @@ const ArchiveDetailPopup: React.FC<ArchiveDetailPopupProps> = ({ personId, initi
     ageAtTime,
     gender,
     crawledAt,
+    occurredAt,
     occurredLocation,
     classificationCode,
     heightCm,
@@ -199,7 +200,7 @@ const ArchiveDetailPopup: React.FC<ArchiveDetailPopupProps> = ({ personId, initi
               
               <Text as="div" size="sm" weight="bold" className={styles['popup-info-label']}>발생일</Text>
               <Text as="div" size="md" className={styles['popup-info-value']}>
-                {formatDate(crawledAt)}
+                {formatDate(occurredAt)}
               </Text>
               
               <Text as="div" size="sm" weight="bold" className={styles['popup-info-label']}>발생장소</Text>
