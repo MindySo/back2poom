@@ -6,9 +6,9 @@ pipeline {
     agent any
 
     environment {
-        S3_BUCKET = 'topoom-s3-bucket'
-        CLOUDFRONT_DISTRIBUTION_ID = 'E3ECTA5JTG17L5'
-        AWS_REGION = 'ap-northeast-2'
+        S3_BUCKET = 'topoom-prod-s3-bucket'
+        CLOUDFRONT_DISTRIBUTION_ID = 'E2RFJP5707A0DX'
+        AWS_REGION = 'ap-southeast-2'
     }
 
     options {
