@@ -6,32 +6,6 @@ networks:
     driver: bridge
     name: topoom-scheduling-network
 
-volumes:
-  rabbitmq-data:
-    name: topoom-scheduling-rabbitmq-data
-
 #############################
 #  SERVICES
 #############################
-services:
-  # RabbitMQ Message Broker
-  rabbitmq:
-    image: rabbitmq:3.12-management
-    container_name: topoom-rabbitmq
-    restart: always
-    environment:
-      - TZ=Asia/Seoul
-      - RABBITMQ_DEFAULT_USER=${RABBITMQ_USERNAME}
-      - RABBITMQ_DEFAULT_PASS=${RABBITMQ_PASSWORD}
-    volumes:
-      - rabbitmq-data:/var/lib/rabbitmq
-    ports:
-      - "5672:5672"   # AMQP 프로토콜
-      - "15672:15672" # Management UI
-    networks:
-      - topoom-scheduling-network
-    healthcheck:
-      test: rabbitmq-diagnostics -q ping
-      interval: 10s
-      timeout: 5s
-      retries: 5
