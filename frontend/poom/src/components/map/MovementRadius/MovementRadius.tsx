@@ -19,6 +19,7 @@ const MovementRadius: React.FC<MovementRadiusProps> = ({ map, position, radius, 
   const circleRef = useRef<kakao.maps.Circle | null>(null);
   const [currentRadius, setCurrentRadius] = useState(radius);
   const [speed, setSpeed] = useState<number>(0);
+  const [isMaxReached, setIsMaxReached] = useState(false);
   const animationRef = useRef<number | null>(null);
   const startTimeRef = useRef<number | null>(null);
 
@@ -46,7 +47,7 @@ const MovementRadius: React.FC<MovementRadiusProps> = ({ map, position, radius, 
   useEffect(() => {
     if (!map || speed === 0) return;
 
-    const MAX_RADIUS = 5000; // 최대 반지름 5km (5000m)
+    const MAX_RADIUS = 15000; // 최대 반지름 15km (15000m)
 
     const animate = (currentTime: number) => {
       if (startTimeRef.current === null) {
@@ -62,7 +63,8 @@ const MovementRadius: React.FC<MovementRadiusProps> = ({ map, position, radius, 
       if (newRadius < MAX_RADIUS) {
         animationRef.current = requestAnimationFrame(animate);
       } else {
-        // 최대값에 도달했으면 정지
+        // 최대값에 도달했으면 컴포넌트 사라지도록 설정
+        setIsMaxReached(true);
         startTimeRef.current = null;
       }
     };
@@ -84,6 +86,12 @@ const MovementRadius: React.FC<MovementRadiusProps> = ({ map, position, radius, 
     // 기존 원이 있으면 제거
     if (circleRef.current) {
       circleRef.current.setMap(null);
+    }
+
+    // 최대값에 도달했으면 원을 표시하지 않음
+    if (isMaxReached) {
+      console.log('[MovementRadius] 최대값 도달, 이동반경 제거됨');
+      return;
     }
 
     // 새로운 Circle 생성
@@ -112,7 +120,7 @@ const MovementRadius: React.FC<MovementRadiusProps> = ({ map, position, radius, 
         circleRef.current.setMap(null);
       }
     };
-  }, [map, position.lat, position.lng, currentRadius]);
+  }, [map, position.lat, position.lng, currentRadius, isMaxReached]);
 
   return null;
 };

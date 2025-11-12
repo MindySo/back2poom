@@ -55,9 +55,9 @@ export interface MissingPerson {
 
 // 실종자 통계
 export interface MissingStats {
-  total_reports: number;  // 금일 실종
-  total_tips: number;     // 제보 건수
-  total_resolved: number; // 해결 건수
+  totalReports: number;  // 금일 실종
+  totalTips: number;     // 제보 건수
+  totalResolved: number; // 해결 건수
 }
 
 // 하위 호환성을 위한 타입 (기존 코드에서 occuredAt 사용)

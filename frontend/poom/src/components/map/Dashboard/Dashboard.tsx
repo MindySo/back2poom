@@ -7,6 +7,7 @@ import logo from '../../../assets/poom_logo.png';
 import { useNavigate } from 'react-router-dom';
 import Text from '../../common/atoms/Text';
 import Badge from '../../common/atoms/Badge';
+import HelpCaption from '../HelpCaption/HelpCaption';
 import ImageCarousel from '../../common/molecules/ImageCarousel/ImageCarousel';
 import type { ImageFile } from '../../../types/missing';
 
@@ -128,8 +129,19 @@ const Dashboard: React.FC<DashboardProps> = ({ isOpen, onClose, missingId }) => 
             />
           </div>
 
-          {/* 버튼/로고 사이 공백 */}
-          <div style={{ width: '40px' }} />
+          {/* 우측 상단 HelpCaption */}
+          <HelpCaption>
+            <Text as="div" size="xs" weight="bold">지도 범례</Text>
+            <Text as="div" size="xs" style={{ marginTop: '0.4rem', lineHeight: '1.4' }}>
+              • 마커와 이동반경은 실종 후 <strong>24시간 이내</strong>인 경우만 표시됩니다.
+            </Text>
+            <Text as="div" size="xs" style={{ marginTop: '0.4rem', lineHeight: '1.4' }}>
+              • 이동반경은 최초 실종 장소에서 시작해 <strong>반경 15km 이내</strong>인 경우만 표시되며, 각 실종자의 특성에 따른 속도를 바탕으로 합니다.
+            </Text>
+            <Text as="div" size="xs" style={{ marginTop: '0.4rem', lineHeight: '1.4' }}>
+              • 사이드바의 최근 실종자 목록는 <strong>72시간 이내</strong>의 사람을 표시하므로, 마커가 표시되지 않는 경우가 있습니다.
+            </Text>
+          </HelpCaption>
         </div>
 
 
