@@ -19,11 +19,14 @@ function AppContent() {
   const isPolicePage = location.pathname.startsWith('/police');
   useGAPageView(); 
 
+  // Police 페이지에서는 모바일 탑바 사용 안 함
+  const shouldUseMobileTopBar = isMobile && !isPolicePage;
+
   return (
     <div style={{ display: 'flex', flexDirection: 'column', height: '100dvh', width: '100%', overflow: 'hidden' }}>
-      {isMobile ? <MobileTopBar /> : isPolicePage ? <PoliceTopBar /> : <TopBar />}
+      {shouldUseMobileTopBar ? <MobileTopBar /> : isPolicePage ? <PoliceTopBar /> : <TopBar />}
       <div 
-        className={`${styles.appContainer} ${isMobile ? styles.mobile : ''} ${isReportPage ? styles.noScroll : ''}`}
+        className={`${styles.appContainer} ${shouldUseMobileTopBar ? styles.mobile : ''} ${isReportPage ? styles.noScroll : ''}`}
       >
         <Routes>
           <Route path="/" element={<DevPage />} />
