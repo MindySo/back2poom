@@ -238,7 +238,13 @@ const Dashboard: React.FC<DashboardProps> = ({ isOpen, onClose, missingId }) => 
 
                     <Text as="div" size="sm" weight="bold" className={styles.infoLabel}>발생일</Text>
                     <Text as="div" size="md" className={styles.infoValue}>
-                      {new Date(missingDetail.occurredAt).toISOString().slice(0, 10)}
+                      {(() => {
+                        const date = new Date(missingDetail.occurredAt);
+                        const year = date.getFullYear();
+                        const month = String(date.getMonth() + 1).padStart(2, '0');
+                        const day = String(date.getDate()).padStart(2, '0');
+                        return `${year}-${month}-${day}`;
+                      })()}
                     </Text>
 
                     <Text as="div" size="sm" weight="bold" className={styles.infoLabel}>발생장소</Text>
@@ -326,7 +332,49 @@ const Dashboard: React.FC<DashboardProps> = ({ isOpen, onClose, missingId }) => 
               }}
               onClick={(e) => {
                 e.stopPropagation(); // 카드 클릭 이벤트와 충돌 방지
-                navigate(`/report?name=${encodeURIComponent(missingDetail.personName)}`);
+                // phoneNumber 수집: 직접 필드, caseContact, caseContacts 배열에서 모두 수집
+                const phoneNumbers: string[] = [];
+                
+                // 1. 직접 필드의 phoneNumber
+                if (missingDetail.phoneNumber) {
+                  if (Array.isArray(missingDetail.phoneNumber)) {
+                    phoneNumbers.push(...missingDetail.phoneNumber);
+                  } else {
+                    phoneNumbers.push(missingDetail.phoneNumber);
+                  }
+                }
+                
+                // 2. caseContact의 phoneNumber (하위 호환성)
+                const phoneNumberFromContact = (missingDetail.caseContact as { phoneNumber?: string | string[] } | undefined)?.phoneNumber;
+                if (phoneNumberFromContact) {
+                  if (Array.isArray(phoneNumberFromContact)) {
+                    phoneNumbers.push(...phoneNumberFromContact);
+                  } else {
+                    phoneNumbers.push(phoneNumberFromContact);
+                  }
+                }
+                
+                // 3. caseContacts 배열의 모든 phoneNumber
+                const caseContacts = (missingDetail as any).caseContacts as Array<{ organization?: string; phoneNumber?: string }> | undefined;
+                if (caseContacts && Array.isArray(caseContacts)) {
+                  caseContacts.forEach(contact => {
+                    if (contact.phoneNumber) {
+                      phoneNumbers.push(contact.phoneNumber);
+                    }
+                  });
+                }
+                
+                // 중복 제거 후 undefined 처리
+                const actualPhoneNumbers = phoneNumbers.length > 0 
+                  ? Array.from(new Set(phoneNumbers)) // 중복 제거
+                  : undefined;
+                
+                navigate(`/report?name=${encodeURIComponent(missingDetail.personName)}`, {
+                  state: {
+                    ...(missingDetail.id && { id: missingDetail.id }),
+                    ...(actualPhoneNumbers && { phoneNumber: actualPhoneNumbers }),
+                  },
+                });
               }}
             >
               제보하기

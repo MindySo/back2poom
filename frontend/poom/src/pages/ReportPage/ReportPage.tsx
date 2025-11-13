@@ -56,15 +56,23 @@ const confidenceLevelAnswers: AnswerOption[] = [
 ];
 
 // 각 단계 컴포넌트를 별도로 정의하여 무한 루프 방지
-const MethodStep: React.FC<{ context: any; history: any; personName: string; phoneNumber?: string }> = React.memo(({ context, history, personName, phoneNumber }) => {
+const MethodStep: React.FC<{ context: any; history: any; personName: string; phoneNumber?: string[] }> = React.memo(({ context, history, personName, phoneNumber }) => {
   const isMobile = useIsMobile(1024);
+  
+  // 010으로 시작하는 번호 찾기
+  const mobilePhone = phoneNumber?.find(num => num.startsWith('010'));
+  // 010으로 시작하지 않는 번호 찾기
+  const otherPhone = phoneNumber?.find(num => !num.startsWith('010'));
+  // 전화할 번호 결정: 010 번호 > 다른 번호 > 182
+  const callPhone = mobilePhone || otherPhone || '182';
+  // 문자 가능 여부: 010으로 시작하는 번호가 있으면 가능
+  const canSendMessage = !!mobilePhone;
   
   const handleAnswerSelect = useCallback(
     (answerId: string) => {
       // 전화로 신고하기를 선택한 경우 바로 전화 걸기
       if (answerId === 'phone') {
-        const phone = phoneNumber || '182';
-        window.location.href = `tel:${phone}`;
+        window.location.href = `tel:${callPhone}`;
         return;
       }
       
@@ -74,7 +82,7 @@ const MethodStep: React.FC<{ context: any; history: any; personName: string; pho
         selectedMethod: answerId,
       }));
     },
-    [history, phoneNumber]
+    [history, callPhone]
   );
 
   const handleMethodNext = useCallback(() => {
@@ -87,10 +95,10 @@ const MethodStep: React.FC<{ context: any; history: any; personName: string; pho
     }
   }, [history, context.selectedMethod]);
 
-  // phoneNumber가 '182'이면 문자하기 옵션 제거
-  const availableAnswers = phoneNumber === '182' 
-    ? reportMethodAnswers.filter(answer => answer.id !== 'message')
-    : reportMethodAnswers;
+  // 문자하기가 불가능하면 옵션 제거
+  const availableAnswers = canSendMessage 
+    ? reportMethodAnswers
+    : reportMethodAnswers.filter(answer => answer.id !== 'message');
 
   return (
     <div className={styles.stepWrapper}>
@@ -374,8 +382,11 @@ const TimeStep: React.FC<{ context: any; history: any; personName: string }> = R
 
 TimeStep.displayName = 'TimeStep';
 
-const DetailStep: React.FC<{ context: any; history: any; personName: string; phoneNumber?: string }> = React.memo(({ context, history, personName, phoneNumber }) => {
+const DetailStep: React.FC<{ context: any; history: any; personName: string; phoneNumber?: string[] }> = React.memo(({ context, history, personName, phoneNumber }) => {
   const [detail, setDetail] = React.useState(() => context.detail || '');
+
+  // 010으로 시작하는 번호 찾기 (문자 전송용)
+  const mobilePhone = phoneNumber?.find(num => num.startsWith('010'));
 
   const handleSubmit = () => {
     if (detail.trim()) {
@@ -393,8 +404,8 @@ const DetailStep: React.FC<{ context: any; history: any; personName: string; pho
         `추가 정보: ${detail.trim()}`,
       ].join('\n');
 
-      // SMS 전송 - phoneNumber가 있으면 그 번호로, 없으면 기본값 182
-      const phone = phoneNumber || '182';
+      // SMS 전송 - 010으로 시작하는 번호가 있으면 그 번호로, 없으면 182
+      const phone = mobilePhone || '182';
       const encodedBody = encodeURIComponent(smsBody);
       window.location.href = `sms:${phone}?body=${encodedBody}`;
     }
@@ -479,8 +490,13 @@ const ReportPage: React.FC = () => {
   const location = useLocation();
   const personName = searchParams.get('name') || '실종자';
   // state에서 id와 phoneNumber 가져오기 (URL에 노출되지 않음)
-  const reportState = (location.state as { id?: number; phoneNumber?: string }) || {};
-  const reportPhoneNumber = reportState.phoneNumber;
+  const reportState = (location.state as { id?: number; phoneNumber?: string | string[] }) || {};
+  // phoneNumber가 배열이 아니면 배열로 변환 (하위 호환성)
+  const reportPhoneNumber = Array.isArray(reportState.phoneNumber) 
+    ? reportState.phoneNumber 
+    : reportState.phoneNumber 
+      ? [reportState.phoneNumber] 
+      : undefined;
 
   // useFunnel을 사용하여 단계 관리 (URL과 동기화)
   const funnel = useFunnel<ReportStepContextMap>({

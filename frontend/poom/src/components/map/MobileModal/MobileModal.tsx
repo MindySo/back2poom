@@ -48,7 +48,11 @@ const MobileModal = forwardRef<MobileModalRef, MobileModalProps>(({ isOpen, onCl
     if (!dateString) return '-';
     const date = new Date(dateString);
     if (isNaN(date.getTime())) return '-';
-    return date.toISOString().slice(0, 10);
+    // 로컬 시간대의 날짜를 직접 포맷팅하여 시간대 변환 문제 방지
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
   };
 
   // 모든 이미지를 배열로 수집
@@ -368,7 +372,51 @@ const MobileModal = forwardRef<MobileModalRef, MobileModalProps>(({ isOpen, onCl
                       variant="primary"
                       size="small"
                       className={cardStyles['m-archive-card__primaryBtn']}
-                      onClick={() => navigate(`/report?name=${encodeURIComponent(detailData.personName)}`)}
+                      onClick={() => {
+                        // phoneNumber 수집: 직접 필드, caseContact, caseContacts 배열에서 모두 수집
+                        const phoneNumbers: string[] = [];
+                        
+                        // 1. 직접 필드의 phoneNumber
+                        if (detailData.phoneNumber) {
+                          if (Array.isArray(detailData.phoneNumber)) {
+                            phoneNumbers.push(...detailData.phoneNumber);
+                          } else {
+                            phoneNumbers.push(detailData.phoneNumber);
+                          }
+                        }
+                        
+                        // 2. caseContact의 phoneNumber (하위 호환성)
+                        const phoneNumberFromContact = (detailData.caseContact as { phoneNumber?: string | string[] } | undefined)?.phoneNumber;
+                        if (phoneNumberFromContact) {
+                          if (Array.isArray(phoneNumberFromContact)) {
+                            phoneNumbers.push(...phoneNumberFromContact);
+                          } else {
+                            phoneNumbers.push(phoneNumberFromContact);
+                          }
+                        }
+                        
+                        // 3. caseContacts 배열의 모든 phoneNumber
+                        const caseContacts = (detailData as any).caseContacts as Array<{ organization?: string; phoneNumber?: string }> | undefined;
+                        if (caseContacts && Array.isArray(caseContacts)) {
+                          caseContacts.forEach(contact => {
+                            if (contact.phoneNumber) {
+                              phoneNumbers.push(contact.phoneNumber);
+                            }
+                          });
+                        }
+                        
+                        // 중복 제거 후 undefined 처리
+                        const actualPhoneNumbers = phoneNumbers.length > 0 
+                          ? Array.from(new Set(phoneNumbers)) // 중복 제거
+                          : undefined;
+                        
+                        navigate(`/report?name=${encodeURIComponent(detailData.personName)}`, {
+                          state: {
+                            ...(detailData.id && { id: detailData.id }),
+                            ...(actualPhoneNumbers && { phoneNumber: actualPhoneNumbers }),
+                          },
+                        });
+                      }}
                     >
                       제보하기
                     </Button>

@@ -7,7 +7,7 @@ import Badge from '../../common/atoms/Badge';
 import Text from '../../common/atoms/Text';
 import Button from '../../common/atoms/Button';
 import ImageCarousel from '../../common/molecules/ImageCarousel/ImageCarousel';
-import type { ImageFile } from '../../../types/missing';
+import type { ImageFile, MissingPerson } from '../../../types/missing';
 import tempImg from '../../../assets/TempImg.png';
 import poomLogo from '../../../assets/poom_logo.png';
 
@@ -98,17 +98,55 @@ const ArchiveDetailPopup: React.FC<ArchiveDetailPopupProps> = ({ personId, initi
     outputImages,
     aiSupport,
     caseContact,
-  } = person;
+    caseContacts,
+  } = person as MissingPerson & { caseContacts?: Array<{ organization?: string; phoneNumber?: string }> };
   
-  // phoneNumber는 직접 필드 또는 caseContact에서 가져오기
-  const actualPhoneNumber = phoneNumber || (caseContact as { phoneNumber?: string } | undefined)?.phoneNumber;
+  // phoneNumber 수집: 직접 필드, caseContact, caseContacts 배열에서 모두 수집
+  const phoneNumbers: string[] = [];
+  
+  // 1. 직접 필드의 phoneNumber
+  if (phoneNumber) {
+    if (Array.isArray(phoneNumber)) {
+      phoneNumbers.push(...phoneNumber);
+    } else {
+      phoneNumbers.push(phoneNumber);
+    }
+  }
+  
+  // 2. caseContact의 phoneNumber (하위 호환성)
+  const phoneNumberFromContact = (caseContact as { phoneNumber?: string | string[] } | undefined)?.phoneNumber;
+  if (phoneNumberFromContact) {
+    if (Array.isArray(phoneNumberFromContact)) {
+      phoneNumbers.push(...phoneNumberFromContact);
+    } else {
+      phoneNumbers.push(phoneNumberFromContact);
+    }
+  }
+  
+  // 3. caseContacts 배열의 모든 phoneNumber
+  if (caseContacts && Array.isArray(caseContacts)) {
+    caseContacts.forEach(contact => {
+      if (contact.phoneNumber) {
+        phoneNumbers.push(contact.phoneNumber);
+      }
+    });
+  }
+  
+  // 중복 제거 후 undefined 처리
+  const actualPhoneNumbers = phoneNumbers.length > 0 
+    ? Array.from(new Set(phoneNumbers)) // 중복 제거
+    : undefined;
   
   // 발생일 포맷팅 (안전하게 처리)
   const formatDate = (dateString: string | undefined): string => {
     if (!dateString) return '-';
     const date = new Date(dateString);
     if (isNaN(date.getTime())) return '-';
-    return date.toISOString().slice(0, 10);
+    // 로컬 시간대의 날짜를 직접 포맷팅하여 시간대 변환 문제 방지
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
   };
   
   // 이미지 URL 가져오기 (없으면 임시 이미지)
@@ -312,7 +350,7 @@ const ArchiveDetailPopup: React.FC<ArchiveDetailPopupProps> = ({ personId, initi
               navigate(`/report?name=${encodeURIComponent(personName)}`, {
                 state: {
                   ...(id && { id }),
-                  phoneNumber: actualPhoneNumber || '182',
+                  ...(actualPhoneNumbers && { phoneNumber: actualPhoneNumbers }),
                 },
               });
             }}
