@@ -6,12 +6,14 @@ import com.topoom.messaging.dto.OcrRequestMessage;
 import com.topoom.messaging.exception.OcrResultInvalidException;
 import com.topoom.messaging.producer.MessageProducer;
 import com.topoom.missingcase.service.CaseOcrService;
+import com.topoom.missingcase.service.MissingCaseUpdateService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.amqp.core.Message;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
 
@@ -32,11 +34,13 @@ public class OcrConsumer {
 
     private final CaseOcrService caseOcrService;
     private final MessageProducer messageProducer;
+    private final MissingCaseUpdateService missingCaseUpdateService;
 
     @Qualifier("ocrWebClient")
     private final WebClient ocrWebClient;
 
     @RabbitListener(queues = RabbitMQConfig.OCR_REQUEST_QUEUE, concurrency = "2-3")
+    @Transactional
     public void consumeOcrRequest(OcrRequestMessage message, Message rawMessage) {
         // RetryListener에서 설정한 재시도 횟수 확인
         int actualRetryCount = RabbitMQConfig.RetryContextHolder.getRetryCount();
@@ -59,7 +63,10 @@ public class OcrConsumer {
                 );
             }
 
-            // 4. finalize-queue로 발행
+            // 4. OCR 데이터를 MissingCase에 즉시 저장
+            missingCaseUpdateService.updateOcrDataOnly(message.getCaseId(), parsedData);
+
+            // 5. finalize-queue로 발행
             FinalizeMessage finalizeMsg = FinalizeMessage.builder()
                 .requestId(message.getRequestId())
                 .blogUrl(message.getPostUrl())
@@ -74,7 +81,7 @@ public class OcrConsumer {
 
             messageProducer.sendToFinalizeQueue(finalizeMsg);
 
-            log.info("✅ OCR 처리 완료, finalize-queue로 발행: requestId={}, caseId={}",
+            log.info("✅ OCR 처리 완료, DB 저장 완료, finalize-queue로 발행: requestId={}, caseId={}",
                 message.getRequestId(), message.getCaseId());
 
         } catch (OcrResultInvalidException e) {

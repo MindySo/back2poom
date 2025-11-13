@@ -75,6 +75,9 @@ public class DlqRetryScheduler {
                 // DLQ 재시도 횟수 확인
                 int dlqRetryCount = getDlqRetryCount(message);
 
+                log.info("📊 DLQ 메시지 처리 중: queue={}, messageId={}, 현재 DLQ 재시도 횟수={}",
+                    originalQueue, message.getMessageProperties().getMessageId(), dlqRetryCount);
+
                 if (dlqRetryCount >= MAX_DLQ_RETRY_COUNT) {
                     // 최대 재시도 횟수 초과 → 영구 실패
                     log.warn("⚠️ 최대 DLQ 재시도 횟수 초과 ({}회), 영구 실패 처리: queue={}, messageId={}",
@@ -89,11 +92,14 @@ public class DlqRetryScheduler {
                 // DLQ 재시도 횟수 증가
                 incrementDlqRetryCount(message, dlqRetryCount);
 
+                log.info("🔄 DLQ 재시도 횟수 증가: {}회 → {}회, queue={}, messageId={}",
+                    dlqRetryCount, dlqRetryCount + 1, originalQueue, message.getMessageProperties().getMessageId());
+
                 // 원래 큐로 재발행
                 try {
                     rabbitTemplate.send(originalQueue, message);
                     requeued++;
-                    log.info("✅ DLQ 메시지 재발행 성공: queue={}, dlqRetryCount={}, messageId={}",
+                    log.info("✅ DLQ 메시지 재발행 성공: queue={}, 다음 DLQ 재시도 횟수={}, messageId={}",
                         originalQueue, dlqRetryCount + 1, message.getMessageProperties().getMessageId());
                 } catch (Exception e) {
                     log.error("❌ DLQ 메시지 재발행 실패: queue={}, messageId={}",
@@ -148,10 +154,36 @@ public class DlqRetryScheduler {
 
     /**
      * DLQ 재시도 횟수 조회
+     * - 커스텀 헤더 우선
+     * - 없으면 x-death 헤더에서 count 확인 (폴백)
      */
     private int getDlqRetryCount(Message message) {
+        // 1. 커스텀 헤더에서 조회
         Integer count = message.getMessageProperties().getHeader(DLQ_RETRY_COUNT_HEADER);
-        return count != null ? count : 0;
+        if (count != null) {
+            log.debug("커스텀 헤더에서 DLQ 재시도 횟수 조회: {}", count);
+            return count;
+        }
+
+        // 2. x-death 헤더에서 count 조회 (폴백)
+        @SuppressWarnings("unchecked")
+        java.util.List<Map<String, Object>> xDeathHeader =
+            (java.util.List<Map<String, Object>>) message.getMessageProperties().getHeader("x-death");
+
+        if (xDeathHeader != null && !xDeathHeader.isEmpty()) {
+            Map<String, Object> firstDeath = xDeathHeader.get(0);
+            Long deathCount = (Long) firstDeath.get("count");
+            if (deathCount != null) {
+                // x-death의 count는 DLQ에 들어간 총 횟수
+                // 첫 실패는 0회, 그 다음부터 1회, 2회...로 계산
+                int retryCount = deathCount.intValue() - 1;
+                log.debug("x-death 헤더에서 DLQ 재시도 횟수 계산: count={}, retryCount={}", deathCount, retryCount);
+                return Math.max(0, retryCount);
+            }
+        }
+
+        log.debug("DLQ 재시도 횟수를 찾을 수 없음, 0으로 반환");
+        return 0;
     }
 
     /**
@@ -226,7 +258,7 @@ public class DlqRetryScheduler {
 
         // 큐 이름으로 실패 사유 추정
         if (originalQueue.contains("finalize")) {
-            return "최종 업데이트 불가";
+            return "위경도 변환 불가";
         } else if (originalQueue.contains("ocr")) {
             return "OCR 처리 불가";
         } else if (originalQueue.contains("crawling")) {

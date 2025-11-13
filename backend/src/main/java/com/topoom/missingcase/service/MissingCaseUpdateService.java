@@ -32,33 +32,49 @@ public class MissingCaseUpdateService {
     private final KakaoClient kakaoClient;
 
     /**
-     * OCR 파싱 데이터로 MissingCase 업데이트 (전체 프로세스)
+     * OCR 데이터만 업데이트 (OcrConsumer에서 호출)
+     */
+    @Transactional
+    public void updateOcrDataOnly(Long caseId, Map<String, Object> parsedOcrData) {
+        log.info("OCR 데이터 업데이트 시작: caseId={}", caseId);
+
+        MissingCase missingCase = missingCaseRepository.findById(caseId)
+            .orElseThrow(() -> new RuntimeException("MissingCase를 찾을 수 없습니다: " + caseId));
+
+        updateFromOcrData(missingCase, parsedOcrData);
+        missingCaseRepository.save(missingCase);
+
+        log.info("💾 OCR 데이터 DB 저장 완료: caseId={}, personName={}, age={}, gender={}",
+            caseId, missingCase.getPersonName(), missingCase.getCurrentAge(), missingCase.getGender());
+    }
+
+    /**
+     * 최종 업데이트 (좌표 변환 & 메인 이미지 설정)
+     * 주의: OCR 데이터는 OcrConsumer에서 이미 저장됨
      */
     @Transactional
     public void finalizeUpdate(Long caseId, Map<String, Object> parsedOcrData) {
-        log.info("MissingCase 최종 업데이트 시작: caseId={}", caseId);
+        log.info("MissingCase 최종 업데이트 시작 (좌표 변환 & 메인 이미지 설정): caseId={}", caseId);
 
         // 1. MissingCase 조회
         MissingCase missingCase = missingCaseRepository.findById(caseId)
             .orElseThrow(() -> new RuntimeException("MissingCase를 찾을 수 없습니다: " + caseId));
 
-        // 2. OCR 파싱 데이터로 업데이트
-        updateFromOcrData(missingCase, parsedOcrData);
-
-        // 3. 좌표 변환 (Kakao API)
+        // 2. 좌표 변환 (Kakao API)
         updateCoordinates(missingCase);
 
-        // 4. 메인 이미지 설정
+        // 3. 메인 이미지 설정
         setMainImage(missingCase);
 
-        // 5. 최종 필수값 검증 (이름, 성별, 나이, 위도, 경도)
+        // 4. 최종 필수값 검증 (이름, 성별, 나이, 위도, 경도)
         validateRequiredFields(missingCase);
 
-        // 6. 저장
+        // 5. 저장
         missingCaseRepository.save(missingCase);
 
-        log.info("✅ MissingCase 최종 업데이트 완료: caseId={}, personName={}, location={}",
-            caseId, missingCase.getPersonName(), missingCase.getOccurredLocation());
+        log.info("✅ MissingCase 최종 업데이트 완료: caseId={}, personName={}, location={}, lat={}, lng={}",
+            caseId, missingCase.getPersonName(), missingCase.getOccurredLocation(),
+            missingCase.getLatitude(), missingCase.getLongitude());
     }
 
     /**

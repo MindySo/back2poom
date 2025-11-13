@@ -45,44 +45,44 @@ ALTER TABLE missing_case AUTO_INCREMENT = 10000;
 
 
 -- =========================================================
--- case_contact 초기 데이터 (총 16건 - 이춘자, 김영해, 이종만 다중 연락처 포함)
+-- case_contact 초기 데이터
 -- =========================================================
 INSERT IGNORE INTO case_contact (
-    case_id, organization, phone_number, source_url, source_title,
+    id, case_id, organization, phone_number, source_url, source_title,
     crawled_at, created_at, updated_at
 ) VALUES
 -- 1 배선희
-(1, '전남나주경찰서', '010-4778-7600', 'https://blog.naver.com/PostView.naver?blogId=safe182pol&logNo=222899905507&parentCategoryNo=&categoryNo=11&viewDate=&isShowPopularPosts=false&from=', '실종경보(배선희)', now(), now(), now()),
+(1, 1, '전남나주경찰서', '010-4778-7600', 'https://blog.naver.com/PostView.naver?blogId=safe182pol&logNo=222899905507&parentCategoryNo=&categoryNo=11&viewDate=&isShowPopularPosts=false&from=', '실종경보(배선희)', now(), now(), now()),
 -- 2 이순남
-(2, '경기남부청 안양만안경찰서 실종수사팀', '010-9149-2935', 'https://blog.naver.com/PostView.naver?blogId=safe182pol&logNo=222890802148&parentCategoryNo=&categoryNo=11&viewDate=&isShowPopularPosts=false&from=', '실종경보(이순남)', now(), now(), now()),
--- 3 이춘자 (전화번호 개행 문자 제거)
-(3, '강원정선경찰서 실종수사팀', '010-6375-1361', 'https://blog.naver.com/PostView.naver?blogId=safe182pol&logNo=222840565637&parentCategoryNo=&categoryNo=11&viewDate=&isShowPopularPosts=false&from=', '실종경보(이춘자)', now(), now(), now()),
-(3, '강원정선경찰서 실종수사팀', '033-560-5267', 'https://blog.naver.com/PostView.naver?blogId=safe182pol&logNo=222840565637&parentCategoryNo=&categoryNo=11&viewDate=&isShowPopularPosts=false&from=', '실종경보(이춘자)', now(), now(), now()),
-(3, '강원정선경찰서 실종수사팀', '033-560-5367', 'https://blog.naver.com/PostView.naver?blogId=safe182pol&logNo=222840565637&parentCategoryNo=&categoryNo=11&viewDate=&isShowPopularPosts=false&from=', '실종경보(이춘자)', now(), now(), now()),
+(2, 2, '경기남부청 안양만안경찰서 실종수사팀', '010-9149-2935', 'https://blog.naver.com/PostView.naver?blogId=safe182pol&logNo=222890802148&parentCategoryNo=&categoryNo=11&viewDate=&isShowPopularPosts=false&from=', '실종경보(이순남)', now(), now(), now()),
+-- 3 이춘자
+(3, 3, '강원정선경찰서 실종수사팀', '010-6375-1361', 'https://blog.naver.com/PostView.naver?blogId=safe182pol&logNo=222840565637&parentCategoryNo=&categoryNo=11&viewDate=&isShowPopularPosts=false&from=', '실종경보(이춘자)', now(), now(), now()),
+(4, 3, '강원정선경찰서 실종수사팀', '033-560-5267', 'https://blog.naver.com/PostView.naver?blogId=safe182pol&logNo=222840565637&parentCategoryNo=&categoryNo=11&viewDate=&isShowPopularPosts=false&from=', '실종경보(이춘자)', now(), now(), now()),
+(5, 3, '강원정선경찰서 실종수사팀', '033-560-5367', 'https://blog.naver.com/PostView.naver?blogId=safe182pol&logNo=222840565637&parentCategoryNo=&categoryNo=11&viewDate=&isShowPopularPosts=false&from=', '실종경보(이춘자)', now(), now(), now()),
 -- 4 정대석
-(4, '전남경찰청 순천경찰서 실종수사팀', '010-8979-0339', 'https://blog.naver.com/PostView.naver?blogId=safe182pol&logNo=222813020812&parentCategoryNo=&categoryNo=11&viewDate=&isShowPopularPosts=false&from=', '실종경보(정대석)', now(), now(), now()),
+(6, 4, '전남경찰청 순천경찰서 실종수사팀', '010-8979-0339', 'https://blog.naver.com/PostView.naver?blogId=safe182pol&logNo=222813020812&parentCategoryNo=&categoryNo=11&viewDate=&isShowPopularPosts=false&from=', '실종경보(정대석)', now(), now(), now()),
 -- 5 김순식
-(5, '경기 평택경찰서 실종수사팀', '010-6885-0564', 'https://blog.naver.com/PostView.naver?blogId=safe182pol&logNo=222766294811&parentCategoryNo=&categoryNo=11&viewDate=&isShowPopularPosts=false&from=', '실종경보(김순식)', now(), now(), now()),
+(7, 5, '경기 평택경찰서 실종수사팀', '010-6885-0564', 'https://blog.naver.com/PostView.naver?blogId=safe182pol&logNo=222766294811&parentCategoryNo=&categoryNo=11&viewDate=&isShowPopularPosts=false&from=', '실종경보(김순식)', now(), now(), now()),
 -- 6 이의오
-(6, '광주 광주서부경찰서 실종수사팀', '010-9993-1150', 'https://blog.naver.com/PostView.naver?blogId=safe182pol&logNo=222729706269&parentCategoryNo=&categoryNo=11&viewDate=&isShowPopularPosts=false&from=', '실종경보(이의오)', now(), now(), now()),
+(8, 6, '광주 광주서부경찰서 실종수사팀', '010-9993-1150', 'https://blog.naver.com/PostView.naver?blogId=safe182pol&logNo=222729706269&parentCategoryNo=&categoryNo=11&viewDate=&isShowPopularPosts=false&from=', '실종경보(이의오)', now(), now(), now()),
 -- 7 김영해
-(7, '강원청 삼척경찰서 실종팀', '010-6885-2059', 'https://blog.naver.com/PostView.naver?blogId=safe182pol&logNo=222685320535&parentCategoryNo=&categoryNo=11&viewDate=&isShowPopularPosts=false&from=', '실종경보(김영해)', now(), now(), now()),
-(7, '강원청 삼척경찰서 실종팀', '033-571-2260', 'https://blog.naver.com/PostView.naver?blogId=safe182pol&logNo=222685320535&parentCategoryNo=&categoryNo=11&viewDate=&isShowPopularPosts=false&from=', '실종경보(김영해)', now(), now(), now()),
+(9, 7, '강원청 삼척경찰서 실종팀', '010-6885-2059', 'https://blog.naver.com/PostView.naver?blogId=safe182pol&logNo=222685320535&parentCategoryNo=&categoryNo=11&viewDate=&isShowPopularPosts=false&from=', '실종경보(김영해)', now(), now(), now()),
+(10, 7, '강원청 삼척경찰서 실종팀', '033-571-2260', 'https://blog.naver.com/PostView.naver?blogId=safe182pol&logNo=222685320535&parentCategoryNo=&categoryNo=11&viewDate=&isShowPopularPosts=false&from=', '실종경보(김영해)', now(), now(), now()),
 -- 8 이종만
-(8, '강원청 삼척경찰서 실종팀', '010-6885-2059', 'https://blog.naver.com/PostView.naver?blogId=safe182pol&logNo=222685310085&parentCategoryNo=&categoryNo=11&viewDate=&isShowPopularPosts=false&from=', '실종경보(이종만)', now(), now(), now()),
-(8, '강원청 삼척경찰서 실종팀', '033-571-2260', 'https://blog.naver.com/PostView.naver?blogId=safe182pol&logNo=222685310085&parentCategoryNo=&categoryNo=11&viewDate=&isShowPopularPosts=false&from=', '실종경보(이종만)', now(), now(), now()),
+(11, 8, '강원청 삼척경찰서 실종팀', '010-6885-2059', 'https://blog.naver.com/PostView.naver?blogId=safe182pol&logNo=222685310085&parentCategoryNo=&categoryNo=11&viewDate=&isShowPopularPosts=false&from=', '실종경보(이종만)', now(), now(), now()),
+(12, 8, '강원청 삼척경찰서 실종팀', '033-571-2260', 'https://blog.naver.com/PostView.naver?blogId=safe182pol&logNo=222685310085&parentCategoryNo=&categoryNo=11&viewDate=&isShowPopularPosts=false&from=', '실종경보(이종만)', now(), now(), now()),
 -- 9 박홍연
-(9, '전북청 군산경찰서 실종수사팀', '010-6885-8486', 'https://blog.naver.com/PostView.naver?blogId=safe182pol&logNo=222668508659&parentCategoryNo=&categoryNo=11&viewDate=&isShowPopularPosts=false&from=', '실종경보(박홍연)', now(), now(), now()),
+(13, 9, '전북청 군산경찰서 실종수사팀', '010-6885-8486', 'https://blog.naver.com/PostView.naver?blogId=safe182pol&logNo=222668508659&parentCategoryNo=&categoryNo=11&viewDate=&isShowPopularPosts=false&from=', '실종경보(박홍연)', now(), now(), now()),
 -- 10 이강릉
-(10, '강원 정선경찰서 실종수사팀', '010-6885-2129', 'https://blog.naver.com/PostView.naver?blogId=safe182pol&logNo=222543932573&parentCategoryNo=&categoryNo=11&viewDate=&isShowPopularPosts=false&from=', '실종경보(이강릉)', now(), now(), now()),
+(14, 10, '강원 정선경찰서 실종수사팀', '010-6885-2129', 'https://blog.naver.com/PostView.naver?blogId=safe182pol&logNo=222543932573&parentCategoryNo=&categoryNo=11&viewDate=&isShowPopularPosts=false&from=', '실종경보(이강릉)', now(), now(), now()),
 -- 11 이재선
-(11, '제주청 제주동부경찰서 실종팀', '010-6885-6527', 'https://blog.naver.com/PostView.naver?blogId=safe182pol&logNo=222543047063&parentCategoryNo=&categoryNo=11&viewDate=&isShowPopularPosts=false&from=', '실종경보(이재선)', now(), now(), now()),
+(15, 11, '제주청 제주동부경찰서 실종팀', '010-6885-6527', 'https://blog.naver.com/PostView.naver?blogId=safe182pol&logNo=222543047063&parentCategoryNo=&categoryNo=11&viewDate=&isShowPopularPosts=false&from=', '실종경보(이재선)', now(), now(), now()),
 -- 12 김도일
-(12, '충남경찰청 아산경찰서', '010-6885-3655', 'https://blog.naver.com/PostView.naver?blogId=safe182pol&logNo=222533693890&parentCategoryNo=&categoryNo=11&viewDate=&isShowPopularPosts=false&from=', '실종경보(김도일)', now(), now(), now()),
+(16, 12, '충남경찰청 아산경찰서', '010-6885-3655', 'https://blog.naver.com/PostView.naver?blogId=safe182pol&logNo=222533693890&parentCategoryNo=&categoryNo=11&viewDate=&isShowPopularPosts=false&from=', '실종경보(김도일)', now(), now(), now()),
 -- 13 김영수
-(13, '서울 송파경찰서 실종수사팀', '010-6885-6923', 'https://blog.naver.com/PostView.naver?blogId=safe182pol&logNo=222439556210&parentCategoryNo=&categoryNo=11&viewDate=&isShowPopularPosts=false&from=', '실종경보(김영수)', now(), now(), now()),
+(17, 13, '서울 송파경찰서 실종수사팀', '010-6885-6923', 'https://blog.naver.com/PostView.naver?blogId=safe182pol&logNo=222439556210&parentCategoryNo=&categoryNo=11&viewDate=&isShowPopularPosts=false&from=', '실종경보(김영수)', now(), now(), now()),
 -- 14 김현빈
-(14, '성남중원경찰서 실종수사팀', '031-8063-5278', 'https://blog.naver.com/PostView.naver?blogId=safe182pol&logNo=222391104274&parentCategoryNo=&categoryNo=11&viewDate=&isShowPopularPosts=false&from=', '실종경보(김현빈)', now(), now(), now());
+(18, 14, '성남중원경찰서 실종수사팀', '031-8063-5278', 'https://blog.naver.com/PostView.naver?blogId=safe182pol&logNo=222391104274&parentCategoryNo=&categoryNo=11&viewDate=&isShowPopularPosts=false&from=', '실종경보(김현빈)', now(), now(), now());
 
 -- =========================================================
 
@@ -179,23 +179,23 @@ ALTER TABLE case_file AUTO_INCREMENT = 100000;
 -- 설명: 크롤링 실패로 수기 관리가 필요한 케이스들
 
 INSERT IGNORE INTO manual_managing_missing_case (
-    missing_case_id, source_title, occurred_at, crawled_at, failure_reason,
+    id, missing_case_id, source_title, occurred_at, crawled_at, failure_reason,
     created_at, updated_at
 ) VALUES
-(1, '실종경보(배선희)', '2022-05-08 00:00:00', '2022-05-08 00:00:00', '게시글 크롤링 불가', now(), now()),
-(2, '실종경보(이순남)', '2022-10-02 00:00:00', '2022-10-02 00:00:00', '게시글 크롤링 불가', now(), now()),
-(3, '실종경보(이춘자)', '2022-08-05 00:00:00', '2022-08-05 00:00:00', '게시글 크롤링 불가', now(), now()),
-(4, '실종경보(정대석)', '2022-07-15 00:00:00', '2022-07-15 00:00:00', '게시글 크롤링 불가', now(), now()),
-(5, '실종경보(김순식)', '2022-06-08 00:00:00', '2022-06-08 00:00:00', '게시글 크롤링 불가', now(), now()),
-(6, '실종경보(이의오)', '2022-05-10 00:00:00', '2022-05-10 00:00:00', '게시글 크롤링 불가', now(), now()),
-(7, '실종경보(김영해)', '2022-02-28 00:00:00', '2022-02-28 00:00:00', '게시글 크롤링 불가', now(), now()),
-(8, '실종경보(이종만)', '2022-02-28 00:00:00', '2022-02-28 00:00:00', '게시글 크롤링 불가', now(), now()),
-(9, '실종경보(박홍연)', '2022-03-07 00:00:00', '2022-03-07 00:00:00', '게시글 크롤링 불가', now(), now()),
-(10, '실종경보(이강릉)', '2021-10-19 00:00:00', '2021-10-19 00:00:00', '게시글 크롤링 불가', now(), now()),
-(11, '실종경보(이재선)', '2021-10-20 00:00:00', '2021-10-20 00:00:00', '게시글 크롤링 불가', now(), now()),
-(12, '실종경보(김도일)', '2021-10-09 00:00:00', '2021-10-09 00:00:00', '게시글 크롤링 불가', now(), now()),
-(13, '실종경보(김영수)', '2021-07-20 00:00:00', '2021-07-20 00:00:00', '게시글 크롤링 불가', now(), now()),
-(14, '실종경보(김현빈)', '2021-05-23 00:00:00', '2021-05-23 00:00:00', '게시글 크롤링 불가', now(), now());
+(1, 1, '실종경보(배선희)', '2022-05-08 00:00:00', '2022-05-08 00:00:00', '게시글 크롤링 불가', now(), now()),
+(2, 2, '실종경보(이순남)', '2022-10-02 00:00:00', '2022-10-02 00:00:00', '게시글 크롤링 불가', now(), now()),
+(3, 3, '실종경보(이춘자)', '2022-08-05 00:00:00', '2022-08-05 00:00:00', '게시글 크롤링 불가', now(), now()),
+(4, 4, '실종경보(정대석)', '2022-07-15 00:00:00', '2022-07-15 00:00:00', '게시글 크롤링 불가', now(), now()),
+(5, 5, '실종경보(김순식)', '2022-06-08 00:00:00', '2022-06-08 00:00:00', '게시글 크롤링 불가', now(), now()),
+(6, 6, '실종경보(이의오)', '2022-05-10 00:00:00', '2022-05-10 00:00:00', '게시글 크롤링 불가', now(), now()),
+(7, 7, '실종경보(김영해)', '2022-02-28 00:00:00', '2022-02-28 00:00:00', '게시글 크롤링 불가', now(), now()),
+(8, 8, '실종경보(이종만)', '2022-02-28 00:00:00', '2022-02-28 00:00:00', '게시글 크롤링 불가', now(), now()),
+(9, 9, '실종경보(박홍연)', '2022-03-07 00:00:00', '2022-03-07 00:00:00', '게시글 크롤링 불가', now(), now()),
+(10, 10, '실종경보(이강릉)', '2021-10-19 00:00:00', '2021-10-19 00:00:00', '게시글 크롤링 불가', now(), now()),
+(11, 11, '실종경보(이재선)', '2021-10-20 00:00:00', '2021-10-20 00:00:00', '게시글 크롤링 불가', now(), now()),
+(12, 12, '실종경보(김도일)', '2021-10-09 00:00:00', '2021-10-09 00:00:00', '게시글 크롤링 불가', now(), now()),
+(13, 13, '실종경보(김영수)', '2021-07-20 00:00:00', '2021-07-20 00:00:00', '게시글 크롤링 불가', now(), now()),
+(14, 14, '실종경보(김현빈)', '2021-05-23 00:00:00', '2021-05-23 00:00:00', '게시글 크롤링 불가', now(), now());
 
 -- =========================================================
 -- 외래키 검사 재활성화
