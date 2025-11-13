@@ -7,7 +7,7 @@ import logo from '../../../assets/poom_logo.png';
 import { useNavigate } from 'react-router-dom';
 import Text from '../../common/atoms/Text';
 import Badge from '../../common/atoms/Badge';
-import HelpCaption from '../HelpCaption/HelpCaption';
+import HelpCaption from '../../common/molecules/HelpCaption/HelpCaption';
 import ImageCarousel from '../../common/molecules/ImageCarousel/ImageCarousel';
 import type { ImageFile } from '../../../types/missing';
 
@@ -130,7 +130,13 @@ const Dashboard: React.FC<DashboardProps> = ({ isOpen, onClose, missingId }) => 
           </div>
 
           {/* 우측 상단 HelpCaption */}
-          <HelpCaption>
+          <HelpCaption
+            inactiveColor="#a5a5a5"
+            activeColor={theme.colors.gray}
+            hoverColor={theme.colors.gray}
+            tooltipBackgroundColor={theme.colors.white}
+            tooltipTextColor={theme.colors.darkMain}
+          >
             <Text as="div" size="xs" weight="bold">지도 범례</Text>
             <Text as="div" size="xs" style={{ marginTop: '0.4rem', lineHeight: '1.4' }}>
               • 마커와 이동반경은 실종 후 <strong>24시간 이내</strong>인 경우만 표시됩니다.

@@ -3,7 +3,7 @@ import { theme } from '../../../theme';
 import Text from '../../common/atoms/Text';
 import styles from './StatusBoard.module.css';
 import { useMissingStats } from '../../../hooks';
-import HelpCaption from '../HelpCaption/HelpCaption';
+import HelpCaption from '../../common/molecules/HelpCaption/HelpCaption';
 
 export interface StatusData {
   label: string;
@@ -15,6 +15,14 @@ export interface StatusBoardProps {
   textColor?: keyof typeof theme.colors;
   borderColor?: string;
   padding?: string;
+  helpCaptionInactiveColor?: string;
+  helpCaptionActiveColor?: string;
+  helpCaptionHoverColor?: string;
+  helpCaptionTooltipBackgroundColor?: string;
+  helpCaptionTooltipTextColor?: string;
+  helpCaptionMargin?: string;
+  helpCaptionTooltipCentered?: boolean;
+  helpCaptionShowOverlay?: boolean;
 }
 
 const StatusBoard: React.FC<StatusBoardProps> = ({
@@ -22,6 +30,14 @@ const StatusBoard: React.FC<StatusBoardProps> = ({
   textColor = 'darkMain',
   borderColor = '#2B3A55',
   padding = '2.25rem 1.5rem 1.5rem',
+  helpCaptionInactiveColor = '#a5a5a5',
+  helpCaptionActiveColor = theme.colors.gray,
+  helpCaptionHoverColor = theme.colors.gray,
+  helpCaptionTooltipBackgroundColor = theme.colors.white,
+  helpCaptionTooltipTextColor = theme.colors.darkMain,
+  helpCaptionMargin = '0',
+  helpCaptionTooltipCentered = false,
+  helpCaptionShowOverlay = false,
 }) => {
   // 커스텀 훅 사용
   const { data: stats, isLoading } = useMissingStats();
@@ -61,7 +77,16 @@ const StatusBoard: React.FC<StatusBoardProps> = ({
         >
           실종자 현황판
         </Text>
-        <HelpCaption>
+        <HelpCaption
+          inactiveColor={helpCaptionInactiveColor}
+          activeColor={helpCaptionActiveColor}
+          hoverColor={helpCaptionHoverColor}
+          tooltipBackgroundColor={helpCaptionTooltipBackgroundColor}
+          tooltipTextColor={helpCaptionTooltipTextColor}
+          margin={helpCaptionMargin}
+          tooltipCentered={helpCaptionTooltipCentered}
+          showOverlay={helpCaptionShowOverlay}
+        >
           <Text size="sm" weight="semiBold" color="darkMain" as="p" style={{ marginBottom: '0.5rem' }}>
             실종자 현황판 안내
           </Text>

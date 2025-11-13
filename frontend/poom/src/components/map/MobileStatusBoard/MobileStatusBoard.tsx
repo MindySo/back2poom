@@ -1,4 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
+import { theme } from '../../../theme';
 import StatusBoard, { type StatusBoardProps } from '../StatusBoard/StatusBoard';
 import styles from './MobileStatusBoard.module.css';
 
@@ -112,6 +113,12 @@ const MobileStatusBoard: React.FC<MobileStatusBoardProps> = ({
           textColor={textColor}
           borderColor={borderColor}
           padding={padding}
+          helpCaptionInactiveColor="#ccccccff"
+          helpCaptionActiveColor={theme.colors.white}
+          helpCaptionHoverColor={theme.colors.white}
+          helpCaptionTooltipBackgroundColor={theme.colors.white}
+          helpCaptionTooltipTextColor={theme.colors.darkMain}
+          helpCaptionMargin="0 20px 0 0"
           className={styles.statusBoardOverride}
         />
       </div>

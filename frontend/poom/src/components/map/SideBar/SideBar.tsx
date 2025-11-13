@@ -25,7 +25,14 @@ const SideBar: React.FC<SideBarProps> = ({ className = '', onMissingCardClick })
       }}
     >
       {/* 현황판 */}
-      <StatusBoard />
+      <StatusBoard
+        helpCaptionInactiveColor="#a5a5a5"
+        helpCaptionActiveColor={theme.colors.gray}
+        helpCaptionHoverColor={theme.colors.gray}
+        helpCaptionTooltipBackgroundColor={theme.colors.white}
+        helpCaptionTooltipTextColor={theme.colors.darkMain}
+        helpCaptionMargin="0"
+      />
 
       {/* 최신 실종자 */}
       <div className={styles.recentMissingHeader}>
