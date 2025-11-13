@@ -52,7 +52,13 @@ export const useShareMissingPerson = () => {
       `이름: ${personName}`,
       `나이: ${ageAtTime}세`,
       `성별: ${gender ?? '성별 미상'}`,
-      `발생일: ${new Date(occurredAt).toISOString().slice(0, 10)}`,
+      `발생일: ${(() => {
+        const date = new Date(occurredAt);
+        const year = date.getFullYear();
+        const month = String(date.getMonth() + 1).padStart(2, '0');
+        const day = String(date.getDate()).padStart(2, '0');
+        return `${year}-${month}-${day}`;
+      })()}`,
       `발생장소: ${occurredLocation}`,
       ``,
       `자세한 정보는 '품으로'에서 확인해주세요: ${shareUrl}`,

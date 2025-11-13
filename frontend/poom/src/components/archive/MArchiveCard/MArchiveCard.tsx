@@ -73,7 +73,11 @@ const MArchiveCard: React.FC<MArchiveCardProps> = ({ personId }) => {
     if (!dateString) return '-';
     const date = new Date(dateString);
     if (isNaN(date.getTime())) return '-';
-    return date.toISOString().slice(0, 10);
+    // 로컬 시간대의 날짜를 직접 포맷팅하여 시간대 변환 문제 방지
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
   };
 
   // 이미지 URL 가져오기
@@ -177,10 +181,16 @@ const MArchiveCard: React.FC<MArchiveCardProps> = ({ personId }) => {
               size="small" 
               className={styles['m-archive-card__primaryBtn']}
               onClick={() => {
+                // phoneNumber를 배열로 변환 (배열이 아니면 배열로 만들기)
+                const phoneNumbers = phoneNumber 
+                  ? Array.isArray(phoneNumber) 
+                    ? phoneNumber 
+                    : [phoneNumber]
+                  : undefined;
                 navigate(`/report?name=${encodeURIComponent(personName)}`, {
                   state: {
                     ...(id && { id }),
-                    ...(phoneNumber && { phoneNumber }),
+                    ...(phoneNumbers && { phoneNumber: phoneNumbers }),
                   },
                 });
               }}
