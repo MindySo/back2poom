@@ -1,6 +1,7 @@
 package com.topoom.external.blog.service;
 
 import com.topoom.external.blog.dto.BlogPostInfo;
+import com.topoom.external.blog.dto.CrawlResult;
 import com.topoom.external.blog.dto.ExtractedImageInfo;
 import com.topoom.external.blog.entity.BlogPost;
 import com.topoom.external.blog.repository.BlogPostRepository;
@@ -25,6 +26,7 @@ import java.util.*;
 import java.util.function.Function;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -52,7 +54,7 @@ public class IntegratedBlogCrawlingService {
 
 
     /** 카테고리 목록만 크롤링 & 저장 */
-    public List<BlogPostInfo> crawlCategoryPostsWithSelenium(String blogId, String categoryNo) {
+    public CrawlResult crawlCategoryPostsWithSelenium(String blogId, String categoryNo) {
         return withDriver(driver -> {
             String categoryUrl = String.format(
                     "https://blog.naver.com/PostList.naver?blogId=%s&categoryNo=%s",
@@ -65,7 +67,28 @@ public class IntegratedBlogCrawlingService {
             List<BlogPostInfo> blogPosts = crawlBlogPostList(driver, blogId, categoryNo);
             List<BlogPost> saved = saveBlogPostsToDatabase(blogPosts);
             log.info("카테고리 크롤링 완료: found={}, saved={}", blogPosts.size(), saved.size());
-            return blogPosts;
+
+            // 수동 관리 케이스 URL 목록 조회
+            Set<String> manualManagedUrls = new HashSet<>(missingCaseRepository.findSourceUrlsByManualManaged());
+            log.info("수동 관리 케이스 제외: {}건", manualManagedUrls.size());
+
+            // 새로 저장된 BlogPost에 해당하는 BlogPostInfo만 필터링
+            Set<String> savedUrls = saved.stream()
+                    .map(BlogPost::getSourceUrl)
+                    .collect(Collectors.toSet());
+
+            // 새로운 게시글 중 수동 관리 케이스 제외
+            List<BlogPostInfo> newPosts = blogPosts.stream()
+                    .filter(info -> savedUrls.contains(info.getPostUrl()))
+                    .filter(info -> !manualManagedUrls.contains(info.getPostUrl()))
+                    .collect(Collectors.toList());
+
+            log.info("새로운 게시글: {}건 (전체 {}건 중, 수동 관리 제외 후)", newPosts.size(), blogPosts.size());
+
+            return CrawlResult.builder()
+                    .allPosts(blogPosts)   // 전체 크롤링 결과 (삭제 프로세스용)
+                    .newPosts(newPosts)    // 새로운 게시글만 (큐 발행용)
+                    .build();
         });
     }
 
@@ -494,14 +517,14 @@ public class IntegratedBlogCrawlingService {
         }
     }
 
-    /** BlogPost 저장 (URL 기준 중복 방지) 및 새 게시글 처리 */
+    /** BlogPost 저장 (URL 기준 중복 방지) - 큐 방식으로 변경 */
     private List<BlogPost> saveBlogPostsToDatabase(List<BlogPostInfo> infos) {
         List<BlogPost> saved = new ArrayList<>();
         for (BlogPostInfo info : infos) {
             try {
                 String urlHash = generateUrlHash(info.getPostUrl());
                 if (!blogPostRepository.existsByUrlHash(urlHash)) {
-                    // 1. BlogPost 저장
+                    // BlogPost만 저장 (나머지 처리는 큐에서 수행)
                     BlogPost entity = BlogPost.builder()
                             .sourceTitle(info.getTitle())
                             .sourceUrl(info.getPostUrl())
@@ -510,15 +533,7 @@ public class IntegratedBlogCrawlingService {
                             .build();
                     BlogPost savedPost = blogPostRepository.save(entity);
                     saved.add(savedPost);
-
-                    // 2. 새 게시글 발견 -> MissingCase 생성 및 이미지 크롤링
-                    try {
-                        Long caseId = createMissingCaseFromBlogPost(info);
-                        crawlImagesForNewPost(info.getPostUrl(), caseId);
-                        log.info("새 게시글 처리 완료: title={}, caseId={}", info.getTitle(), caseId);
-                    } catch (Exception e) {
-                        log.error("새 게시글 처리 실패: title={}, url={}", info.getTitle(), info.getPostUrl(), e);
-                    }
+                    log.info("새 게시글 발견: title={}, url={}", info.getTitle(), info.getPostUrl());
                 }
             } catch (Exception e) {
                 log.error("BlogPost 저장 실패: title={}, url={}", info.getTitle(), info.getPostUrl(), e);
@@ -528,7 +543,7 @@ public class IntegratedBlogCrawlingService {
     }
 
     /** 새 게시글로부터 MissingCase 생성 (크롤링 정보만) */
-    private Long createMissingCaseFromBlogPost(BlogPostInfo info) {
+    public Long createMissingCaseFromBlogPost(BlogPostInfo info) {
         try {
             // 크롤링 정보만으로 MissingCase 생성 (나머지 필드는 null)
             MissingCase missingCase = MissingCase.builder()
@@ -563,7 +578,7 @@ public class IntegratedBlogCrawlingService {
                     .build();
 
             MissingCase saved = missingCaseRepository.save(missingCase);
-            log.info("MissingCase 생성 완료: id={}, title={}", saved.getId(), info.getTitle());
+                log.info("MissingCase 생성 완료: id={}, title={}", saved.getId(), info.getTitle());
             return saved.getId();
 
         } catch (Exception e) {

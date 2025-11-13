@@ -58,6 +58,11 @@ public class OcrRequestMessage implements Serializable {
     private String lastImageS3Key;
 
     /**
+     * MissingCase ID (FinalizeConsumer에서 사용)
+     */
+    private Long caseId;
+
+    /**
      * 재시도 횟수 (RabbitMQ retry에서 자동 증가)
      */
     @Builder.Default

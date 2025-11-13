@@ -19,16 +19,7 @@ public class MessageProducer {
     private final RabbitTemplate rabbitTemplate;
 
     /**
-     * crawling-queue에 메시지 발행 (기존 - 이미지 크롤링용)
-     */
-    public void sendToCrawlingQueue(CrawlingMessage message) {
-        log.info("발행: crawling-queue - requestId={}, blogUrl={}",
-            message.getRequestId(), message.getBlogUrl());
-        rabbitTemplate.convertAndSend(RabbitMQConfig.CRAWLING_QUEUE, message);
-    }
-
-    /**
-     * crawling-queue에 블로그 게시글 크롤링 메시지 발행 (신규)
+     * crawling-queue에 블로그 게시글 크롤링 메시지 발행
      */
     public void sendToBlogCrawlingQueue(BlogCrawlingMessage message) {
         log.info("발행: crawling-queue - requestId={}, postUrl={}",
@@ -37,29 +28,11 @@ public class MessageProducer {
     }
 
     /**
-     * classification-queue에 메시지 발행
-     */
-    public void sendToClassificationQueue(ClassificationMessage message) {
-        log.info("발행: classification-queue - requestId={}, images={}",
-            message.getRequestId(), message.getClassifiedImages().size());
-        rabbitTemplate.convertAndSend(RabbitMQConfig.CLASSIFICATION_QUEUE, message);
-    }
-
-    /**
-     * s3-upload-queue에 메시지 발행
-     */
-    public void sendToS3UploadQueue(ClassificationMessage message) {
-        log.info("발행: s3-upload-queue - requestId={}, images={}",
-            message.getRequestId(), message.getClassifiedImages().size());
-        rabbitTemplate.convertAndSend(RabbitMQConfig.S3_UPLOAD_QUEUE, message);
-    }
-
-    /**
      * ocr-request-queue에 메시지 발행
      */
     public void sendToOcrQueue(OcrRequestMessage message) {
-        log.info("발행: ocr-request-queue - requestId={}, s3Key={}",
-            message.getRequestId(), message.getLastImageS3Key());
+        log.info("발행: ocr-request-queue - requestId={}, caseId={}, s3Key={}",
+            message.getRequestId(), message.getCaseId(), message.getLastImageS3Key());
         rabbitTemplate.convertAndSend(RabbitMQConfig.OCR_REQUEST_QUEUE, message);
     }
 

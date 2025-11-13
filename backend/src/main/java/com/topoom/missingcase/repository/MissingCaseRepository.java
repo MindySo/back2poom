@@ -54,4 +54,8 @@ public interface MissingCaseRepository extends JpaRepository<MissingCase, Long> 
 
     // sourceUrl로 MissingCase 조회 (삭제 여부 무관)
     Optional<MissingCase> findBySourceUrl(String sourceUrl);
+
+    // 수동 관리 케이스의 sourceUrl 목록 조회
+    @Query("SELECT mc.sourceUrl FROM MissingCase mc WHERE mc.isManualManaged = true AND mc.sourceUrl IS NOT NULL")
+    List<String> findSourceUrlsByManualManaged();
 }

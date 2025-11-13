@@ -62,4 +62,9 @@ public class FinalizeMessage implements Serializable {
      * (personName, age, gender 등)
      */
     private Map<String, Object> parsedOcrData;
+
+    /**
+     * MissingCase ID
+     */
+    private Long caseId;
 }

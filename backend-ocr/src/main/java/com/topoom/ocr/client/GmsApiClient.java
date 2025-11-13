@@ -86,8 +86,10 @@ public class GmsApiClient {
                 })
                 .bodyToMono(ChatCompletionResponse.class)
                 .map(response -> {
+                    String content = response.getChoices().get(0).getMessage().getContent();
                     log.info("GMS API 응답 성공 - 선택지 수: {}", response.getChoices().size());
-                    return response.getChoices().get(0).getMessage().getContent();
+                    log.info("📄 GMS API 응답 내용 (OCR 결과):\n{}", content);
+                    return content;
                 })
                 .doOnError(error -> log.error("GMS API 호출 실패", error));
     }
