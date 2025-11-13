@@ -11,7 +11,7 @@ interface MovementRadiusProps {
 interface MissingPersonDetail {
   id: number;
   name: string;
-  speed: number; // 초당 이동 거리 (미터 단위)
+  speed: number; // 이동 속도 (km/h 단위)
   [key: string]: any;
 }
 
@@ -34,7 +34,7 @@ const MovementRadius: React.FC<MovementRadiusProps> = ({ map, position, radius, 
 
         const data: MissingPersonDetail = await response.json();
         setSpeed(data.speed || 0);
-        console.log('[MovementRadius] API에서 speed 받아옴:', data.speed);
+        console.log('[MovementRadius] API에서 speed 받아옴:', data.speed, 'km/h (', (data.speed / 3.6).toFixed(2), 'm/s)');
       } catch (error) {
         console.error('[MovementRadius] API 호출 실패:', error);
       }
@@ -55,7 +55,9 @@ const MovementRadius: React.FC<MovementRadiusProps> = ({ map, position, radius, 
       }
 
       const elapsedSeconds = (currentTime - startTimeRef.current) / 1000;
-      const newRadius = Math.min(radius + speed * elapsedSeconds, MAX_RADIUS);
+      // speed는 km/h 단위이므로 m/s로 변환 (÷ 3.6)
+      const speedInMeterPerSecond = speed / 3.6;
+      const newRadius = Math.min(radius + speedInMeterPerSecond * elapsedSeconds, MAX_RADIUS);
 
       setCurrentRadius(newRadius);
 
@@ -111,7 +113,7 @@ const MovementRadius: React.FC<MovementRadiusProps> = ({ map, position, radius, 
     console.log('[MovementRadius] 이동반경 표시됨:', {
       position,
       currentRadius: Math.round(currentRadius),
-      speed,
+      speed: `${speed} km/h (${(speed / 3.6).toFixed(2)} m/s)`,
     });
 
     // cleanup
