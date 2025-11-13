@@ -14,7 +14,7 @@ type NavItem = {
 };
 
 const navItems: NavItem[] = [
-  { label: '실종자 지도', path: '/map' },
+  { label: '실종자 지도', path: '/' },
   { label: '실종자 목록', path: '/list' },
 ];
 
@@ -26,9 +26,7 @@ const MobileTopBar: React.FC<MobileTopBarProps> = ({ className = '' }) => {
     navigate(path);
   };
 
-  const getCurrentPath = () => {
-    return location.pathname === '/' ? '/map' : location.pathname;
-  };
+  const getCurrentPath = () => location.pathname;
 
   return (
     <header

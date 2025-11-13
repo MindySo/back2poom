@@ -28,7 +28,7 @@ const DevPage: React.FC = () => {
         flexWrap: 'wrap'
       }}>
         <Link 
-          to="/map" 
+          to="/" 
           style={{ 
             padding: '20px 30px', 
             backgroundColor: '#007bff', 

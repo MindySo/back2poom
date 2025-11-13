@@ -14,7 +14,7 @@ type NavItem = {
 };
 
 const navItems: NavItem[] = [
-  { label: '실종자 지도페이지', path: '/map' },
+  { label: '실종자 지도페이지', path: '/' },
   { label: '실종자 목록페이지', path: '/list' },
 ];
 

@@ -29,8 +29,8 @@ function AppContent() {
         className={`${styles.appContainer} ${shouldUseMobileTopBar ? styles.mobile : ''} ${isReportPage ? styles.noScroll : ''}`}
       >
         <Routes>
-          <Route path="/" element={<DevPage />} />
-          <Route path="/map" element={<MapPage />} />
+          <Route path="/dev" element={<DevPage />} />
+          <Route path="/" element={<MapPage />} />
           <Route path="/list" element={<ListPage />} />
           <Route path="/report" element={<ReportPage />} />
           <Route path="/police" element={<PoliceMapPage />} />
