@@ -7,6 +7,8 @@ import ReportQuestionStep from '../../components/report/ReportQuestionStep/Repor
 import ReportLocationInput from '../../components/report/ReportLocationInput/ReportLocationInput';
 import ReportTimeInput from '../../components/report/ReportTimeInput/ReportTimeInput';
 import ReportDetailInput from '../../components/report/ReportDetailInput/ReportDetailInput';
+import HelpCaption from '../../components/common/molecules/HelpCaption/HelpCaption';
+import { useIsMobile } from '../../hooks/useMediaQuery';
 import type { AnswerOption } from '../../components/report/ReportQuestionStep/ReportQuestionStep';
 import backIcon from '../../assets/back_icon.png';
 import styles from './ReportPage.module.css';
@@ -55,6 +57,8 @@ const confidenceLevelAnswers: AnswerOption[] = [
 
 // 각 단계 컴포넌트를 별도로 정의하여 무한 루프 방지
 const MethodStep: React.FC<{ context: any; history: any; personName: string; phoneNumber?: string }> = React.memo(({ context, history, personName, phoneNumber }) => {
+  const isMobile = useIsMobile(1024);
+  
   const handleAnswerSelect = useCallback(
     (answerId: string) => {
       // 전화로 신고하기를 선택한 경우 바로 전화 걸기
@@ -91,9 +95,25 @@ const MethodStep: React.FC<{ context: any; history: any; personName: string; pho
   return (
     <div className={styles.stepWrapper}>
       <div className={styles.stepContent}>
-        <Text size="md" color="black" className={styles.context}>
-          {personName}님을 제보하시는 군요
-        </Text>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+          <Text size="md" color="black" className={styles.context}>
+            {personName}님을 제보하시는 군요
+          </Text>
+          <HelpCaption 
+            showOverlay={isMobile}
+            tooltipCentered={isMobile}
+            size={0.9}
+          >
+            <Text size="xs" weight="regular" color="darkMain" as="p" style={{ marginBottom: '0.25rem', textAlign: isMobile ? 'center' : 'left' }}>
+              <strong>담당자 번호가 존재하는 경우</strong> <br/>
+              담당 경찰관에게 직접 통화·문자 가능
+            </Text>
+            <Text size="xs" weight="regular" color="darkMain" as="p" style={{ textAlign: isMobile ? 'center' : 'left' }}>
+              <strong>담당자 번호가 존재하지 않는 경우</strong> <br/>
+              182 센터로 연결되어 상담·제보 가능
+            </Text>
+          </HelpCaption>
+        </div>
         <ReportQuestionStep
           question="신고 방법을 선택해주세요."
           answers={availableAnswers}
@@ -460,7 +480,6 @@ const ReportPage: React.FC = () => {
   const personName = searchParams.get('name') || '실종자';
   // state에서 id와 phoneNumber 가져오기 (URL에 노출되지 않음)
   const reportState = (location.state as { id?: number; phoneNumber?: string }) || {};
-  const reportId = reportState.id;
   const reportPhoneNumber = reportState.phoneNumber;
 
   // useFunnel을 사용하여 단계 관리 (URL과 동기화)
