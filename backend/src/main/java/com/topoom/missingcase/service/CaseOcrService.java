@@ -116,12 +116,228 @@ public class CaseOcrService {
     }
 
     /**
+     * OCR 텍스트 처리 및 검증 (큐 방식용)
+     * - 전처리, 파싱, 필수값 검증까지 수행
+     * @return 파싱된 데이터 Map (필수값 검증 실패 시 null)
+     */
+    public Map<String, Object> processAndValidateOcr(String ocrText) {
+        try {
+            log.info("OCR 텍스트 처리 시작: 길이={}", ocrText != null ? ocrText.length() : 0);
+
+            // 1. 전처리
+            String cleanedText = preprocessOcrText(ocrText);
+            if (cleanedText == null) {
+                log.warn("OCR 텍스트 전처리 실패 (거부 메시지 또는 빈 값)");
+                return null;
+            }
+
+            // 2. 파싱
+            Map<String, Object> parsedData = parseOcrTextToMap(cleanedText);
+
+            // 3. 필수값 검증
+            if (!validateEssentialFields(parsedData)) {
+                log.warn("필수값 검증 실패: parsedData={}", parsedData.keySet());
+                return null;
+            }
+
+            log.info("✅ OCR 텍스트 처리 성공: 필드 수={}", parsedData.size());
+            return parsedData;
+
+        } catch (Exception e) {
+            log.error("OCR 텍스트 처리 중 오류", e);
+            return null;
+        }
+    }
+
+    /**
+     * OCR 텍스트를 Map으로 파싱 (정규식 사용)
+     */
+    private Map<String, Object> parseOcrTextToMap(String ocrText) {
+        Map<String, Object> parsed = new java.util.HashMap<>();
+
+        // 첫 줄 통합 패턴 처리
+        Matcher firstLineMatcher = FIRST_LINE_PATTERN.matcher(ocrText);
+        if (firstLineMatcher.find()) {
+            parsed.put("targetType", firstLineMatcher.group(1));
+            parsed.put("personName", firstLineMatcher.group(2));
+            parsed.put("age", Integer.parseInt(firstLineMatcher.group(3)));
+            parsed.put("gender", normalizeGender(firstLineMatcher.group(4)));
+        }
+
+        // 개별 필드 파싱 (fallback)
+        Matcher nameMatcher = NAME_PATTERN.matcher(ocrText);
+        if (nameMatcher.find() && !parsed.containsKey("personName")) {
+            parsed.put("personName", nameMatcher.group(1));
+        }
+
+        Matcher ageMatcher = AGE_PATTERN.matcher(ocrText);
+        if (ageMatcher.find() && !parsed.containsKey("age")) {
+            parsed.put("age", Integer.parseInt(ageMatcher.group(1)));
+        }
+
+        Matcher genderMatcher = GENDER_PATTERN.matcher(ocrText);
+        if (genderMatcher.find() && !parsed.containsKey("gender")) {
+            parsed.put("gender", normalizeGender(genderMatcher.group(1)));
+        }
+
+        // 발생일시
+        Matcher occurredDateMatcher = OCCURRED_DATE_PATTERN.matcher(ocrText);
+        if (occurredDateMatcher.find()) {
+            String dateStr = String.format("%s-%s-%s",
+                occurredDateMatcher.group(1),
+                occurredDateMatcher.group(2),
+                occurredDateMatcher.group(3)
+            );
+            parsed.put("occurredAt", dateStr);
+        }
+
+        // 실종장소
+        Matcher locationMatcher = LOCATION_PATTERN.matcher(ocrText);
+        if (locationMatcher.find()) {
+            parsed.put("occurredLocation", locationMatcher.group(1).trim());
+        }
+
+        // 신장
+        Matcher heightMatcher = HEIGHT_PATTERN.matcher(ocrText);
+        if (heightMatcher.find()) {
+            parsed.put("heightCm", Integer.parseInt(heightMatcher.group(1)));
+        }
+
+        // 체중
+        Matcher weightMatcher = WEIGHT_PATTERN.matcher(ocrText);
+        if (weightMatcher.find()) {
+            parsed.put("weightKg", Integer.parseInt(weightMatcher.group(1)));
+        }
+
+        // 체격
+        Matcher bodyTypeMatcher = BODY_TYPE_PATTERN.matcher(ocrText);
+        if (bodyTypeMatcher.find()) {
+            parsed.put("bodyType", bodyTypeMatcher.group(1).trim());
+        }
+
+        // 얼굴형
+        Matcher faceShapeMatcher = FACE_SHAPE_PATTERN.matcher(ocrText);
+        if (faceShapeMatcher.find()) {
+            parsed.put("faceShape", faceShapeMatcher.group(1).trim());
+        }
+
+        // 두발색상
+        Matcher hairColorMatcher = HAIR_COLOR_PATTERN.matcher(ocrText);
+        if (hairColorMatcher.find()) {
+            parsed.put("hairColor", hairColorMatcher.group(1).trim());
+        }
+
+        // 두발형태
+        Matcher hairStyleMatcher = HAIR_STYLE_PATTERN.matcher(ocrText);
+        if (hairStyleMatcher.find()) {
+            parsed.put("hairStyle", hairStyleMatcher.group(1).trim());
+        }
+
+        // 착의의상
+        Matcher clothingMatcher = CLOTHING_PATTERN.matcher(ocrText);
+        if (clothingMatcher.find()) {
+            String clothing = clothingMatcher.group(1).trim();
+            if (clothing.length() >= 2 && !clothing.matches("^(착의|의상|착의의상|착의사항)$")) {
+                parsed.put("clothingDesc", clothing);
+            }
+        }
+
+        // 특이사항
+        Matcher featuresMatcher = FEATURES_PATTERN.matcher(ocrText);
+        if (featuresMatcher.find()) {
+            parsed.put("etcFeatures", featuresMatcher.group(1).trim());
+        }
+
+        // 진행상태
+        Matcher progressStatusMatcher = PROGRESS_STATUS_PATTERN.matcher(ocrText);
+        if (progressStatusMatcher.find()) {
+            parsed.put("progressStatus", progressStatusMatcher.group(1).trim());
+        }
+
+        // 기본값 설정
+        parsed.putIfAbsent("targetType", "실종자");
+        parsed.putIfAbsent("progressStatus", "신고");
+
+        log.info("OCR 파싱 완료: 필드 수={}", parsed.size());
+        return parsed;
+    }
+
+    /**
+     * 필수값 검증: personName, age, gender 모두 있어야 true
+     */
+    private boolean validateEssentialFields(Map<String, Object> parsedData) {
+        boolean hasPersonName = parsedData.containsKey("personName") &&
+            parsedData.get("personName") != null &&
+            !parsedData.get("personName").toString().trim().isEmpty();
+
+        boolean hasAge = parsedData.containsKey("age") &&
+            parsedData.get("age") != null &&
+            (Integer) parsedData.get("age") > 0;
+
+        boolean hasGender = parsedData.containsKey("gender") &&
+            parsedData.get("gender") != null &&
+            !parsedData.get("gender").toString().trim().isEmpty();
+
+        boolean result = hasPersonName && hasAge && hasGender;
+
+        log.info("필수값 검증: personName={}, age={}, gender={}, 결과={}",
+            hasPersonName, hasAge, hasGender, result ? "성공" : "실패");
+
+        return result;
+    }
+
+    /**
+     * OCR 텍스트 전처리
+     * - 마크다운 코드블록 제거
+     * - GMS 거부 메시지 감지
+     */
+    private String preprocessOcrText(String rawText) {
+        if (rawText == null || rawText.trim().isEmpty()) {
+            return null;
+        }
+
+        // GMS API 거부 메시지 감지
+        if (rawText.contains("죄송합니다") &&
+            (rawText.contains("이미지를 분석할 수 없습니다") ||
+             rawText.contains("텍스트를 추출할 수 없습니다"))) {
+            log.warn("GMS API가 이미지 처리 완전 거부");
+            return null;
+        }
+
+        // 마크다운 코드블록 추출 (```...```)
+        Pattern codeBlockPattern = Pattern.compile("```\\s*([\\s\\S]*?)\\s*```");
+        Matcher matcher = codeBlockPattern.matcher(rawText);
+        if (matcher.find()) {
+            String extracted = matcher.group(1).trim();
+            log.info("마크다운 코드블록 제거 완료: 원본 {}자 → 정제 {}자", rawText.length(), extracted.length());
+            return extracted;
+        }
+
+        // 마크다운이 없으면 원본 그대로 반환
+        return rawText;
+    }
+
+    /**
      * OCR 결과를 파싱하여 MissingCase 업데이트
+     * @return 파싱된 필수값(personName, currentAge, gender) 모두 있으면 true
      */
     @Transactional
-    private void updateMissingCaseFromOcrResult(Long caseId, String ocrText) {
+    public boolean updateMissingCaseFromOcrResult(Long caseId, String ocrText) {
         try {
             log.info("OCR 원본 텍스트 (caseId={}): \n{}", caseId, ocrText);
+
+            // 전처리
+            String cleanedText = preprocessOcrText(ocrText);
+            if (cleanedText == null) {
+                log.warn("OCR 텍스트 전처리 실패 (거부 메시지 또는 빈 값): caseId={}", caseId);
+                return false;
+            }
+
+            if (!cleanedText.equals(ocrText)) {
+                log.info("OCR 전처리 후 텍스트 (caseId={}): \n{}", caseId, cleanedText);
+            }
+
+            ocrText = cleanedText;
 
             MissingCase missingCase = missingCaseRepository.findById(caseId)
                     .orElseThrow(() -> new RuntimeException("MissingCase를 찾을 수 없습니다: " + caseId));
@@ -353,9 +569,22 @@ public class CaseOcrService {
             } else {
                 log.info("업데이트할 필드가 없음: caseId={}", caseId);
             }
-            
+
+            // 필수값 검증: personName, currentAge, gender 모두 있어야 성공
+            boolean hasPersonName = !isNullOrEmpty(missingCase.getPersonName());
+            boolean hasAge = missingCase.getCurrentAge() != null && missingCase.getCurrentAge() > 0;
+            boolean hasGender = !isNullOrEmpty(missingCase.getGender());
+
+            boolean hasAllEssentialFields = hasPersonName && hasAge && hasGender;
+
+            log.info("필수값 검증 결과: caseId={}, personName={}, age={}, gender={}, 결과={}",
+                caseId, hasPersonName, hasAge, hasGender, hasAllEssentialFields ? "성공" : "실패");
+
+            return hasAllEssentialFields;
+
         } catch (Exception e) {
             log.error("MissingCase 업데이트 실패: caseId={}", caseId, e);
+            return false;
         }
     }
     

@@ -2,6 +2,7 @@ package com.topoom.external.scheduler;
 
 import com.topoom.external.blog.dto.BlogPostInfo;
 import com.topoom.external.blog.dto.CleanupResult;
+import com.topoom.external.blog.dto.CrawlResult;
 import com.topoom.external.blog.service.BlogPostCleanupService;
 import com.topoom.external.blog.service.IntegratedBlogCrawlingService;
 import com.topoom.messaging.dto.BlogCrawlingMessage;
@@ -33,7 +34,7 @@ public class BlogCrawlingScheduler {
      * - 각 게시글을 RabbitMQ 큐로 발행 (병렬 처리)
      * - 삭제 프로세스는 기존과 동일
      */
-    @Scheduled(fixedDelay = 900000)  // 15분 = 900,000ms
+    @Scheduled(fixedDelay = 300000)  // 15분 = 900,000ms
     public void scheduleBlogCrawling() {
         log.info("🔄 블로그 크롤링 스케줄러 시작 (15분 주기)");
 
@@ -41,14 +42,15 @@ public class BlogCrawlingScheduler {
 
         try {
             // 1단계: 카테고리 목록만 크롤링 (빠른 실행)
-            List<BlogPostInfo> crawledPosts =
+            CrawlResult crawlResult =
                 integratedBlogCrawlingService.crawlCategoryPostsWithSelenium("safe182pol", "11");
 
-            log.info("✅ 카테고리 목록 크롤링 완료: {}건", crawledPosts.size());
+            log.info("✅ 카테고리 목록 크롤링 완료: 전체 {}건, 신규 {}건",
+                crawlResult.getAllPosts().size(), crawlResult.getNewPosts().size());
 
-            // 2단계: 각 게시글을 큐로 발행 (병렬 처리)
+            // 2단계: 새로운 게시글만 큐로 발행 (병렬 처리)
             int publishedCount = 0;
-            for (BlogPostInfo post : crawledPosts) {
+            for (BlogPostInfo post : crawlResult.getNewPosts()) {
                 try {
                     BlogCrawlingMessage message = BlogCrawlingMessage.builder()
                         .requestId(UUID.randomUUID().toString())
@@ -69,16 +71,16 @@ public class BlogCrawlingScheduler {
 
             log.info("✅ 게시글 큐 발행 완료: {}건 (batchId={})", publishedCount, batchId);
 
-            // 3단계: 삭제 프로세스 실행 (기존과 동일)
-            List<String> currentUrls = crawledPosts.stream()
+            // 3단계: 삭제 프로세스 실행 (전체 크롤링 결과 사용)
+            List<String> currentUrls = crawlResult.getAllPosts().stream()
                 .map(BlogPostInfo::getPostUrl)
                 .collect(Collectors.toList());
 
             CleanupResult result = blogPostCleanupService.executeFullCleanupProcess(currentUrls);
 
             log.info("✅ 삭제 프로세스 완료: {}", result);
-            log.info("🎉 블로그 크롤링 스케줄러 완료: 크롤링={}건, 발행={}건, batchId={}",
-                crawledPosts.size(), publishedCount, batchId);
+            log.info("🎉 블로그 크롤링 스케줄러 완료: 전체={}건, 신규={}건, 발행={}건, batchId={}",
+                crawlResult.getAllPosts().size(), crawlResult.getNewPosts().size(), publishedCount, batchId);
 
         } catch (Exception e) {
             log.error("❌ 블로그 크롤링 스케줄러 실패: batchId={}", batchId, e);
