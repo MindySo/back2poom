@@ -279,7 +279,7 @@
 
 /* 데스크톱 버전 스타일 */
 .list-page.desktop {
-  padding: 0 0 48px; /* 상단 padding 제거하여 헤더와 배너가 붙도록 */
+  padding: 0; /* Footer가 마지막 요소이므로 하단 padding 제거 */
 }
 
 /* 기존 미디어 쿼리는 유지 (CSS만으로도 스타일 조정 가능) */

@@ -16,7 +16,6 @@ type NavItem = {
 const navItems: NavItem[] = [
   { label: '실종자 지도페이지', path: '/map' },
   { label: '실종자 목록페이지', path: '/list' },
-  { label: '기타 페이지', path: '/report' },
 ];
 
 const TopBar: React.FC<TopBarProps> = ({ className = '' }) => {

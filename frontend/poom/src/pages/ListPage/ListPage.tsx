@@ -2,6 +2,7 @@ import { useState, useMemo, useEffect, useRef } from "react";
 import { ArchiveCard } from "../../components/archive/ArchiveCard/ArchiveCard";
 import { MArchiveCard } from "../../components/archive/MArchiveCard/MArchiveCard";
 import { ArchiveDetailPopup } from "../../components/archive/ArchiveDetailPopup/ArchiveDetailPopup";
+import Footer from "../../components/common/molecules/Footer/Footer";
 import styles from "./ListPage.module.css";
 import bannerImg from "../../assets/hero_section.png";
 import { useIsMobile } from "../../hooks/useMediaQuery";
@@ -255,6 +256,9 @@ const ListPage = () => {
             <MArchiveCard key={p.id} personId={p.id} />
           ))}
         </div>
+
+        {/* Footer */}
+        <Footer />
       </div>
     );
   }
@@ -322,6 +326,9 @@ const ListPage = () => {
           />
         ))}
       </div>
+
+      {/* Footer */}
+      <Footer />
 
       {/* 상세 정보 팝업 (데스크탑 크기일 때만) */}
       {selectedPersonId !== null && !isMobile && (() => {

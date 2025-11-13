@@ -1,0 +1,158 @@
+.footer {
+  width: 100vw;
+  padding: 40px 20px 0;
+  border-top: 1px solid rgba(43, 58, 85, 0.1);
+  margin-top: 60px;
+  margin-bottom: 0;
+  box-sizing: border-box;
+  position: relative;
+  left: 50%;
+  right: 50%;
+  margin-left: -50vw;
+  margin-right: -50vw;
+}
+
+.footerContainer {
+  max-width: 1200px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 40px;
+  margin-bottom: 30px;
+  padding: 0 20px;
+  box-sizing: border-box;
+}
+
+/* 첫 번째 행: 로고 + 설명 */
+.firstRow {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+/* 두 번째 행: 3열 */
+.secondRow {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  justify-content: space-between;
+  gap: 150px;
+
+}
+
+.footerSection {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.logo {
+  height: auto;
+  max-height: 50px;
+  width: auto;
+  max-width: 180px;
+  object-fit: contain;
+  display: block;
+  flex-shrink: 0;
+}
+
+.serviceDescription {
+  line-height: 1.6;
+}
+
+.sectionTitle {
+  margin-bottom: 20px;
+  font-size: 16px;
+}
+
+.contactInfo {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  line-height: 1.6;
+}
+
+.links {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.link {
+  text-decoration: none;
+  transition: opacity 0.2s;
+  cursor: pointer;
+}
+
+.link:hover {
+  opacity: 0.7;
+}
+
+.link:active {
+  opacity: 0.5;
+}
+
+.copyright {
+  padding: 24px 0;
+  border-top: 1px solid rgba(43, 58, 85, 0.1);
+  margin-top: 60px;
+  max-width: 1200px;
+  margin-left: auto;
+  margin-right: auto;
+  padding-left: 20px;
+  padding-right: 20px;
+}
+
+/* 모바일 반응형 */
+@media (max-width: 768px) {
+  .footer {
+    padding: 30px 16px 0;
+    margin-top: 40px;
+    margin-bottom: 0;
+    width: 100vw;
+    position: relative;
+    left: 50%;
+    right: 50%;
+    margin-left: -50vw;
+    margin-right: -50vw;
+  }
+
+  .footerContainer {
+    gap: 32px;
+    margin-bottom: 24px;
+    padding: 0 16px;
+  }
+
+  /* 첫 번째 행: 모바일에서는 세로 배치 */
+  .firstRow {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 16px;
+  }
+
+  /* 두 번째 행: 모바일에서는 세로 배치 */
+  .secondRow {
+    grid-template-columns: 1fr;
+    gap: 32px;
+  }
+
+  .footerSection {
+    gap: 12px;
+  }
+
+  .sectionTitle {
+    margin-bottom: 12px;
+  }
+
+  .logo {
+    max-height: 40px;
+    max-width: 150px;
+  }
+
+  .copyright {
+    padding-top: 16px;
+    margin-top: 16px;
+  }
+}
+
