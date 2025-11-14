@@ -24,14 +24,6 @@ pipeline {
         stage('Checkout') {
             agent any
             steps {
-                script {
-                    // workspace 정리 (corrupted files 제거)
-                    sh '''
-                        rm -rf frontend/poom/node_modules || true
-                        rm -rf .git || true
-                        rm -rf * || true
-                    '''
-                }
                 checkout([
                     $class: 'GitSCM',
                     branches: [[name: '*/dev']],
@@ -74,6 +66,9 @@ pipeline {
             steps {
                 dir('frontend/poom') {
                     sh '''
+                        # 이전 빌드 결과물 정리 (Docker container 내부에서 실행)
+                        rm -rf node_modules dist || true
+
                         npm ci
                         npm run build
                     '''
@@ -139,16 +134,24 @@ pipeline {
     /* ------------------------------------------------------ */
     post {
         success {
-            echo '✅ Frontend S3 배포 성공'
+            node('any') {
+                echo '✅ Frontend S3 배포 성공'
+            }
         }
         failure {
-            echo '❌ Frontend S3 배포 실패 — 콘솔 로그 확인'
+            node('any') {
+                echo '❌ Frontend S3 배포 실패 — 콘솔 로그 확인'
+            }
         }
         notBuilt {
-            echo '⏭️  Frontend 변경사항 없음 - 빌드 스킵'
+            node('any') {
+                echo '⏭️  Frontend 변경사항 없음 - 빌드 스킵'
+            }
         }
         always {
-            cleanWs(deleteDirs: true, disableDeferredWipeout: true)
+            node('any') {
+                cleanWs(deleteDirs: true, disableDeferredWipeout: true)
+            }
         }
     }
 }
