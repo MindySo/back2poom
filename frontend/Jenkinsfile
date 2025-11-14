@@ -89,7 +89,7 @@ pipeline {
             }
             steps {
                 withCredentials([[$class: 'AmazonWebServicesCredentialsBinding',
-                                  credentialsId: 'AWS_access_key']]) {
+                                  credentialsId: 'aws-credentials']]) {
                     dir('frontend/poom') {
                         sh """
                             # S3 버킷에 빌드 파일 업로드
