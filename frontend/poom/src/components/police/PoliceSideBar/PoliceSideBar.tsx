@@ -48,7 +48,7 @@ const PoliceSideBar: React.FC<PoliceSideBarProps> = ({ className = '', onMissing
       <div className={styles.recentMissingList}>
         {isLoading ? (
           <div className={styles.emptyMessage}>
-            <Text size="md" color="gray">로딩 중...</Text>
+            <Text size="md" color="white">로딩 중...</Text>
           </div>
         ) : recentList && recentList.length > 0 ? (
           recentList.map((person) => (
@@ -62,12 +62,13 @@ const PoliceSideBar: React.FC<PoliceSideBarProps> = ({ className = '', onMissing
               location={person.occurredLocation}
               occurredAt={person.crawledAt}
               targetType={person.targetType}
+              textColor="white"
               onClick={() => onMissingCardClick?.(person.id)}
             />
           ))
         ) : (
           <div className={styles.emptyMessage}>
-            <Text size="md" color="gray">최근 {hours}시간 내 실종자가 없습니다.</Text>
+            <Text size="md" color="white">최근 {hours}시간 내 실종자가 없습니다.</Text>
           </div>
         )}
       </div>
