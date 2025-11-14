@@ -140,7 +140,10 @@ const PoliceDashboard: React.FC<PoliceDashboardProps> = ({ isOpen, onClose, miss
         {/* Content - Two rows layout */}
         <div className={styles.contentContainer}>
           {isLoading ? (
-            <div className={styles.emptyMessage}>로딩 중...</div>
+            <div className={styles.loadingContainer}>
+              <div className={styles.spinner}></div>
+              <Text as="div" size="sm" color="white" style={{ marginTop: '1rem' }}>로딩 중...</Text>
+            </div>
           ) : missingDetail ? (
             <>
               {/* 왼쪽 줄 */}
@@ -276,13 +279,17 @@ const PoliceDashboard: React.FC<PoliceDashboardProps> = ({ isOpen, onClose, miss
                           <div className={styles.aiInfoSection}>
                             <Text as="div" size="sm" weight="bold" color="white" className={styles.aiSubtitle}>우선순위</Text>
                             <div className={styles.aiInfoItem}>
-                              <Text as="div" size="xs" color="white">1순위</Text>
-                              <Text as="div" size="sm" color="white">{missingDetail.aiSupport.top1Desc || '-'}</Text>
+                              <Text as="span" size="xs" color="white">1순위</Text>
+                              <Text as="span" size="sm" color="white">{missingDetail.aiSupport.top1Desc || '-'}</Text>
                             </div>
                             <div className={styles.aiInfoItem}>
-                              <Text as="div" size="xs" color="white">2순위</Text>
-                              <Text as="div" size="sm" color="white">{missingDetail.aiSupport.top2Desc || '-'}</Text>
+                              <Text as="span" size="xs" color="white">2순위</Text>
+                              <Text as="span" size="sm" color="white">{missingDetail.aiSupport.top2Desc || '-'}</Text>
                             </div>
+                            <Text as="div" size="xs" color="white" style={{ marginTop: '0.2rem', textAlign: 'center', fontSize: '0.7rem' }}>
+                  ① AI 분석을 주요 정보를 우선적으로 정리한 내용으로, 
+                 <br/> 참고용으로 활용해주시기 바랍니다.
+                </Text>
                           </div>
                         </>
                       ) : (
