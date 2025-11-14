@@ -14,7 +14,8 @@ pipeline {
     }
 
     options {
-        skipDefaultCheckout()
+        skipDefaultCheckout(true)
+        skipStagesAfterUnstable()
         timestamps()
     }
 
@@ -30,7 +31,8 @@ pipeline {
                     userRemoteConfigs: [[
                         url: 'https://lab.ssafy.com/s13-final/S13P31A706',
                         credentialsId: 'gitlab-jenkins-token'
-                    ]]
+                    ]],
+                    extensions: [[$class: 'CloneOption', noTags: false, shallow: false, depth: 0]]
                 ])
             }
         }
@@ -59,7 +61,7 @@ pipeline {
             agent {
                 docker {
                     image 'node:20-alpine'
-                    args '-u root:root'
+                    args '-u 1000:1000'  // Jenkins user와 동일한 UID/GID
                     reuseNode true
                 }
             }
@@ -81,7 +83,7 @@ pipeline {
             agent {
                 docker {
                     image 'amazon/aws-cli:latest'
-                    args '-u root:root --entrypoint=""'
+                    args '-u 1000:1000 --entrypoint=""'
                     reuseNode true
                 }
             }
@@ -112,7 +114,7 @@ pipeline {
             agent {
                 docker {
                     image 'amazon/aws-cli:latest'
-                    args '-u root:root --entrypoint=""'
+                    args '-u 1000:1000 --entrypoint=""'
                     reuseNode true
                 }
             }
@@ -134,23 +136,31 @@ pipeline {
     /* ------------------------------------------------------ */
     post {
         success {
-            node('any') {
-                echo '✅ Frontend S3 배포 성공'
+            script {
+                node {
+                    echo '✅ Frontend S3 배포 성공'
+                }
             }
         }
         failure {
-            node('any') {
-                echo '❌ Frontend S3 배포 실패 — 콘솔 로그 확인'
+            script {
+                node {
+                    echo '❌ Frontend S3 배포 실패 — 콘솔 로그 확인'
+                }
             }
         }
         notBuilt {
-            node('any') {
-                echo '⏭️  Frontend 변경사항 없음 - 빌드 스킵'
+            script {
+                node {
+                    echo '⏭️  Frontend 변경사항 없음 - 빌드 스킵'
+                }
             }
         }
         always {
-            node('any') {
-                cleanWs(deleteDirs: true, disableDeferredWipeout: true)
+            script {
+                node {
+                    cleanWs(deleteDirs: true, disableDeferredWipeout: true)
+                }
             }
         }
     }
