@@ -30,6 +30,7 @@ public class MissingCaseUpdateService {
     private final MissingCaseRepository missingCaseRepository;
     private final CaseFileRepository caseFileRepository;
     private final KakaoClient kakaoClient;
+    private final org.springframework.transaction.PlatformTransactionManager transactionManager;
 
     /**
      * OCR 데이터만 업데이트 (OcrConsumer에서 호출)
@@ -56,20 +57,20 @@ public class MissingCaseUpdateService {
     public void finalizeUpdate(Long caseId, Map<String, Object> parsedOcrData) {
         log.info("MissingCase 최종 업데이트 시작 (메인 이미지 설정 & 좌표 변환): caseId={}", caseId);
 
-        // 1. MissingCase 조회
+        // 1. 메인 이미지 설정 (별도 트랜잭션으로 먼저 커밋)
+        setAndSaveMainImageInNewTransaction(caseId);
+
+        // 2. MissingCase 조회
         MissingCase missingCase = missingCaseRepository.findById(caseId)
             .orElseThrow(() -> new RuntimeException("MissingCase를 찾을 수 없습니다: " + caseId));
 
-        // 2. 메인 이미지 설정 (좌표 변환 실패 시에도 저장되어야 함)
-        setMainImage(missingCase);
-
-        // 3. 좌표 변환 (Kakao API)
+        // 3. 좌표 변환 (Kakao API) - 실패 시 예외 발생 → OCR 큐로 재전송
         updateCoordinates(missingCase);
 
         // 4. 최종 필수값 검증 (이름, 성별, 나이, 위도, 경도)
         validateRequiredFields(missingCase);
 
-        // 5. 저장
+        // 5. 최종 저장 (좌표 포함)
         missingCaseRepository.save(missingCase);
 
         log.info("✅ MissingCase 최종 업데이트 완료: caseId={}, personName={}, location={}, lat={}, lng={}",
@@ -109,7 +110,6 @@ public class MissingCaseUpdateService {
                 String dateStr = (String) parsedData.get("occurredAt");
                 LocalDateTime occurredAt = LocalDateTime.parse(dateStr + "T00:00:00");
                 missingCase.setOccurredAt(occurredAt);
-                // crawledAt도 occurredAt과 동일한 값으로 설정
                 missingCase.setCrawledAt(occurredAt);
             } catch (Exception e) {
                 log.warn("발생일시 파싱 실패: caseId={}, value={}",
@@ -220,6 +220,29 @@ public class MissingCaseUpdateService {
             log.error(errorMsg, e);
             throw new CoordinateConversionException(errorMsg, e);
         }
+    }
+
+    /**
+     * 메인 이미지 설정 및 저장 (별도 트랜잭션)
+     * TransactionTemplate을 사용하여 새로운 트랜잭션에서 실행하고 즉시 커밋
+     */
+    private void setAndSaveMainImageInNewTransaction(Long caseId) {
+        // 새로운 트랜잭션 템플릿 생성 (REQUIRES_NEW)
+        org.springframework.transaction.support.TransactionTemplate newTransactionTemplate =
+            new org.springframework.transaction.support.TransactionTemplate(transactionManager);
+        newTransactionTemplate.setPropagationBehavior(
+            org.springframework.transaction.TransactionDefinition.PROPAGATION_REQUIRES_NEW);
+
+        newTransactionTemplate.executeWithoutResult(status -> {
+            MissingCase missingCase = missingCaseRepository.findById(caseId)
+                .orElseThrow(() -> new RuntimeException("MissingCase를 찾을 수 없습니다: " + caseId));
+
+            setMainImage(missingCase);
+            missingCaseRepository.save(missingCase);
+
+            log.info("💾 메인 이미지 저장 완료 (별도 트랜잭션): caseId={}, mainFileId={}",
+                caseId, missingCase.getMainFile() != null ? missingCase.getMainFile().getId() : "없음");
+        });
     }
 
     /**
