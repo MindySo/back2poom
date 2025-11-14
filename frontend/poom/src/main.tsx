@@ -3,6 +3,36 @@ import { createRoot } from 'react-dom/client'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import App from './App.tsx'
 
+// 카카오 지도 SDK 로드
+const loadKakaoMapSDK = () => {
+  return new Promise<void>((resolve, reject) => {
+    if (window.kakao && window.kakao.maps) {
+      resolve()
+      return
+    }
+
+    const script = document.createElement('script')
+    const appKey = import.meta.env.VITE_KAKAO_JAVASCRIPT_KEY
+
+    if (!appKey) {
+      reject(new Error('VITE_KAKAO_JAVASCRIPT_KEY is not defined'))
+      return
+    }
+
+    script.src = `//dapi.kakao.com/v2/maps/sdk.js?appkey=${appKey}&autoload=false`
+    script.async = true
+    script.onload = () => {
+      if (window.kakao && window.kakao.maps) {
+        window.kakao.maps.load(() => resolve())
+      } else {
+        reject(new Error('Failed to load Kakao Maps SDK'))
+      }
+    }
+    script.onerror = () => reject(new Error('Failed to load Kakao Maps SDK'))
+    document.head.appendChild(script)
+  })
+}
+
 // React Query Client 설정
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -15,10 +45,24 @@ const queryClient = new QueryClient({
   },
 })
 
-createRoot(document.getElementById('root')!).render(
-  <StrictMode>
-    <QueryClientProvider client={queryClient}>
-      <App />
-    </QueryClientProvider>
-  </StrictMode>,
-)
+// 카카오 SDK 로드 후 React 앱 렌더링
+loadKakaoMapSDK()
+  .then(() => {
+    createRoot(document.getElementById('root')!).render(
+      <StrictMode>
+        <QueryClientProvider client={queryClient}>
+          <App />
+        </QueryClientProvider>
+      </StrictMode>,
+    )
+  })
+  .catch(() => {
+    // SDK 로드 실패해도 앱은 렌더링 (지도 기능만 사용 불가)
+    createRoot(document.getElementById('root')!).render(
+      <StrictMode>
+        <QueryClientProvider client={queryClient}>
+          <App />
+        </QueryClientProvider>
+      </StrictMode>,
+    )
+  })
