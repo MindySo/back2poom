@@ -72,25 +72,25 @@ const ArchiveCard: React.FC<ArchiveCardProps> = ({ person, onClick }) => {
             </div>
 
             <div className={styles['archive-card__row']}>
-              <Text as="span" size="md" weight="bold" className={styles['archive-card__name']}>{personName}</Text>
+              <Text as="span" size="lg" weight="bold" className={styles['archive-card__name']}>{personName}</Text>
               <Text as="span" size="sm" color="gray" className={styles['archive-card__meta']}>
                 {gender ?? '성별 미상'}
               </Text>
             </div>
             <div className={styles['archive-card__info']}>
-              <div>
-                <Text as="div" size="xs" color="gray" className={styles['archive-card__label']}>나이</Text>
-                <Text as="div" size="xs" className={styles['archive-card__value']}>
+              <div className={styles['archive-card__info-item']}>
+                <Text as="span" size="sm" color="gray" className={styles['archive-card__label']}>나이</Text>
+                <Text as="span" size="sm" className={styles['archive-card__value']}>
                   {ageAtTime}세{currentAge ? ` (현재 나이: ${currentAge}세)` : ''}
                 </Text>
               </div>
-              <div>
-                <Text as="div" size="xs" color="gray" className={styles['archive-card__label']}>발생일</Text>
-                <Text as="div" size="xs" className={styles['archive-card__value']}>{formatDate(occurredAt)}</Text>
+              <div className={styles['archive-card__info-item']}>
+                <Text as="span" size="sm" color="gray" className={styles['archive-card__label']}>발생일</Text>
+                <Text as="span" size="sm" className={styles['archive-card__value']}>{formatDate(occurredAt)}</Text>
               </div>
-              <div>
-                <Text as="div" size="xs" color="gray" className={styles['archive-card__label']}>발생장소</Text>
-                <Text as="div" size="xs" className={styles['archive-card__value']}>{occurredLocation}</Text>
+              <div className={styles['archive-card__info-item']}>
+                <Text as="span" size="sm" color="gray" className={styles['archive-card__label']}>발생장소</Text>
+                <Text as="span" size="sm" className={styles['archive-card__value']}>{occurredLocation}</Text>
               </div>
             </div>
           </div>
