@@ -11,9 +11,10 @@ pipeline {
     }
 
     environment {
-        S3_PROD_BUCKET = 'topoom-s3-bucket'
-        CLOUDFRONT_DISTRIBUTION_ID = 'E3ECTA5JTG17L5'
-        AWS_PROD_REGION = 'ap-northeast-2'
+        S3_PROD_BUCKET = 'topoom-prod-s3-bucket'
+        S3_REGION = 'ap-southeast-2'
+        CLOUDFRONT_DISTRIBUTION_ID = 'E2RFJP5707A0DX'
+        CLOUDFRONT_REGION = 'us-east-1'
         HOME = '/tmp'
     }
 
@@ -84,14 +85,14 @@ pipeline {
                         sh """
                             # S3 버킷에 빌드 파일 업로드
                             aws s3 sync dist/ s3://\${S3_PROD_BUCKET}/ \\
-                                --region \${AWS_PROD_REGION} \\
+                                --region \${S3_REGION} \\
                                 --delete \\
                                 --cache-control 'public,max-age=31536000,immutable' \\
                                 --exclude 'index.html'
 
                             # index.html은 캐시 없이 업로드
                             aws s3 cp dist/index.html s3://\${S3_PROD_BUCKET}/index.html \\
-                                --region \${AWS_PROD_REGION} \\
+                                --region \${S3_REGION} \\
                                 --cache-control 'public,max-age=0,must-revalidate'
                         """
                     }
@@ -116,7 +117,7 @@ pipeline {
                         aws cloudfront create-invalidation \\
                             --distribution-id \${CLOUDFRONT_DISTRIBUTION_ID} \\
                             --paths '/*' \\
-                            --region \${AWS_PROD_REGION}
+                            --region \${CLOUDFRONT_REGION}
                     """
                 }
             }
