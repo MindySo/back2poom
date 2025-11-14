@@ -1,0 +1,77 @@
+yolov8n.pt
+models/
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# Virtual Environment
+venv/
+env/
+ENV/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Model files
+*.pt
+*.pth
+*.onnx
+*.bin
+!yolov8n.pt
+
+# Output
+output/
+results/
+logs/
+*.log
+
+# Data
+data/
+videos/
+images/
+*.mp4
+*.avi
+*.jpg
+*.png
+*.jpeg
+!example*.jpg
+!example*.png
+
+# HuggingFace Cache
+.cache/
+huggingface/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Jupyter
+.ipynb_checkpoints/
+*.ipynb
+
+# Test
+.pytest_cache/
+.coverage
+htmlcov/
