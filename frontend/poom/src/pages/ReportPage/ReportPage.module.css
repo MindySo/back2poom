@@ -16,6 +16,12 @@
   box-sizing: border-box;
 }
 
+@media (max-width: 1023px) {
+  .container {
+    padding-top: 16px;
+  }
+}
+
 
 .stepWrapper {
   display: flex;
