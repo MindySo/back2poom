@@ -336,7 +336,7 @@ const MobileModal = forwardRef<MobileModalRef, MobileModalProps>(({ isOpen, onCl
                   </div>
                 <div className={cardStyles['m-archive-card__right']}>
                   <div className={cardStyles['m-archive-card__main']}>
-                    <div className={cardStyles['m-archive-card__header']}>
+                    <div className={cardStyles['m-archive-card__header']} style={{ marginBottom: '5px' }}>
                       <Badge variant="time" size="xs">{elapsedTime}</Badge>
                       {detailData.classificationCode && (
                         <Badge variant="feature" size="xs">{detailData.classificationCode}</Badge>
@@ -344,23 +344,23 @@ const MobileModal = forwardRef<MobileModalRef, MobileModalProps>(({ isOpen, onCl
                     </div>
 
                     <div className={cardStyles['m-archive-card__row']}>
-                      <Text as="span" size="md" weight="bold" className={cardStyles['m-archive-card__name']}>
+                      <Text as="span" size="sm" weight="bold" className={cardStyles['m-archive-card__name']}>
                         {detailData.personName}
                       </Text>
-                      <Text as="span" size="sm" color="gray" className={cardStyles['m-archive-card__meta']}>
+                      <Text as="span" size="xs" color="gray" className={cardStyles['m-archive-card__meta']}>
                         {detailData.gender ?? '성별 미상'} / {detailData.ageAtTime}세
                       </Text>
                     </div>
                     <div className={cardStyles['m-archive-card__info']}>
                       <div>
-                        <Text as="div" size="sm" color="gray" className={cardStyles['m-archive-card__label']}>발생일</Text>
-                        <Text as="div" size="sm" className={cardStyles['m-archive-card__value']}>
+                        <Text as="div" size="xs" color="gray" className={cardStyles['m-archive-card__label']}>발생일</Text>
+                        <Text as="div" size="xs" className={cardStyles['m-archive-card__value']}>
                           {formatDate(detailData.occurredAt)}
                         </Text>
                       </div>
                       <div>
-                        <Text as="div" size="sm" color="gray" className={cardStyles['m-archive-card__label']}>발생장소</Text>
-                        <Text as="div" size="sm" className={cardStyles['m-archive-card__value']}>
+                        <Text as="div" size="xs" color="gray" className={cardStyles['m-archive-card__label']}>발생장소</Text>
+                        <Text as="div" size="xs" className={cardStyles['m-archive-card__value']}>
                           {detailData.occurredLocation}
                         </Text>
                       </div>

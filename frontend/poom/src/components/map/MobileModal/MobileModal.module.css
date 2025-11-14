@@ -139,6 +139,7 @@
   margin-bottom: 16px;
 }
 
+
 /* 모바일 화면에서만 표시 */
 @media (min-width: 1024px) {
   .modalContainer,

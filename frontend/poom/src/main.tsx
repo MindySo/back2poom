@@ -19,7 +19,7 @@ const loadKakaoMapSDK = () => {
       return
     }
 
-    script.src = `//dapi.kakao.com/v2/maps/sdk.js?appkey=${appKey}&autoload=false`
+    script.src = `https://dapi.kakao.com/v2/maps/sdk.js?appkey=${appKey}&autoload=false`
     script.async = true
     script.onload = () => {
       if (window.kakao && window.kakao.maps) {
@@ -56,8 +56,10 @@ loadKakaoMapSDK()
       </StrictMode>,
     )
   })
-  .catch(() => {
+  .catch((error) => {
     // SDK 로드 실패해도 앱은 렌더링 (지도 기능만 사용 불가)
+    // useKakaoMap 훅에서 재시도 가능
+    console.warn('카카오맵 SDK 초기 로드 실패:', error.message)
     createRoot(document.getElementById('root')!).render(
       <StrictMode>
         <QueryClientProvider client={queryClient}>

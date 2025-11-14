@@ -20,9 +20,13 @@
   font-family: 'Pretendard, -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif';
   outline: none;
   resize: none;
-  overflow: hidden;
+  overflow-y: auto;
+  overflow-x: hidden;
   line-height: 1.5;
   background: transparent;
+  height: auto;
+  min-height: auto;
+  max-height: 6em; /* 약 4줄 높이 */
 }
 
 .textarea:focus {
@@ -68,7 +72,11 @@
   .textarea {
     font-size: 14px;
     padding: 14px 16px;
-    min-height: 100px;
+    height: auto;
+    min-height: auto;
+    max-height: 6em;
+    overflow-y: auto;
+    overflow-x: hidden;
   }
 }
 

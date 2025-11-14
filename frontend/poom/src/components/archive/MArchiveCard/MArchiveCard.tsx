@@ -130,6 +130,7 @@ const MArchiveCard: React.FC<MArchiveCardProps> = ({ personId }) => {
   return (
     <div className={styles['m-archive-card']}>
       <div className={styles['m-archive-card__content']}>
+        {/* 1열: 세로가 긴 이미지 */}
         <div className={styles['m-archive-card__imageWrap']}>
           <img 
             src={displayMainImageUrl} 
@@ -139,74 +140,74 @@ const MArchiveCard: React.FC<MArchiveCardProps> = ({ personId }) => {
             style={{ cursor: 'pointer' }}
           />
         </div>
+        
+        {/* 2열: 뱃지들 + 정보 영역 */}
         <div className={styles['m-archive-card__right']}>
-          <div className={styles['m-archive-card__main']}>
-            <div className={styles['m-archive-card__header']}>
-              <Badge variant="time" size="xs">{elapsedTime}</Badge>
-              {targetType && (
-                <Badge variant="feature" size="xs">{targetType}</Badge>
-              )}
-              {classificationCode && (
-                <Badge variant="feature" size="xs">{classificationCode}</Badge>
-              )}
-            </div>
-
-            <div className={styles['m-archive-card__row']}>
-              <Text as="span" size="sm" weight="bold" className={styles['m-archive-card__name']}>{personName}</Text>
-              <Text as="span" size="xs" color="gray" className={styles['m-archive-card__meta']}>
-                {gender ?? '성별 미상'}
-              </Text>
-            </div>
-            <div className={styles['m-archive-card__info']}>
-              <div>
-                <Text as="div" size="xs" color="gray" className={styles['m-archive-card__label']}>나이</Text>
-                <Text as="div" size="xs" className={styles['m-archive-card__value']}>
-                  {ageAtTime}세{currentAge ? ` (현재 나이: ${currentAge}세)` : ''}
-                </Text>
-              </div>
-              <div>
-                <Text as="div" size="xs" color="gray" className={styles['m-archive-card__label']}>발생일</Text>
-                <Text as="div" size="xs" className={styles['m-archive-card__value']}>{formatDate(occurredAt)}</Text>
-              </div>
-              <div>
-                <Text as="div" size="xs" color="gray" className={styles['m-archive-card__label']}>발생장소</Text>
-                <Text as="div" size="xs" className={styles['m-archive-card__value']}>{occurredLocation}</Text>
-              </div>
-            </div>
+          {/* 첫 번째 행: 뱃지들 */}
+          <div className={styles['m-archive-card__header']}>
+            <Badge variant="time" size="xs">{elapsedTime}</Badge>
+            {targetType && (
+              <Badge variant="feature" size="xs">{targetType}</Badge>
+            )}
+            {classificationCode && (
+              <Badge variant="feature" size="xs">{classificationCode}</Badge>
+            )}
           </div>
 
-          <div className={styles['m-archive-card__actions']}>
-            <Button 
-              variant="primary" 
-              size="small" 
-              className={styles['m-archive-card__primaryBtn']}
-              onClick={() => {
-                // phoneNumber를 배열로 변환 (배열이 아니면 배열로 만들기)
-                const phoneNumbers = phoneNumber 
-                  ? Array.isArray(phoneNumber) 
-                    ? phoneNumber 
-                    : [phoneNumber]
-                  : undefined;
-                navigate(`/report?name=${encodeURIComponent(personName)}`, {
-                  state: {
-                    ...(id && { id }),
-                    ...(phoneNumbers && { phoneNumber: phoneNumbers }),
-                  },
-                });
-              }}
-            >
-              제보하기
-            </Button>
-            <Button 
-              variant="secondary" 
-              size="small" 
-              className={styles['m-archive-card__iconBtn']} 
-              aria-label="공유"
-              onClick={onShareClick}
-              disabled={isSharing}
-            >
-              ↗
-            </Button>
+          {/* 두 번째 행: 이름, 나이, 발생일, 발생장소, 제보하기+공유하기 */}
+          <div className={styles['m-archive-card__infoRow']}>
+            <div className={styles['m-archive-card__infoSection']}>
+              <Text as="span" size="sm" weight="bold" className={styles['m-archive-card__name']}>{personName}</Text>
+              <div className={styles['m-archive-card__info']}>
+                <div className={styles['m-archive-card__info-item']}>
+                  <Text as="span" size="xs" color="gray" className={styles['m-archive-card__label']}>나이</Text>
+                  <Text as="span" size="xs" className={styles['m-archive-card__value']}>
+                    {ageAtTime}세{currentAge ? ` (현재 나이: ${currentAge}세)` : ''}
+                  </Text>
+                </div>
+                <div className={styles['m-archive-card__info-item']}>
+                  <Text as="span" size="xs" color="gray" className={styles['m-archive-card__label']}>발생일</Text>
+                  <Text as="span" size="xs" className={styles['m-archive-card__value']}>{formatDate(occurredAt)}</Text>
+                </div>
+                <div className={styles['m-archive-card__info-item']}>
+                  <Text as="span" size="xs" color="gray" className={styles['m-archive-card__label']}>발생장소</Text>
+                  <Text as="span" size="xs" className={styles['m-archive-card__value']}>{occurredLocation}</Text>
+                </div>
+              </div>
+            </div>
+            <div className={styles['m-archive-card__actions']}>
+              <Button 
+                variant="primary" 
+                size="small" 
+                className={styles['m-archive-card__primaryBtn']}
+                onClick={() => {
+                  // phoneNumber를 배열로 변환 (배열이 아니면 배열로 만들기)
+                  const phoneNumbers = phoneNumber 
+                    ? Array.isArray(phoneNumber) 
+                      ? phoneNumber 
+                      : [phoneNumber]
+                    : undefined;
+                  navigate(`/report?name=${encodeURIComponent(personName)}`, {
+                    state: {
+                      ...(id && { id }),
+                      ...(phoneNumbers && { phoneNumber: phoneNumbers }),
+                    },
+                  });
+                }}
+              >
+                제보하기
+              </Button>
+              <Button 
+                variant="secondary" 
+                size="small" 
+                className={styles['m-archive-card__iconBtn']} 
+                aria-label="공유"
+                onClick={onShareClick}
+                disabled={isSharing}
+              >
+                ↗
+              </Button>
+            </div>
           </div>
         </div>
       </div>
@@ -238,7 +239,7 @@ const MArchiveCard: React.FC<MArchiveCardProps> = ({ personId }) => {
               
               {/* 상세정보 - 한 행으로 배치 */}
               <div className={styles['m-archive-card__detailInfo']}>
-                <Text as="div" size="xs" weight="bold" className={styles['m-archive-card__detailTitle']}>상세정보</Text>
+                <Text as="div" size="sm" weight="bold" className={styles['m-archive-card__detailTitle']}>상세정보</Text>
                 <div className={styles['m-archive-card__detailList']}>
                   <div className={styles['m-archive-card__detailItem']}>
                     <Text as="div" size="xs" color="gray">신체정보</Text>
@@ -265,7 +266,7 @@ const MArchiveCard: React.FC<MArchiveCardProps> = ({ personId }) => {
               
               {/* AI 이미지와 AI 서포트 정보 */}
               <div className={styles['m-archive-card__aiSection']}>
-                <Text as="div" size="xs" weight="bold" className={styles['m-archive-card__detailTitle']}>AI 서포트</Text>
+                <Text as="div" size="sm" weight="bold" className={styles['m-archive-card__detailTitle']}>AI 서포트</Text>
                 <div className={styles['m-archive-card__aiContent']}>
                   {/* 왼쪽: AI 이미지 */}
                   <div className={styles['m-archive-card__aiImageWrapperOuter']}>
