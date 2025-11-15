@@ -7,7 +7,7 @@ import MyLocationButton from '../../components/map/MyLocationButton/MyLocationBu
 import MyLocationMarker from '../../components/map/MyLocationMarker/MyLocationMarker';
 import MovementRadius from '../../components/map/MovementRadius/MovementRadius';
 import MobileStatusBoard from '../../components/map/MobileStatusBoard/MobileStatusBoard';
-import MobileModal, { type MobileModalRef } from '../../components/map/MobileModal/MobileModal';
+import MissingInfoModal, { type MissingInfoModalRef } from '../../components/map/MissingInfoModal/MissingInfoModal';
 import Marker from '../../components/map/Marker/Marker';
 import styles from './MapPage.module.css';
 
@@ -18,7 +18,7 @@ const MapPage: React.FC = () => {
 
   const isLoaded = useKakaoMap(API_KEY);
   const mapRef = useRef<HTMLDivElement | null>(null);
-  const mobileModalRef = useRef<MobileModalRef>(null);
+  const missingInfoModalRef = useRef<MissingInfoModalRef>(null);
   const [map, setMap] = useState<kakao.maps.Map | null>(null);
   const [isDashboardOpen, setIsDashboardOpen] = useState(false);
   const [selectedMissingId, setSelectedMissingId] = useState<number | null>(null);
@@ -33,7 +33,7 @@ const MapPage: React.FC = () => {
   const tapStartRef = useRef<{ x: number; y: number; time: number } | null>(null);
 
   // 최근 24시간 내 실종자 데이터 가져오기 (Marker용)
-  const { data: markerMissingList, isLoading: isMarkerLoading, isError: isMarkerError, error: markerError } = useRecentMissing(24);
+  const { data: markerMissingList, isLoading: isMarkerLoading, isError: isMarkerError, error: markerError } = useRecentMissing(1000);
 
 
   useEffect(() => {
@@ -84,7 +84,7 @@ const MapPage: React.FC = () => {
       if (deltaX < 10 && deltaY < 10 && deltaTime < 300) {
         if (mobileModalState === 'half') {
           // half 상태에서는 initial로
-          mobileModalRef.current?.collapseToInitial();
+          missingInfoModalRef.current?.collapseToInitial();
         } else if (mobileModalState === 'initial') {
           // initial 상태에서는 완전히 닫기
           setIsTestModalOpen(false);
@@ -123,7 +123,7 @@ const MapPage: React.FC = () => {
       if (deltaX < 10 && deltaY < 10 && deltaTime < 300) {
         if (mobileModalState === 'half') {
           // half 상태에서는 initial로
-          mobileModalRef.current?.collapseToInitial();
+          missingInfoModalRef.current?.collapseToInitial();
         } else if (mobileModalState === 'initial') {
           // initial 상태에서는 완전히 닫기
           setIsTestModalOpen(false);
@@ -437,8 +437,8 @@ const MapPage: React.FC = () => {
 
       {/* 모바일 모달 */}
       {isMobile && (
-        <MobileModal
-          ref={mobileModalRef}
+        <MissingInfoModal
+          ref={missingInfoModalRef}
           isOpen={isTestModalOpen}
           personId={selectedMissingId}
           onClose={() => {
