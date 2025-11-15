@@ -39,9 +39,22 @@ const ListPage = () => {
   type TabKey = "all" | "within24" | "over24";
   const [activeTab, setActiveTab] = useState<TabKey>("all");
   const [selectedPersonId, setSelectedPersonId] = useState<number | null>(null);
-  const [searchTerm, setSearchTerm] = useState<string>("");
+  const [inputValue, setInputValue] = useState<string>(""); // 입력값 관리
+  const [searchTerm, setSearchTerm] = useState<string>(""); // 실제 검색에 사용되는 값
   const [scrollY, setScrollY] = useState<number>(0);
   const pageRef = useRef<HTMLDivElement>(null);
+
+  // 검색 실행 함수
+  const handleSearch = () => {
+    setSearchTerm(inputValue);
+  };
+
+  // Enter 키 처리
+  const handleKeyPress = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter') {
+      handleSearch();
+    }
+  };
 
   const filteredPeople = useMemo(() => {
     let filtered = people;
@@ -60,13 +73,15 @@ const ListPage = () => {
         const name = p.personName?.toLowerCase() || "";
         const location = p.occurredLocation?.toLowerCase() || "";
         const gender = p.gender?.toLowerCase() || "";
-        const age = p.ageAtTime?.toString() || "";
 
+        // 지역과 성별 검색은 두 글자 이상일 때만 검색
+        const locationMatch = searchLower.length >= 2 && location.includes(searchLower);
+        const genderMatch = searchLower.length >= 2 && gender.includes(searchLower);
+        
         return (
           name.includes(searchLower) ||
-          location.includes(searchLower) ||
-          gender.includes(searchLower) ||
-          age.includes(searchLower)
+          locationMatch ||
+          genderMatch
         );
       });
     }
@@ -244,9 +259,10 @@ const ListPage = () => {
         {/* 모바일 검색바 (탭 바로 아래) */}
         <div className={`${styles['search-bar']} ${styles['mobile-search']}`}>
           <input 
-            placeholder="실종자를 검색해보세요" 
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
+            placeholder="이름, 지역, 성별을 입력해 검색해보세요" 
+            value={inputValue}
+            onChange={(e) => setInputValue(e.target.value)}
+            onKeyPress={handleKeyPress}
           />
         </div>
 
@@ -285,9 +301,10 @@ const ListPage = () => {
             </h2>
             <div className={styles['search-bar']}>
               <input 
-                placeholder="실종자를 검색해보세요" 
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
+                placeholder="이름, 지역, 성별을 입력해 검색해보세요" 
+                value={inputValue}
+                onChange={(e) => setInputValue(e.target.value)}
+                onKeyPress={handleKeyPress}
               />
             </div>
           </header>
