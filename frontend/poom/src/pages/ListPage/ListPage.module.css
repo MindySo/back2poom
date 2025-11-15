@@ -203,7 +203,7 @@
   max-width: 100%;
   grid-template-columns: repeat(2, 1fr); /* 최대 2열로 고정 */
   gap: 16px;
-  margin: 16px auto 0;
+  margin: 0px auto 0;
   justify-items: stretch; /* 그리드 아이템이 셀 전체를 채우도록 */
   align-items: start; /* 카드가 독립적으로 높이를 가지도록 */
   box-sizing: border-box;
