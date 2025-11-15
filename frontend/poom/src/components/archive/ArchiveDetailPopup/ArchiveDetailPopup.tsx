@@ -81,6 +81,7 @@ const ArchiveDetailPopup: React.FC<ArchiveDetailPopupProps> = ({ personId, initi
     phoneNumber,
     personName,
     ageAtTime,
+    currentAge,
     gender,
     crawledAt,
     occurredAt,
@@ -252,7 +253,9 @@ const ArchiveDetailPopup: React.FC<ArchiveDetailPopupProps> = ({ personId, initi
               </Text>
               
               <Text as="div" size="sm" weight="bold" className={styles['popup-info-label']}>나이</Text>
-              <Text as="div" size="md" className={styles['popup-info-value']}>{ageAtTime}세</Text>
+              <Text as="div" size="md" className={styles['popup-info-value']}>
+                {ageAtTime}세{currentAge ? ` (현재나이 ${currentAge}세)` : ''}
+              </Text>
               
               <Text as="div" size="sm" weight="bold" className={styles['popup-info-label']}>발생일</Text>
               <Text as="div" size="md" className={styles['popup-info-value']}>

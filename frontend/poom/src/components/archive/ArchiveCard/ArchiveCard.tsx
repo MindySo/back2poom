@@ -81,7 +81,7 @@ const ArchiveCard: React.FC<ArchiveCardProps> = ({ person, onClick }) => {
               <div className={styles['archive-card__info-item']}>
                 <Text as="span" size="sm" color="gray" className={styles['archive-card__label']}>나이</Text>
                 <Text as="span" size="sm" className={styles['archive-card__value']}>
-                  {ageAtTime}세{currentAge ? ` (현재 나이: ${currentAge}세)` : ''}
+                  {ageAtTime}세{currentAge ? ` (현재나이 ${currentAge}세)` : ''}
                 </Text>
               </div>
               <div className={styles['archive-card__info-item']}>
@@ -90,7 +90,7 @@ const ArchiveCard: React.FC<ArchiveCardProps> = ({ person, onClick }) => {
               </div>
               <div className={styles['archive-card__info-item']}>
                 <Text as="span" size="sm" color="gray" className={styles['archive-card__label']}>발생장소</Text>
-                <Text as="span" size="sm" className={styles['archive-card__value']}>{occurredLocation}</Text>
+                <Text as="span" size="sm" className={`${styles['archive-card__value']} ${styles['archive-card__value--location']}`}>{occurredLocation}</Text>
               </div>
             </div>
           </div>

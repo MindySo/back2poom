@@ -162,7 +162,7 @@ const MArchiveCard: React.FC<MArchiveCardProps> = ({ personId }) => {
                 <div className={styles['m-archive-card__info-item']}>
                   <Text as="span" size="xs" color="gray" className={styles['m-archive-card__label']}>나이</Text>
                   <Text as="span" size="xs" className={styles['m-archive-card__value']}>
-                    {ageAtTime}세{currentAge ? ` (현재 나이: ${currentAge}세)` : ''}
+                    {ageAtTime}세{currentAge ? ` (현재나이 ${currentAge}세)` : ''}
                   </Text>
                 </div>
                 <div className={styles['m-archive-card__info-item']}>
