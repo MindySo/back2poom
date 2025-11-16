@@ -1,34 +1,26 @@
-import React, { useRef, useState, forwardRef, useImperativeHandle } from 'react';
+import React, { useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useMissingDetail } from '../../../hooks/useMissingDetail';
 import { useElapsedTime } from '../../../hooks/useElapsedTime';
 import { useShareMissingPerson } from '../../../hooks/useShareMissingPerson';
-import BottomSheet, { type BottomSheetRef } from '../../common/molecules/BottomSheet/BottomSheet';
 import Badge from '../../common/atoms/Badge';
 import Text from '../../common/atoms/Text';
 import Button from '../../common/atoms/Button';
 import ImageCarousel from '../../common/molecules/ImageCarousel/ImageCarousel';
+import InitialInfoModal from '../InitialInfoModal/InitialInfoModal';
 import type { ImageFile } from '../../../types/missing';
 import tempImg from '../../../assets/TempImg.png';
 import cardStyles from '../../archive/MArchiveCard/MArchiveCard.module.css';
 import styles from './MissingInfoModal.module.css';
 
 interface MissingInfoModalProps {
-  isOpen: boolean;
-  onClose: () => void;
   personId?: number | null; // 선택된 실종자 ID
-  onOverlayClick?: () => void;
-  onStateChange?: (state: 'initial' | 'half' | 'full') => void;
   onGoBack?: () => void; // 초기 정보 모달로 돌아가는 콜백
+  onMarkerCardClick?: (id: number) => void; // 마커 카드 클릭 콜백
 }
 
-export interface MissingInfoModalRef {
-  collapseToInitial: () => void;
-}
-
-const MissingInfoModal = forwardRef<MissingInfoModalRef, MissingInfoModalProps>(({ isOpen, onClose, personId, onOverlayClick, onStateChange, onGoBack }, ref) => {
+const MissingInfoModal: React.FC<MissingInfoModalProps> = ({ personId, onGoBack, onMarkerCardClick }) => {
   const navigate = useNavigate();
-  const bottomSheetRef = useRef<BottomSheetRef>(null);
   const detailInfoRef = useRef<HTMLDivElement>(null);
   const [carouselOpen, setCarouselOpen] = useState(false);
   const [initialImageIndex, setInitialImageIndex] = useState(0);
@@ -90,29 +82,15 @@ const MissingInfoModal = forwardRef<MissingInfoModalRef, MissingInfoModalProps>(
     setCarouselOpen(false);
   };
 
-  // ref를 통해 외부에서 호출 가능한 함수 expose
-  useImperativeHandle(ref, () => ({
-    collapseToInitial: () => {
-      bottomSheetRef.current?.collapseToInitial();
-    },
-  }));
-
   return (
     <>
-      <BottomSheet
-        ref={bottomSheetRef}
-        isOpen={isOpen}
-        onClose={onClose}
-        onOverlayClick={onOverlayClick}
-        onStateChange={onStateChange}
-      >
-        {!personId ? (
-          // personId가 없으면 가이드 표시
-          <div style={{ padding: '16px' }}>
-            <h2 style={{ marginTop: 0 }}>지도 사용 가이드</h2>
-            <p>지도의 마커를 클릭하면 실종자 정보가 여기에 표시됩니다.</p>
-            <p>손잡이를 드래그하거나 클릭해서 모달 크기를 조절할 수 있습니다.</p>
-          </div>
+      {!personId ? (
+        // personId가 없으면 InitialInfoModal 내용 표시
+        <InitialInfoModal
+          onMarkerCardClick={(id) => {
+            onMarkerCardClick?.(id);
+          }}
+        />
         ) : isDetailLoading ? (
           // 로딩 중
           <div style={{ padding: '16px', textAlign: 'center' }}>로딩 중...</div>
@@ -361,11 +339,8 @@ const MissingInfoModal = forwardRef<MissingInfoModalRef, MissingInfoModalProps>(
             )}
           </>
         )}
-      </BottomSheet>
     </>
   );
-});
-
-MissingInfoModal.displayName = 'MissingInfoModal';
+};
 
 export default MissingInfoModal;

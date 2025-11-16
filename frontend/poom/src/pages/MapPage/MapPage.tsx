@@ -3,12 +3,12 @@ import SideBar from '../../components/map/SideBar/SideBar';
 import useKakaoMap from '../../hooks/useKakaoMap';
 import Dashboard from '../../components/map/Dashboard/Dashboard';
 import { useIsMobile, useRecentMissing } from '../../hooks';
+import BottomSheet, { type BottomSheetRef } from '../../components/common/molecules/BottomSheet/BottomSheet';
 import MyLocationButton from '../../components/map/MyLocationButton/MyLocationButton';
 import MyLocationMarker from '../../components/map/MyLocationMarker/MyLocationMarker';
 import MovementRadius from '../../components/map/MovementRadius/MovementRadius';
 import MobileStatusBoard from '../../components/map/MobileStatusBoard/MobileStatusBoard';
-import MissingInfoModal, { type MissingInfoModalRef } from '../../components/map/MissingInfoModal/MissingInfoModal';
-import InitialInfoModal from '../../components/map/InitialInfoModal/InitialInfoModal';
+import MissingInfoModal from '../../components/map/MissingInfoModal/MissingInfoModal';
 import Marker from '../../components/map/Marker/Marker';
 import styles from './MapPage.module.css';
 
@@ -19,7 +19,7 @@ const MapPage: React.FC = () => {
 
   const isLoaded = useKakaoMap(API_KEY);
   const mapRef = useRef<HTMLDivElement | null>(null);
-  const missingInfoModalRef = useRef<MissingInfoModalRef>(null);
+  const bottomSheetRef = useRef<BottomSheetRef>(null);
   const [map, setMap] = useState<kakao.maps.Map | null>(null);
   const [isDashboardOpen, setIsDashboardOpen] = useState(false);
   const [selectedMissingId, setSelectedMissingId] = useState<number | null>(null);
@@ -87,7 +87,7 @@ const MapPage: React.FC = () => {
       if (deltaX < 10 && deltaY < 10 && deltaTime < 300) {
         if (mobileModalState === 'half') {
           // half 상태에서는 initial로
-          missingInfoModalRef.current?.collapseToInitial();
+          bottomSheetRef.current?.collapseToInitial();
         } else if (mobileModalState === 'initial') {
           // initial 상태에서는 완전히 닫기
           setIsTestModalOpen(false);
@@ -126,7 +126,7 @@ const MapPage: React.FC = () => {
       if (deltaX < 10 && deltaY < 10 && deltaTime < 300) {
         if (mobileModalState === 'half') {
           // half 상태에서는 initial로
-          missingInfoModalRef.current?.collapseToInitial();
+          bottomSheetRef.current?.collapseToInitial();
         } else if (mobileModalState === 'initial') {
           // initial 상태에서는 완전히 닫기
           setIsTestModalOpen(false);
@@ -162,9 +162,14 @@ const MapPage: React.FC = () => {
         setSelectedRadiusPosition(null);
         setSelectedRadiusValue(0);
       } else {
-        // 다른 마커를 클릭하면 모달 열기
+        // 다른 마커를 클릭하면 내용만 변경 (모달은 닫지 않음)
         setSelectedMissingId(id);
-        setIsTestModalOpen(true);
+        setIsInitialModalOpen(false); // 초기 정보 모달 닫기
+
+        // 모달이 닫혀있으면 열기
+        if (!isTestModalOpen) {
+          setIsTestModalOpen(true);
+        }
 
         // 해당 실종자의 위치로 지도 이동 (모바일 모달을 고려한 중앙 계산)
         if (map) {
@@ -438,38 +443,32 @@ const MapPage: React.FC = () => {
         />
       )}
 
-      {/* 모바일 모달 */}
-      {isMobile && (
-        <>
-          {/* 초기 정보 모달 (마커 목록) - BottomSheet 사용 */}
-          <InitialInfoModal
-            isOpen={isInitialModalOpen && !isTestModalOpen}
-            onClose={() => setIsInitialModalOpen(false)}
+      {/* 모바일 모달 - 통합 BottomSheet */}
+      {isMobile && (isInitialModalOpen || isTestModalOpen) && (
+        <BottomSheet
+          ref={bottomSheetRef}
+          isOpen={isInitialModalOpen || isTestModalOpen}
+          onClose={() => {
+            setIsInitialModalOpen(false);
+            setIsTestModalOpen(false);
+            setSelectedMissingId(null);
+            setSelectedRadiusPosition(null);
+            setSelectedRadiusValue(0);
+          }}
+          onStateChange={setMobileModalState}
+        >
+          {/* selectedMissingId가 없으면 InitialInfoModal, 있으면 MissingInfoModal */}
+          <MissingInfoModal
+            personId={selectedMissingId}
+            onGoBack={() => {
+              setSelectedMissingId(null);
+            }}
             onMarkerCardClick={(id) => {
-              setIsInitialModalOpen(false);
+              setSelectedMissingId(id);
               handleMissingCardClick(id);
             }}
           />
-
-          {/* 마커 상세 정보 모달 */}
-          <MissingInfoModal
-            ref={missingInfoModalRef}
-            isOpen={isTestModalOpen}
-            personId={selectedMissingId}
-            onClose={() => {
-              setIsTestModalOpen(false);
-              setSelectedMissingId(null);
-              setSelectedRadiusPosition(null);
-              setSelectedRadiusValue(0);
-            }}
-            onStateChange={setMobileModalState}
-            onGoBack={() => {
-              setIsTestModalOpen(false);
-              setSelectedMissingId(null);
-              setIsInitialModalOpen(true);
-            }}
-          />
-        </>
+        </BottomSheet>
       )}
     </>
   );

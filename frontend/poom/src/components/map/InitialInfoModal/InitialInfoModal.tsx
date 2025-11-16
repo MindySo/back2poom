@@ -1,23 +1,15 @@
-import React, { forwardRef, useRef } from 'react';
+import React from 'react';
 import { useRecentMissing } from '../../../hooks';
-import BottomSheet, { type BottomSheetRef } from '../../common/molecules/BottomSheet/BottomSheet';
 import Text from '../../common/atoms/Text';
 import tempImg from '../../../assets/TempImg.png';
 import styles from './InitialInfoModal.module.css';
 import theme from '../../../theme';
 
 interface InitialInfoModalProps {
-  isOpen: boolean;
-  onClose: () => void;
   onMarkerCardClick?: (id: number) => void;
-  onStateChange?: (state: 'initial' | 'half' | 'full') => void;
 }
 
-export interface InitialInfoModalRef {
-  collapseToInitial: () => void;
-}
-
-const InitialInfoModalContent: React.FC<{ onMarkerCardClick?: (id: number) => void }> = ({ onMarkerCardClick }) => {
+const InitialInfoModal: React.FC<InitialInfoModalProps> = ({ onMarkerCardClick }) => {
   const { data: markerMissingList, isLoading: isMarkerLoading } = useRecentMissing(1000);
 
   return (
@@ -94,24 +86,5 @@ const InitialInfoModalContent: React.FC<{ onMarkerCardClick?: (id: number) => vo
     </div>
   );
 };
-
-const InitialInfoModal = forwardRef<InitialInfoModalRef, InitialInfoModalProps>(
-  ({ isOpen, onClose, onMarkerCardClick, onStateChange }, ref) => {
-    const bottomSheetRef = useRef<BottomSheetRef>(null);
-
-    return (
-      <BottomSheet
-        ref={bottomSheetRef}
-        isOpen={isOpen}
-        onClose={onClose}
-        onStateChange={onStateChange}
-      >
-        <InitialInfoModalContent onMarkerCardClick={onMarkerCardClick} />
-      </BottomSheet>
-    );
-  }
-);
-
-InitialInfoModal.displayName = 'InitialInfoModal';
 
 export default InitialInfoModal;
