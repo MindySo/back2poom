@@ -1,0 +1,5 @@
+package com.topoom.detection.controller;
+
+public class DetectionController {
+
+}
