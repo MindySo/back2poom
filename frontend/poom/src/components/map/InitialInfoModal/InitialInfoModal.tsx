@@ -1,7 +1,7 @@
 import React from 'react';
 import { useRecentMissing } from '../../../hooks';
 import Text from '../../common/atoms/Text';
-import tempImg from '../../../assets/TempImg.png';
+import anonymousProfile from '../../../assets/anonymous_profile.svg';
 import styles from './InitialInfoModal.module.css';
 import theme from '../../../theme';
 
@@ -58,7 +58,7 @@ const InitialInfoModal: React.FC<InitialInfoModalProps> = ({ onMarkerCardClick }
                 {/* 이미지 */}
                 <div className={styles.imageWrapper}>
                   <img
-                    src={person.mainImage?.url || tempImg}
+                    src={person.mainImage?.url || anonymousProfile}
                     alt={person.personName}
                     className={styles.image}
                   />

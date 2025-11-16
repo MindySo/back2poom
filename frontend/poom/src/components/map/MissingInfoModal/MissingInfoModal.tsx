@@ -9,7 +9,7 @@ import Button from '../../common/atoms/Button';
 import ImageCarousel from '../../common/molecules/ImageCarousel/ImageCarousel';
 import InitialInfoModal from '../InitialInfoModal/InitialInfoModal';
 import type { ImageFile } from '../../../types/missing';
-import tempImg from '../../../assets/TempImg.png';
+import anonymousProfile from '../../../assets/anonymous_profile.svg';
 import cardStyles from '../../archive/MArchiveCard/MArchiveCard.module.css';
 import styles from './MissingInfoModal.module.css';
 
@@ -117,7 +117,7 @@ const MissingInfoModal: React.FC<MissingInfoModalProps> = ({ personId, onGoBack,
               <div className={cardStyles['m-archive-card__content']}>
                 <div className={cardStyles['m-archive-card__imageWrap']}>
                   <img
-                    src={detailData.mainImage?.url || tempImg}
+                    src={detailData.mainImage?.url || anonymousProfile}
                     alt="메인 이미지"
                     className={cardStyles['m-archive-card__image']}
                     onClick={() => detailData.mainImage && handleImageClick(detailData.mainImage.url)}
