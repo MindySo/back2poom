@@ -117,12 +117,14 @@ class LazyQwenTryOnPipeline:
     def load(self):
         if self.pipe is None:
             print("Loading Qwen-Image-Edit-2509 pipeline...")
+            print("Using multi-GPU distribution to handle large model...")
+
             self.pipe = QwenImageEditPlusPipeline.from_pretrained(
                 "Qwen/Qwen-Image-Edit-2509",
-                torch_dtype=dtype
+                torch_dtype=dtype,
+                device_map="auto"  # Automatically distribute across GPUs
             )
-            self.pipe.to(device)
-            print("Qwen-Image-Edit-2509 loaded!")
+            print("Qwen-Image-Edit-2509 loaded and distributed across GPUs!")
 
     def extract_clothes(self, clothing_image_path, output_path):
         """Stage 1: Extract clothing from image"""
