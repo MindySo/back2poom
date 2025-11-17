@@ -44,8 +44,8 @@ const StatusBoard: React.FC<StatusBoardProps> = ({
 
   // 데이터 매핑
   const data: [StatusData, StatusData, StatusData] = [
-    { label: '금일 실종', value: stats?.totalReports ?? 0 },
-    { label: '제보 건수', value: stats?.totalTips ?? 0 },
+    { label: '금일 실종', value: stats?.totalCases ?? 0 },
+    { label: '제보 건수', value: stats?.totalReports ?? 0 },
     { label: '해결 건수', value: stats?.totalResolved ?? 0 },
   ];
   const getFormattedDate = () => {
