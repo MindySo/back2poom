@@ -243,12 +243,10 @@ class LazyFluxFillPipeline:
     def load(self):
         if self.pipe is None:
             print("Loading FLUX.1-Fill-dev pipeline...")
-            hf_token = HUGGINGFACE_CONFIG.get('token', None)
-
+            # Token already configured via 'huggingface-cli login'
             self.pipe = FluxFillPipeline.from_pretrained(
                 "black-forest-labs/FLUX.1-Fill-dev",
-                torch_dtype=dtype,
-                token=hf_token if hf_token else None
+                torch_dtype=dtype
             )
             self.pipe.to(device)
             print("FLUX.1-Fill-dev loaded!")
