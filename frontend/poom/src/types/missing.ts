@@ -55,8 +55,8 @@ export interface MissingPerson {
 
 // 실종자 통계
 export interface MissingStats {
-  totalReports: number;  // 금일 실종
-  totalTips: number;     // 제보 건수
+  totalCases: number;  // 금일 실종
+  totalReports: number;     // 제보 건수
   totalResolved: number; // 해결 건수
 }
 

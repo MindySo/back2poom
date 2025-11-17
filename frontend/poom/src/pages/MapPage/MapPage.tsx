@@ -127,13 +127,8 @@ const MapPage: React.FC = () => {
         if (mobileModalState === 'half') {
           // half 상태에서는 initial로
           bottomSheetRef.current?.collapseToInitial();
-        } else if (mobileModalState === 'initial') {
-          // initial 상태에서는 완전히 닫기
-          setIsTestModalOpen(false);
-          setSelectedMissingId(null);
-          setSelectedRadiusPosition(null);
-          setSelectedRadiusValue(0);
         }
+        // initial 상태에서는 손잡이 유지 (아무 동작 안 함)
       }
 
       tapStartRef.current = null;
@@ -166,13 +161,8 @@ const MapPage: React.FC = () => {
         if (mobileModalState === 'half') {
           // half 상태에서는 initial로
           bottomSheetRef.current?.collapseToInitial();
-        } else if (mobileModalState === 'initial') {
-          // initial 상태에서는 완전히 닫기
-          setIsTestModalOpen(false);
-          setSelectedMissingId(null);
-          setSelectedRadiusPosition(null);
-          setSelectedRadiusValue(0);
         }
+        // initial 상태에서는 손잡이 유지 (아무 동작 안 함)
       }
 
       tapStartRef.current = null;
@@ -194,20 +184,26 @@ const MapPage: React.FC = () => {
   const handleMissingCardClick = (id: number) => {
     // 모바일 환경에서는 모달 열기
     if (isMobile) {
-      // 같은 마커를 클릭하면 토글
-      if (selectedMissingId === id && isTestModalOpen) {
-        setIsTestModalOpen(false);
+      // half/full 상태에서 같은 마커를 클릭하면 initial 상태로 축소하고 초기 정보 모달로 돌아감
+      if (selectedMissingId === id && isTestModalOpen && (mobileModalState === 'half' || mobileModalState === 'full')) {
+        bottomSheetRef.current?.collapseToInitial();
         setSelectedMissingId(null);
+        setIsInitialModalOpen(true);
         setSelectedRadiusPosition(null);
         setSelectedRadiusValue(0);
       } else {
-        // 다른 마커를 클릭하면 내용만 변경 (모달은 닫지 않음)
+        // initial 상태거나 다른 마커를 클릭하면 내용 변경하고 half 상태로 확장
         setSelectedMissingId(id);
         setIsInitialModalOpen(false); // 초기 정보 모달 닫기
 
         // 모달이 닫혀있으면 열기
         if (!isTestModalOpen) {
           setIsTestModalOpen(true);
+        }
+
+        // initial 상태에서 마커를 클릭하면 명시적으로 half 상태로 확장
+        if (mobileModalState === 'initial') {
+          bottomSheetRef.current?.expandToHalf();
         }
 
         // 해당 실종자의 위치로 지도 이동 (모바일 모달을 고려한 중앙 계산)
@@ -486,13 +482,6 @@ const MapPage: React.FC = () => {
         <BottomSheet
           ref={bottomSheetRef}
           isOpen={isInitialModalOpen || isTestModalOpen}
-          onClose={() => {
-            setIsInitialModalOpen(false);
-            setIsTestModalOpen(false);
-            setSelectedMissingId(null);
-            setSelectedRadiusPosition(null);
-            setSelectedRadiusValue(0);
-          }}
           onStateChange={setMobileModalState}
         >
           {/* selectedMissingId가 없으면 InitialInfoModal, 있으면 MissingInfoModal */}
@@ -501,10 +490,7 @@ const MapPage: React.FC = () => {
             onGoBack={() => {
               setSelectedMissingId(null);
             }}
-            onMarkerCardClick={(id) => {
-              setSelectedMissingId(id);
-              handleMissingCardClick(id);
-            }}
+            onMarkerCardClick={handleMissingCardClick}
           />
         </BottomSheet>
       )}
