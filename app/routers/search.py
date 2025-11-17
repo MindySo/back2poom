@@ -18,7 +18,9 @@ async def search_person(
     video_file: UploadFile = File(...),
     query_mode: int = Form(...),  # 1=img, 2=text, 3=both
     text_query: str = Form(None),
-    image_query: UploadFile = File(None)
+    image_query: UploadFile = File(None),
+    missing_id: int = Form(...),
+    cctv_id: int = Form(...)                                 
 ):
     # ---- Load Video ----
     temp_video = video_file.filename
@@ -58,6 +60,7 @@ async def search_person(
     # ---- Extract features from video ----
     features = []
     detections = []
+    crops = []
 
     while True:
         ret, frame = cap.read()
@@ -66,6 +69,7 @@ async def search_person(
 
         for x1, y1, x2, y2 in detect_person(frame):
             crop = frame[y1:y2, x1:x2]
+            crops.append(crop)
             crop_tensor = preprocess_image(crop)
 
             reid_feat = extract_reid_feature(crop_tensor)
@@ -95,7 +99,8 @@ async def search_person(
         pil_crop = Image.fromarray(cv2.cvtColor(crop, cv2.COLOR_BGR2RGB))
 
         # ---- S3 업로드 ----
-        image_url = upload_image_to_s3(pil_crop, prefix="detections/")
+        prefix = f"detections/missing-person-{missing_id}/cctv-{cctv_id}/"
+        image_url = upload_image_to_s3(pil_crop, prefix=prefix)
 
         result.append({
             "score": float(scores[idx][0]),
