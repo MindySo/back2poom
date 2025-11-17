@@ -482,13 +482,6 @@ const MapPage: React.FC = () => {
         <BottomSheet
           ref={bottomSheetRef}
           isOpen={isInitialModalOpen || isTestModalOpen}
-          onClose={() => {
-            setIsInitialModalOpen(false);
-            setIsTestModalOpen(false);
-            setSelectedMissingId(null);
-            setSelectedRadiusPosition(null);
-            setSelectedRadiusValue(0);
-          }}
           onStateChange={setMobileModalState}
         >
           {/* selectedMissingId가 없으면 InitialInfoModal, 있으면 MissingInfoModal */}
