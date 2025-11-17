@@ -14,7 +14,4 @@ GMS_CONFIG = {
     'base_url': 'https://gms.ssafy.io/gmsapi/api.openai.com/v1'
 }
 
-# HuggingFace Configuration
-HUGGINGFACE_CONFIG = {
-    'token': ''  # Fill in your HuggingFace token here (optional, leave empty if public model)
-}
+# Note: HuggingFace authentication is done via CLI: huggingface-cli login

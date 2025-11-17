@@ -18,11 +18,11 @@ from RealESRGAN import RealESRGAN
 
 # Import configurations
 try:
-    from config import S3_CONFIG, GMS_CONFIG, HUGGINGFACE_CONFIG
+    from config import S3_CONFIG, GMS_CONFIG
 except ImportError:
     import sys
     print("Error: config.py file not found!")
-    print("Please create config.py with S3_CONFIG, GMS_CONFIG, and HUGGINGFACE_CONFIG")
+    print("Please create config.py with S3_CONFIG and GMS_CONFIG")
     sys.exit(1)
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
