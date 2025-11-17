@@ -5,4 +5,4 @@ export { useRecentMissing } from './useRecentMissing';
 export { useIsMobile } from './useMediaQuery';
 export { useShareMissingPerson } from './useShareMissingPerson';
 export { useElapsedTime } from './useElapsedTime';
-
+export { useMapLocationCenter } from './useMapLocationCenter';

@@ -2,12 +2,13 @@ import React, { useEffect, useRef, useState } from 'react';
 import SideBar from '../../components/map/SideBar/SideBar';
 import useKakaoMap from '../../hooks/useKakaoMap';
 import Dashboard from '../../components/map/Dashboard/Dashboard';
-import { useIsMobile, useRecentMissing } from '../../hooks';
+import { useIsMobile, useRecentMissing, useMapLocationCenter } from '../../hooks';
+import BottomSheet, { type BottomSheetRef } from '../../components/common/molecules/BottomSheet/BottomSheet';
 import MyLocationButton from '../../components/map/MyLocationButton/MyLocationButton';
 import MyLocationMarker from '../../components/map/MyLocationMarker/MyLocationMarker';
 import MovementRadius from '../../components/map/MovementRadius/MovementRadius';
 import MobileStatusBoard from '../../components/map/MobileStatusBoard/MobileStatusBoard';
-import MobileModal, { type MobileModalRef } from '../../components/map/MobileModal/MobileModal';
+import MissingInfoModal from '../../components/map/MissingInfoModal/MissingInfoModal';
 import Marker from '../../components/map/Marker/Marker';
 import styles from './MapPage.module.css';
 
@@ -18,8 +19,9 @@ const MapPage: React.FC = () => {
 
   const isLoaded = useKakaoMap(API_KEY);
   const mapRef = useRef<HTMLDivElement | null>(null);
-  const mobileModalRef = useRef<MobileModalRef>(null);
+  const bottomSheetRef = useRef<BottomSheetRef>(null);
   const [map, setMap] = useState<kakao.maps.Map | null>(null);
+  const { moveMapToCenter } = useMapLocationCenter({ map, mapContainerRef: mapRef, isMobile });
   const [isDashboardOpen, setIsDashboardOpen] = useState(false);
   const [selectedMissingId, setSelectedMissingId] = useState<number | null>(null);
   const [myLocation, setMyLocation] = useState<{ lat: number; lng: number } | null>(null);
@@ -28,26 +30,66 @@ const MapPage: React.FC = () => {
   const [selectedRadiusValue, setSelectedRadiusValue] = useState<number>(0);
   const [isTestModalOpen, setIsTestModalOpen] = useState(false);
   const [mobileModalState, setMobileModalState] = useState<'initial' | 'half' | 'full'>('initial');
+  const [isInitialModalOpen, setIsInitialModalOpen] = useState(true); // 초기 정보 모달
 
   // 지도 탭 감지를 위한 상태
   const tapStartRef = useRef<{ x: number; y: number; time: number } | null>(null);
 
   // 최근 24시간 내 실종자 데이터 가져오기 (Marker용)
-  const { data: markerMissingList, isLoading: isMarkerLoading, isError: isMarkerError, error: markerError } = useRecentMissing(24);
-
+  const { data: markerMissingList, isLoading: isMarkerLoading, isError: isMarkerError, error: markerError } = useRecentMissing(1000);
 
   useEffect(() => {
     if (!isLoaded || !mapRef.current) return;
 
-    const center = new kakao.maps.LatLng(37.5665, 126.9780); // 서울 중심
-    const mapOptions = {
-      center,
-      level: 5, // 확대 레벨
-    };
+    // 내 위치로 지도 초기화
+    if ('geolocation' in navigator) {
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          const { latitude, longitude } = position.coords;
+          const center = new kakao.maps.LatLng(latitude, longitude);
+          const mapOptions = {
+            center,
+            level: 5,
+          };
 
-    const mapInstance = new kakao.maps.Map(mapRef.current, mapOptions);
-    setMap(mapInstance);
+          const mapInstance = new kakao.maps.Map(mapRef.current!, mapOptions);
+          setMap(mapInstance);
+          setMyLocation({ lat: latitude, lng: longitude });
+        },
+        () => {
+          // 위치 조회 실패 시 서울 중심으로 폴백
+          const center = new kakao.maps.LatLng(37.5665, 126.9780);
+          const mapOptions = {
+            center,
+            level: 5,
+          };
+
+          const mapInstance = new kakao.maps.Map(mapRef.current!, mapOptions);
+          setMap(mapInstance);
+        }
+      );
+    } else {
+      // geolocation 미지원 시 서울 중심
+      const center = new kakao.maps.LatLng(37.5665, 126.9780);
+      const mapOptions = {
+        center,
+        level: 5,
+      };
+
+      const mapInstance = new kakao.maps.Map(mapRef.current, mapOptions);
+      setMap(mapInstance);
+    }
   }, [isLoaded]);
+
+  // 모바일에서 초기 진입 시 내 위치를 모달을 고려한 중앙에 배치
+  useEffect(() => {
+    if (!isMobile || !map || !myLocation) return;
+
+    // 초기 진입 시에만 실행 (모달이 열려있지 않을 때)
+    if (isInitialModalOpen && !isTestModalOpen) {
+      moveMapToVisibleCenterMobile(myLocation.lat, myLocation.lng);
+    }
+  }, [isMobile, map, myLocation]);
 
   // 모바일에서 지도 탭 감지 (initial/half 상태일 때)
   useEffect(() => {
@@ -84,7 +126,7 @@ const MapPage: React.FC = () => {
       if (deltaX < 10 && deltaY < 10 && deltaTime < 300) {
         if (mobileModalState === 'half') {
           // half 상태에서는 initial로
-          mobileModalRef.current?.collapseToInitial();
+          bottomSheetRef.current?.collapseToInitial();
         } else if (mobileModalState === 'initial') {
           // initial 상태에서는 완전히 닫기
           setIsTestModalOpen(false);
@@ -123,7 +165,7 @@ const MapPage: React.FC = () => {
       if (deltaX < 10 && deltaY < 10 && deltaTime < 300) {
         if (mobileModalState === 'half') {
           // half 상태에서는 initial로
-          mobileModalRef.current?.collapseToInitial();
+          bottomSheetRef.current?.collapseToInitial();
         } else if (mobileModalState === 'initial') {
           // initial 상태에서는 완전히 닫기
           setIsTestModalOpen(false);
@@ -159,9 +201,14 @@ const MapPage: React.FC = () => {
         setSelectedRadiusPosition(null);
         setSelectedRadiusValue(0);
       } else {
-        // 다른 마커를 클릭하면 모달 열기
+        // 다른 마커를 클릭하면 내용만 변경 (모달은 닫지 않음)
         setSelectedMissingId(id);
-        setIsTestModalOpen(true);
+        setIsInitialModalOpen(false); // 초기 정보 모달 닫기
+
+        // 모달이 닫혀있으면 열기
+        if (!isTestModalOpen) {
+          setIsTestModalOpen(true);
+        }
 
         // 해당 실종자의 위치로 지도 이동 (모바일 모달을 고려한 중앙 계산)
         if (map) {
@@ -332,12 +379,11 @@ const MapPage: React.FC = () => {
 
           setMyLocation(location);
 
-          // 지도 중심을 내 위치로 이동
-          const moveLatLon = new kakao.maps.LatLng(latitude, longitude);
-          map.panTo(moveLatLon);
-
           // 줌 레벨 조정 (더 가까이)
           map.setLevel(3);
+
+          // 훅에서 제공하는 함수로 환경에 맞게 지도 중심 조정
+          moveMapToCenter(latitude, longitude);
 
           setIsLoadingLocation(false);
         },
@@ -435,20 +481,32 @@ const MapPage: React.FC = () => {
         />
       )}
 
-      {/* 모바일 모달 */}
-      {isMobile && (
-        <MobileModal
-          ref={mobileModalRef}
-          isOpen={isTestModalOpen}
-          personId={selectedMissingId}
+      {/* 모바일 모달 - 통합 BottomSheet */}
+      {isMobile && (isInitialModalOpen || isTestModalOpen) && (
+        <BottomSheet
+          ref={bottomSheetRef}
+          isOpen={isInitialModalOpen || isTestModalOpen}
           onClose={() => {
+            setIsInitialModalOpen(false);
             setIsTestModalOpen(false);
             setSelectedMissingId(null);
             setSelectedRadiusPosition(null);
             setSelectedRadiusValue(0);
           }}
           onStateChange={setMobileModalState}
-        />
+        >
+          {/* selectedMissingId가 없으면 InitialInfoModal, 있으면 MissingInfoModal */}
+          <MissingInfoModal
+            personId={selectedMissingId}
+            onGoBack={() => {
+              setSelectedMissingId(null);
+            }}
+            onMarkerCardClick={(id) => {
+              setSelectedMissingId(id);
+              handleMissingCardClick(id);
+            }}
+          />
+        </BottomSheet>
       )}
     </>
   );

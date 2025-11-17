@@ -19,6 +19,7 @@ export interface RecentMissingProps {
   occurredAt: string;
   targetType?: string;
   className?: string;
+  textColor?: 'white' | 'black' | 'darkMain' | 'gray';
   onClick?: () => void;
 }
 
@@ -32,6 +33,7 @@ const RecentMissing: React.FC<RecentMissingProps> = ({
   occurredAt,
   targetType,
   className = '',
+  textColor,
   onClick,
 }) => {
   // 실종 경과 시간을 실시간으로 업데이트
@@ -85,14 +87,14 @@ const RecentMissing: React.FC<RecentMissingProps> = ({
           <Text
             size="lg"
             weight="bold"
-            color="darkMain"
+            color={textColor === 'white' ? 'white' : 'darkMain'}
           >
             {name || '-'}
           </Text>
           <Text
             size="sm"
             weight="regular"
-            color="gray"
+            color={textColor === 'white' ? 'white' : 'gray'}
           >
             {gender} / {age || '- '}세
           </Text>
@@ -103,14 +105,14 @@ const RecentMissing: React.FC<RecentMissingProps> = ({
           <Text
             size="md"
             weight="medium"
-            color="darkMain"
+            color={textColor === 'white' ? 'white' : 'darkMain'}
           >
             실종 장소
           </Text>
           <Text
             size="md"
             weight="regular"
-            color="gray"
+            color={textColor === 'white' ? 'white' : 'gray'}
           >
             {location || '-'}
           </Text>

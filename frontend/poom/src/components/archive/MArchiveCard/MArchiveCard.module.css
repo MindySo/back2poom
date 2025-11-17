@@ -123,6 +123,7 @@
 .m-archive-card__label {
   color: #9aa3af;
   flex-shrink: 0;
+  min-width: 48px; /* 나이, 발생일, 발생장소가 같은 위치에서 시작하도록 */
 }
 
 .m-archive-card__value {

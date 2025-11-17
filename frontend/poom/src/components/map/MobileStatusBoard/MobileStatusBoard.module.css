@@ -12,6 +12,9 @@
   transition: transform 0.3s ease, opacity 0.3s ease;
   user-select: none;
   pointer-events: auto;
+  max-width: calc(100vw - 2rem);
+  max-height: calc(100vh - 2rem);
+  box-sizing: border-box;
 }
 
 .container.hidden {
@@ -20,6 +23,7 @@
 
 .content {
   position: relative;
+  overflow: hidden;
 }
 
 .backButton {

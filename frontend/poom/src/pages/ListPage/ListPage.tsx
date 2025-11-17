@@ -1,4 +1,4 @@
-import { useState, useMemo, useEffect, useRef } from "react";
+import { useState, useMemo, useEffect, useRef, useCallback, startTransition } from "react";
 import { ArchiveCard } from "../../components/archive/ArchiveCard/ArchiveCard";
 import { MArchiveCard } from "../../components/archive/MArchiveCard/MArchiveCard";
 import { ArchiveDetailPopup } from "../../components/archive/ArchiveDetailPopup/ArchiveDetailPopup";
@@ -39,9 +39,34 @@ const ListPage = () => {
   type TabKey = "all" | "within24" | "over24";
   const [activeTab, setActiveTab] = useState<TabKey>("all");
   const [selectedPersonId, setSelectedPersonId] = useState<number | null>(null);
-  const [searchTerm, setSearchTerm] = useState<string>("");
+  const [inputValue, setInputValue] = useState<string>(""); // 입력값 관리
+  const [searchTerm, setSearchTerm] = useState<string>(""); // 실제 검색에 사용되는 값
   const [scrollY, setScrollY] = useState<number>(0);
   const pageRef = useRef<HTMLDivElement>(null);
+
+  // 검색 실행 함수
+  const handleSearch = () => {
+    setSearchTerm(inputValue);
+  };
+
+  // Enter 키 처리
+  const handleKeyPress = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter') {
+      handleSearch();
+    }
+  };
+
+  // 탭 변경 핸들러 최적화 (startTransition으로 낮은 우선순위 업데이트)
+  const handleTabChange = useCallback((tab: TabKey) => {
+    startTransition(() => {
+      setActiveTab(tab);
+    });
+  }, []);
+
+  // 카드 클릭 핸들러 최적화
+  const handleCardClick = useCallback((personId: number) => {
+    setSelectedPersonId(personId);
+  }, []);
 
   const filteredPeople = useMemo(() => {
     let filtered = people;
@@ -60,13 +85,15 @@ const ListPage = () => {
         const name = p.personName?.toLowerCase() || "";
         const location = p.occurredLocation?.toLowerCase() || "";
         const gender = p.gender?.toLowerCase() || "";
-        const age = p.ageAtTime?.toString() || "";
 
+        // 지역과 성별 검색은 두 글자 이상일 때만 검색
+        const locationMatch = searchLower.length >= 2 && location.includes(searchLower);
+        const genderMatch = searchLower.length >= 2 && gender.includes(searchLower);
+        
         return (
           name.includes(searchLower) ||
-          location.includes(searchLower) ||
-          gender.includes(searchLower) ||
-          age.includes(searchLower)
+          locationMatch ||
+          genderMatch
         );
       });
     }
@@ -208,7 +235,7 @@ const ListPage = () => {
         <div className={`${styles['list-tabs']} ${styles['mobile-tabs']}`}>
           <button
             className={`${styles['mobile-tab']} ${activeTab === "all" ? styles['mobile-tab-active'] : ''}`}
-            onClick={() => setActiveTab("all")}
+            onClick={() => handleTabChange("all")}
             style={{
               backgroundColor: activeTab === "all" ? theme.colors.darkMain : theme.colors.white,
               color: activeTab === "all" ? theme.colors.white : theme.colors.gray,
@@ -219,7 +246,7 @@ const ListPage = () => {
           </button>
           <button
             className={`${styles['mobile-tab']} ${activeTab === "within24" ? styles['mobile-tab-active'] : ''}`}
-            onClick={() => setActiveTab("within24")}
+            onClick={() => handleTabChange("within24")}
             style={{
               backgroundColor: activeTab === "within24" ? theme.colors.darkMain : theme.colors.white,
               color: activeTab === "within24" ? theme.colors.white : theme.colors.gray,
@@ -230,7 +257,7 @@ const ListPage = () => {
           </button>
           <button
             className={`${styles['mobile-tab']} ${activeTab === "over24" ? styles['mobile-tab-active'] : ''}`}
-            onClick={() => setActiveTab("over24")}
+            onClick={() => handleTabChange("over24")}
             style={{
               backgroundColor: activeTab === "over24" ? theme.colors.darkMain : theme.colors.white,
               color: activeTab === "over24" ? theme.colors.white : theme.colors.gray,
@@ -244,9 +271,10 @@ const ListPage = () => {
         {/* 모바일 검색바 (탭 바로 아래) */}
         <div className={`${styles['search-bar']} ${styles['mobile-search']}`}>
           <input 
-            placeholder="실종자를 검색해보세요" 
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
+            placeholder="이름, 지역, 성별을 입력해 검색해보세요" 
+            value={inputValue}
+            onChange={(e) => setInputValue(e.target.value)}
+            onKeyPress={handleKeyPress}
           />
         </div>
 
@@ -285,9 +313,10 @@ const ListPage = () => {
             </h2>
             <div className={styles['search-bar']}>
               <input 
-                placeholder="실종자를 검색해보세요" 
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
+                placeholder="이름, 지역, 성별을 입력해 검색해보세요" 
+                value={inputValue}
+                onChange={(e) => setInputValue(e.target.value)}
+                onKeyPress={handleKeyPress}
               />
             </div>
           </header>
@@ -297,19 +326,19 @@ const ListPage = () => {
         <div className={styles['list-tabs']}>
         <button
           className={activeTab === "all" ? "active" : undefined}
-          onClick={() => setActiveTab("all")}
+          onClick={() => handleTabChange("all")}
         >
           전체
         </button>
         <button
           className={activeTab === "within24" ? "active" : undefined}
-          onClick={() => setActiveTab("within24")}
+          onClick={() => handleTabChange("within24")}
         >
           24시간 이내
         </button>
         <button
           className={activeTab === "over24" ? "active" : undefined}
-          onClick={() => setActiveTab("over24")}
+          onClick={() => handleTabChange("over24")}
         >
           24시간 이상
         </button>
@@ -322,7 +351,7 @@ const ListPage = () => {
           <ArchiveCard 
             key={p.id} 
             person={p} 
-            onClick={() => setSelectedPersonId(p.id)}
+            onClick={() => handleCardClick(p.id)}
           />
         ))}
       </div>

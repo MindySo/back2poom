@@ -12,9 +12,9 @@ interface MobileStatusBoardProps extends Omit<StatusBoardProps, 'className' | 'd
 
 // 기본 데이터
 const DEFAULT_DATA: StatusBoardProps['data'] = [
-  { label: '실종자', value: 42 },
-  { label: '발견', value: 18 },
-  { label: '해결', value: 15 }
+  { label: '실종자', value: 0 },
+  { label: '발견', value: 0 },
+  { label: '해결', value: 0 }
 ];
 
 const MIN_SCALE = 0.5;
@@ -24,7 +24,7 @@ const MobileStatusBoard: React.FC<MobileStatusBoardProps> = ({
   data = DEFAULT_DATA,
   textColor = 'white',
   borderColor = 'transparent',
-  padding = '1.5rem 0 1.5rem 2.5rem',
+  padding = '1.5rem 0 1.5rem 2rem',
   visible = true,
 }) => {
   const [scale, setScale] = useState(MIN_SCALE);

@@ -10,7 +10,7 @@ import styles from './MArchiveCard.module.css';
 import Badge from '../../common/atoms/Badge';
 import Text from '../../common/atoms/Text';
 import ImageCarousel from '../../common/molecules/ImageCarousel/ImageCarousel';
-import tempImg from '../../../assets/TempImg.png';
+import anonymousProfile from '../../../assets/anonymous_profile.svg';
 import Button from '../../common/atoms/Button';
 
 export interface MArchiveCardProps {
@@ -82,8 +82,8 @@ const MArchiveCard: React.FC<MArchiveCardProps> = ({ personId }) => {
 
   // 이미지 URL 가져오기
   const thumbnailImages = inputImages?.slice(0, 4) || [];
-  const aiImageUrl = outputImages && outputImages.length > 0 ? outputImages[0].url : tempImg;
-  const displayMainImageUrl = mainImage?.url || tempImg;
+  const aiImageUrl = outputImages && outputImages.length > 0 ? outputImages[0].url : anonymousProfile;
+  const displayMainImageUrl = mainImage?.url || anonymousProfile;
 
   // 모든 이미지를 배열로 수집
   const getAllImages = (): ImageFile[] => {
@@ -162,7 +162,7 @@ const MArchiveCard: React.FC<MArchiveCardProps> = ({ personId }) => {
                 <div className={styles['m-archive-card__info-item']}>
                   <Text as="span" size="xs" color="gray" className={styles['m-archive-card__label']}>나이</Text>
                   <Text as="span" size="xs" className={styles['m-archive-card__value']}>
-                    {ageAtTime}세{currentAge ? ` (현재 나이: ${currentAge}세)` : ''}
+                    {ageAtTime}세{currentAge ? ` (현재나이 ${currentAge}세)` : ''}
                   </Text>
                 </div>
                 <div className={styles['m-archive-card__info-item']}>
@@ -231,7 +231,7 @@ const MArchiveCard: React.FC<MArchiveCardProps> = ({ personId }) => {
                       className={styles['m-archive-card__thumbnail']}
                       onClick={() => img.url && handleImageClick(img.url)}
                     >
-                      <img src={img.url || tempImg} alt={`추가 사진 ${index + 1}`} />
+                      <img src={img.url || anonymousProfile} alt={`추가 사진 ${index + 1}`} />
                     </div>
                   ))}
                 </div>

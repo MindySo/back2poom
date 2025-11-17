@@ -1,0 +1,106 @@
+.container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  width: 100%;
+  overflow: hidden;
+  background: linear-gradient(135deg, #1a2332 0%, #2B3A55 100%);
+  padding: 1.25rem;
+  gap: 2rem;
+}
+
+.loginCard {
+  background: white;
+  padding: 3rem 4rem;
+  border-radius: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+  width: 100%;
+  max-width: 800px;
+  min-width: 600px;
+}
+
+.logoContainer {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.logo {
+  max-width: 180px;
+  height: auto;
+  object-fit: contain;
+}
+
+.title {
+  margin-bottom: 0;
+  padding-bottom: 1.25rem;
+  border-bottom: 2px solid rgba(0, 0, 0, 0.1);
+  letter-spacing: 0.5px;
+  text-align: center;
+}
+
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.inputGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.label {
+  opacity: 0.9;
+  letter-spacing: 0.3px;
+}
+
+.input {
+  width: 100%;
+  padding: 0.875rem 1rem;
+  background: #f8f9fa;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  color: #333;
+  font-size: 16px;
+  font-family: 'Pretendard, -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif';
+  transition: all 0.2s ease;
+  outline: none;
+}
+
+.input::placeholder {
+  color: #999;
+  opacity: 1;
+}
+
+.input:focus {
+  background: white;
+  border-color: #2B3A55;
+  box-shadow: 0 0 0 3px rgba(43, 58, 85, 0.1);
+}
+
+.input:hover:not(:focus) {
+  background: #f0f0f0;
+  border-color: #d0d0d0;
+}
+
+.loginButton {
+  margin-top: 0.5rem;
+  transition: all 0.2s ease;
+}
+
+.loginButton:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4);
+}
+
+.loginButton:active:not(:disabled) {
+  transform: translateY(0);
+}
+
