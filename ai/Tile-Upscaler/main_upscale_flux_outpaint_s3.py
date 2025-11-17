@@ -57,9 +57,9 @@ class GMSAPIClient:
 
         return base64.b64encode(buffer.read()).decode('utf-8')
 
-    def extract_portrait_description(self, image_path):
-        """Extract portrait description from text image"""
-        print(f"Extracting portrait description from: {os.path.basename(image_path)}")
+    def analyze_appearance_image(self, image_path):
+        """Analyze appearance image (first image) for clothing and style details"""
+        print(f"Analyzing appearance from: {os.path.basename(image_path)}")
 
         base64_image = self.image_to_base64(image_path)
 
@@ -71,24 +71,21 @@ class GMSAPIClient:
                     "content": [
                         {
                             "type": "text",
-                            "text": """이 이미지에서 실종자의 인상착의 정보를 추출하여 영어 프롬프트로 변환해주세요.
+                            "text": """이 이미지에서 사람의 옷차림과 외모 특징을 상세히 분석해주세요.
 
 다음 형식의 JSON을 반환하세요:
 {
-  "prompt": "A realistic full-body portrait of a Korean woman, 62 years old, 150cm tall, average build, wearing gray long-sleeve top and black pants, short hair, standing pose, photorealistic, high quality",
-  "negative_prompt": "cartoon, anime, painting, blurry, distorted, deformed, cropped",
-  "raw_data": {
-    "gender": "여성",
-    "age": "62세",
-    "height": "150cm",
-    "build": "보통",
-    "clothing": "회색 긴팔 상의, 검은색 바지",
-    "hair": "단발",
-    "features": "기타 특징"
-  }
+  "clothing_upper": "회색 긴팔 셔츠",
+  "clothing_lower": "검은색 바지",
+  "shoes": "검은색 운동화",
+  "accessories": "안경",
+  "hair_style": "단발 머리",
+  "overall_style": "캐주얼",
+  "colors": ["gray", "black"],
+  "additional_details": "기타 특이사항"
 }
 
-키, 체형, 의상을 명확히 반영하고 전신 인상착의로 프롬프트를 작성하세요."""
+옷의 종류, 색상, 스타일을 최대한 상세하게 분석해주세요."""
                         },
                         {
                             "type": "image_url",
@@ -99,7 +96,7 @@ class GMSAPIClient:
                     ]
                 }
             ],
-            "max_tokens": 800
+            "max_tokens": 600
         }
 
         try:
@@ -118,16 +115,75 @@ class GMSAPIClient:
             elif "```" in text_content:
                 text_content = text_content.split("```")[1].split("```")[0].strip()
 
-            extracted_data = json.loads(text_content)
-            print(f"  → Prompt: {extracted_data.get('prompt', 'N/A')[:100]}...")
-            return extracted_data
+            appearance_data = json.loads(text_content)
+            print(f"  → Clothing: {appearance_data.get('clothing_upper', 'N/A')} / {appearance_data.get('clothing_lower', 'N/A')}")
+            return appearance_data
+        except Exception as e:
+            print(f"Error analyzing appearance: {e}")
+            return {}
+
+    def extract_portrait_description(self, image_path):
+        """Extract portrait description from text image"""
+        print(f"Extracting portrait description from: {os.path.basename(image_path)}")
+
+        base64_image = self.image_to_base64(image_path)
+
+        payload = {
+            "model": "gpt-4o",
+            "messages": [
+                {
+                    "role": "user",
+                    "content": [
+                        {
+                            "type": "text",
+                            "text": """이 이미지에서 실종자의 기본 정보를 추출해주세요.
+
+다음 형식의 JSON을 반환하세요:
+{
+  "gender": "여성",
+  "age": "62세",
+  "height": "150cm",
+  "build": "보통",
+  "hair": "단발",
+  "features": "기타 특징"
+}
+
+성별, 나이, 키, 체형 등 기본 정보를 추출하세요."""
+                        },
+                        {
+                            "type": "image_url",
+                            "image_url": {
+                                "url": f"data:image/jpeg;base64,{base64_image}"
+                            }
+                        }
+                    ]
+                }
+            ],
+            "max_tokens": 500
+        }
+
+        try:
+            response = requests.post(
+                f"{self.base_url}/chat/completions",
+                headers=self.headers,
+                json=payload,
+                timeout=30
+            )
+            response.raise_for_status()
+            result = response.json()
+            text_content = result['choices'][0]['message']['content'].strip()
+
+            if "```json" in text_content:
+                text_content = text_content.split("```json")[1].split("```")[0].strip()
+            elif "```" in text_content:
+                text_content = text_content.split("```")[1].split("```")[0].strip()
+
+            basic_data = json.loads(text_content)
+            print(f"  → Info: {basic_data.get('gender', '')} {basic_data.get('age', '')} {basic_data.get('height', '')}")
+            return basic_data
         except Exception as e:
             print(f"Error extracting: {e}")
-            return {
-                "prompt": "A realistic full-body portrait of a Korean person, standing pose, photorealistic",
-                "negative_prompt": "blurry, cartoon, anime, distorted",
-                "raw_data": {}
-            }
+            return {}
 
 
 class S3Handler:
@@ -232,6 +288,62 @@ class LazyFluxFillPipeline:
 
 
 lazy_flux_fill_pipe = LazyFluxFillPipeline()
+
+
+def create_combined_prompt(basic_info, appearance_info):
+    """Combine basic info and appearance info into FLUX prompt"""
+    # Basic attributes
+    gender = basic_info.get('gender', 'person')
+    age = basic_info.get('age', '').replace('세', ' years old')
+    height = basic_info.get('height', '').replace('cm', 'cm tall')
+    build = basic_info.get('build', 'average build')
+
+    # Gender mapping
+    gender_en = 'woman' if '여' in gender else 'man' if '남' in gender else 'person'
+
+    # Clothing details from appearance
+    upper = appearance_info.get('clothing_upper', 'shirt')
+    lower = appearance_info.get('clothing_lower', 'pants')
+    shoes = appearance_info.get('shoes', '')
+    accessories = appearance_info.get('accessories', '')
+    hair = appearance_info.get('hair_style', basic_info.get('hair', 'short hair'))
+
+    # Build prompt
+    prompt_parts = [
+        f"A realistic full-body portrait of a Korean {gender_en}",
+        age,
+        height,
+        build,
+        f"wearing {upper}",
+        f"and {lower}",
+    ]
+
+    if shoes:
+        prompt_parts.append(f"with {shoes}")
+    if accessories:
+        prompt_parts.append(f"wearing {accessories}")
+
+    prompt_parts.extend([
+        hair,
+        "standing pose",
+        "full body visible",
+        "photorealistic",
+        "high quality",
+        "professional photography"
+    ])
+
+    prompt = ", ".join(filter(None, prompt_parts))
+
+    negative_prompt = "cartoon, anime, painting, blurry, distorted, deformed, cropped, low quality, watermark"
+
+    print(f"\n  Combined Prompt: {prompt[:150]}...")
+
+    return {
+        "prompt": prompt,
+        "negative_prompt": negative_prompt,
+        "basic_data": basic_info,
+        "appearance_data": appearance_info
+    }
 
 
 def detect_face_score(image_path):
@@ -413,22 +525,31 @@ def process_missing_person_case_flux_outpaint(case_id):
             print(f"Error: Need at least 2 images")
             return False
 
-        # Last image is text description
-        text_image_path = downloaded_files[-1]
-        print(f"\nText description: {os.path.basename(text_image_path)}")
+        # Image assignment
+        first_image_path = downloaded_files[0]  # Appearance/clothing image
+        text_image_path = downloaded_files[-1]  # Text description image
 
-        # Select best face image from remaining images
+        print(f"\nAppearance image: {os.path.basename(first_image_path)}")
+        print(f"Text description: {os.path.basename(text_image_path)}")
+
+        # Step 1: Analyze appearance from first image
+        appearance_data = gms_client.analyze_appearance_image(first_image_path)
+
+        # Step 2: Extract basic info from text image
+        basic_data = gms_client.extract_portrait_description(text_image_path)
+
+        # Step 3: Combine into detailed prompt
+        prompt_data = create_combined_prompt(basic_data, appearance_data)
+
+        # Step 4: Select best face image from all images except last
         face_candidates = downloaded_files[:-1]
         face_image_path = select_best_face_image(face_candidates)
 
-        # Step 1: Crop face region
+        # Step 5: Crop face region
         cropped_face_path = os.path.join(temp_dir, "face_cropped.jpg")
         cropped_face, face_detected = crop_face_region(face_image_path, cropped_face_path)
 
-        # Step 2: Extract description
-        prompt_data = gms_client.extract_portrait_description(text_image_path)
-
-        # Step 3: Generate full body with FLUX.1-Fill outpainting
+        # Step 6: Generate full body with FLUX.1-Fill outpainting
         final_output = os.path.join(temp_dir, "final_result.jpg")
         result_image = generate_fullbody_with_flux_fill(
             cropped_face,
@@ -436,18 +557,20 @@ def process_missing_person_case_flux_outpaint(case_id):
             final_output
         )
 
-        # Step 4: Analysis result
+        # Step 7: Analysis result
         analysis_result = {
             "case_id": case_id,
             "processed_at": time.strftime("%Y-%m-%d %H:%M:%S"),
-            "processing_method": "FLUX_Fill_Outpainting",
+            "processing_method": "FLUX_Fill_Outpainting_VQA",
             "face_detected": face_detected,
+            "face_image_used": os.path.basename(face_image_path),
             "prompt_used": prompt_data['prompt'],
-            "extracted_info": prompt_data.get('raw_data', {}),
+            "basic_info": prompt_data.get('basic_data', {}),
+            "appearance_info": prompt_data.get('appearance_data', {}),
             "output_size": result_image.size
         }
 
-        # Step 5: Upload
+        # Step 8: Upload
         success = s3_handler.upload_processed_results(
             case_id,
             final_output,
