@@ -212,29 +212,6 @@ class S3Handler:
             return False
 
 
-class LazyRealESRGAN:
-    def __init__(self, device, scale):
-        self.device = device
-        self.scale = scale
-        self.model = None
-
-    def load_model(self):
-        if self.model is None:
-            model_path = f'models/upscalers/RealESRGAN_x{self.scale}.pth'
-            if not os.path.exists(model_path):
-                print(f"Downloading RealESRGAN x{self.scale}...")
-                self.model = RealESRGAN(self.device, scale=self.scale)
-                self.model.load_weights(f'models/upscalers/RealESRGAN_x{self.scale}.pth', download=True)
-            else:
-                self.model = RealESRGAN(self.device, scale=self.scale)
-                self.model.load_weights(model_path, download=False)
-                print(f"Loaded RealESRGAN x{self.scale}")
-
-    def predict(self, img):
-        self.load_model()
-        return self.model.predict(img)
-
-
 class LazyFluxFillPipeline:
     def __init__(self):
         self.pipe = None
@@ -254,18 +231,7 @@ class LazyFluxFillPipeline:
         return self.pipe(*args, **kwargs)
 
 
-lazy_realesrgan_x4 = LazyRealESRGAN(device, scale=4)
 lazy_flux_fill_pipe = LazyFluxFillPipeline()
-
-
-def upscale_image(image_path, output_path):
-    """Upscale image using RealESRGAN"""
-    print(f"Upscaling: {os.path.basename(image_path)}")
-    image = Image.open(image_path).convert("RGB")
-    upscaled = lazy_realesrgan_x4.predict(image)
-    upscaled.save(output_path)
-    print(f"  → Upscaled to: {upscaled.size}")
-    return upscaled
 
 
 def crop_face_region(image_path, output_path):
@@ -409,18 +375,14 @@ def process_missing_person_case_flux_outpaint(case_id):
         print(f"\nFace: {os.path.basename(face_image_path)}")
         print(f"Text: {os.path.basename(text_image_path)}")
 
-        # Step 1: Upscale face
-        upscaled_face_path = os.path.join(temp_dir, "face_upscaled.jpg")
-        upscale_image(face_image_path, upscaled_face_path)
-
-        # Step 2: Crop face region
+        # Step 1: Crop face region
         cropped_face_path = os.path.join(temp_dir, "face_cropped.jpg")
-        cropped_face, face_detected = crop_face_region(upscaled_face_path, cropped_face_path)
+        cropped_face, face_detected = crop_face_region(face_image_path, cropped_face_path)
 
-        # Step 3: Extract description
+        # Step 2: Extract description
         prompt_data = gms_client.extract_portrait_description(text_image_path)
 
-        # Step 4: Generate full body with FLUX.1-Fill outpainting
+        # Step 3: Generate full body with FLUX.1-Fill outpainting
         final_output = os.path.join(temp_dir, "final_result.jpg")
         result_image = generate_fullbody_with_flux_fill(
             cropped_face,
@@ -428,7 +390,7 @@ def process_missing_person_case_flux_outpaint(case_id):
             final_output
         )
 
-        # Step 5: Analysis result
+        # Step 4: Analysis result
         analysis_result = {
             "case_id": case_id,
             "processed_at": time.strftime("%Y-%m-%d %H:%M:%S"),
@@ -439,7 +401,7 @@ def process_missing_person_case_flux_outpaint(case_id):
             "output_size": result_image.size
         }
 
-        # Step 6: Upload
+        # Step 5: Upload
         success = s3_handler.upload_processed_results(
             case_id,
             final_output,
