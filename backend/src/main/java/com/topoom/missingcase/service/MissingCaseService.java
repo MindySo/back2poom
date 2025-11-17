@@ -89,11 +89,15 @@ public class MissingCaseService {
                 .map(this::toImageItem)
                 .collect(Collectors.toList());
 
-        List<MissingCaseDetailResponse.ImageItem> outputImages = caseFileRepository
-                .findByMissingCaseIdAndIoRole(mc.getId(), CaseFile.IoRole.OUTPUT)
-                .stream()
-                .map(this::toImageItem)
-                .collect(Collectors.toList());
+        List<MissingCaseDetailResponse.ImageItem> outputImages = inputImages.stream()
+                .map(input -> MissingCaseDetailResponse.ImageItem.builder()
+                        .fileId(null)
+                        .purpose("ENHANCED")
+                        .contentType("image/jpeg")
+                        .url(generateFileUrl("output/missing-person-" + mc.getId() + "/enhanced_image.jpg"))
+                        .build()
+                )
+                .toList();
 
         List<MissingCaseDetailResponse.CaseContact> caseContacts;
 
