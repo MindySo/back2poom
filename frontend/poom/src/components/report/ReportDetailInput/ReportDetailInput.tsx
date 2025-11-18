@@ -51,7 +51,7 @@ const ReportDetailInput: React.FC<ReportDetailInputProps> = React.memo(({ contex
           <Text size="sm" color="gray" className={styles.readOnlyLabel}>
             추가 정보
           </Text>
-          <Text size="md" weight="bold" color="black" className={styles.readOnlyValue}>
+          <Text size="md" weight="bold" color="darkMain" className={styles.readOnlyValue}>
             {detail}
           </Text>
         </div>
@@ -66,6 +66,13 @@ const ReportDetailInput: React.FC<ReportDetailInputProps> = React.memo(({ contex
             readOnly={readOnly}
             maxLength={80}
           />
+          {!readOnly && (
+            <div className={styles.charCounter}>
+              <Text size="xs" color="gray">
+                {detail.length} / 80
+              </Text>
+            </div>
+          )}
         </div>
       )}
       {!readOnly && !hideButtons && (
