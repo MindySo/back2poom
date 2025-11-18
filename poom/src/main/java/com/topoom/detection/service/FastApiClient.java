@@ -17,7 +17,6 @@ public class FastApiClient {
     private String fastApiUrl;
 
     public FastApiResponse sendDetectionRequest(FastApiRequest req) {
-
         return webClient.post()
                 .uri(fastApiUrl)
                 .bodyValue(req)

@@ -23,3 +23,6 @@ spring:
         default_batch_fetch_size: 100
     open-in-view: false
     defer-datasource-initialization: true  # JPA 테이블 생성 후 init.sql 실행
+
+fastapi:
+  url: http://127.0.0.1:8000/detect

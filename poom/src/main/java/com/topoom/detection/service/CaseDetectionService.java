@@ -17,20 +17,15 @@ public class CaseDetectionService {
     private final FastApiClient fastApiClient;
     private final CaseDetectionRepository detectionRepository;
 
-    public FastApiResponse detect(Long caseId, String videoUrl) throws Exception {
+    public FastApiResponse detect(Long caseId, Integer cctvId, String imageUrl) throws Exception {
 
-        String imageUrl = "https://cdn.back2poom.site/output/missing-person-"
-                + caseId + "/enhanced_image.jpg";
-        Integer cctvId = Integer.parseInt(
-                videoUrl.substring(videoUrl.lastIndexOf("/") + 1, videoUrl.lastIndexOf("."))
-        );
+        String videoUrl = "https://cdn.back2poom.site/videos/" + cctvId + ".mp4";
 
         FastApiRequest req = FastApiRequest.builder()
                 .videoUrl(videoUrl)
                 .caseId(caseId)
                 .cctvId(cctvId)
                 .imageUrl(imageUrl)
-                .textQuery(null)
                 .build();
 
         // 1) FastAPI 호출
