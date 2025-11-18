@@ -177,24 +177,14 @@ class LazyQwenPoseTryOnPipeline:
         person_img = Image.open(person_with_face_path).convert('RGB')
         clothes_img = Image.open(clothes_image_path).convert('RGB')
 
-        # Standard try-on prompt with trigger word
-        prompt = (
-            "tryon_clothes dress the clothing onto the person"
-        )
-
-        negative_prompt = (
-            "blurry, low quality, deformed"
-        )
-
+        # Standard try-on with trigger word only
         print(f"  Processing with standard 2-image try-on...")
 
         # Generate with standard 2-image input
         result = self.pipe(
             image=[person_img, clothes_img],
-            prompt=prompt,
-            negative_prompt=negative_prompt,
-            num_inference_steps=50,
-            guidance_scale=7.5
+            prompt="tryon_clothes",
+            num_inference_steps=50
         ).images[0]
 
         result.save(output_path)
@@ -447,9 +437,23 @@ def process_missing_person_case_pose_tryon(case_id):
             person_with_face_path
         )
 
+        # Save debug outputs to check the intermediate results
+        debug_dir = os.path.join(os.path.dirname(__file__), "debug_output", case_id)
+        os.makedirs(debug_dir, exist_ok=True)
+
+        import shutil
+        shutil.copy(pose_template_path, os.path.join(debug_dir, "1_pose_template.jpg"))
+        shutil.copy(face_image, os.path.join(debug_dir, "2_original_face.jpg"))
+        shutil.copy(person_with_face_path, os.path.join(debug_dir, "3_person_with_face.jpg"))
+        print(f"  → Debug images saved to: {debug_dir}")
+
         # Step 3: Extract clothing from reference image
         extracted_clothes_path = os.path.join(temp_dir, "extracted_clothes.png")
         lazy_qwen_pose_tryon.extract_clothes(clothing_ref_image, extracted_clothes_path)
+
+        # Save extracted clothes to debug
+        shutil.copy(clothing_ref_image, os.path.join(debug_dir, "4_clothing_reference.jpg"))
+        shutil.copy(extracted_clothes_path, os.path.join(debug_dir, "5_extracted_clothes.png"))
 
         # Step 4: Standard 2-image try-on (Person + Clothes)
         final_output = os.path.join(temp_dir, "final_result.jpg")
@@ -458,6 +462,9 @@ def process_missing_person_case_pose_tryon(case_id):
             extracted_clothes_path,
             final_output
         )
+
+        # Save final result to debug
+        shutil.copy(final_output, os.path.join(debug_dir, "6_final_result.jpg"))
 
         # Analysis
         analysis_result = {
