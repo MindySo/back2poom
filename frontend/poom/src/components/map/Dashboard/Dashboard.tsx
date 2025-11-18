@@ -1,12 +1,14 @@
 import React from 'react';
 import { theme } from '../../../theme';
 import { useMissingDetail } from '../../../hooks';
+import { useShareMissingPerson } from '../../../hooks/useShareMissingPerson';
 import styles from './Dashboard.module.css';
 import close from '../../../assets/back_icon.svg';
 import logo from '../../../assets/poom_logo.png';
 import { useNavigate } from 'react-router-dom';
 import Text from '../../common/atoms/Text';
 import Badge from '../../common/atoms/Badge';
+import Button from '../../common/atoms/Button';
 import HelpCaption from '../../common/molecules/HelpCaption/HelpCaption';
 import ImageCarousel from '../../common/molecules/ImageCarousel/ImageCarousel';
 import type { ImageFile } from '../../../types/missing';
@@ -19,10 +21,15 @@ export interface DashboardProps {
 
 const Dashboard: React.FC<DashboardProps> = ({ isOpen, onClose, missingId }) => {
   const navigate = useNavigate();
+  const { share, isSharing } = useShareMissingPerson();
   const [isClosing, setIsClosing] = React.useState(false);
   const [shouldRender, setShouldRender] = React.useState(false);
   const [carouselOpen, setCarouselOpen] = React.useState(false);
   const [initialImageIndex, setInitialImageIndex] = React.useState(0);
+
+  // 스크롤바 표시 상태 관리
+  const [showScrollbar, setShowScrollbar] = React.useState(false);
+  const scrollbarTimerRef = React.useRef<NodeJS.Timeout | null>(null);
 
   // missingId가 있을 때만 API 호출
   const { data: missingDetail, isLoading } = useMissingDetail(missingId);
@@ -94,6 +101,28 @@ const Dashboard: React.FC<DashboardProps> = ({ isOpen, onClose, missingId }) => 
     setCarouselOpen(false);
   };
 
+  // 스크롤바 표시 타이머 관리
+  const handleContentMouseMove = React.useCallback(() => {
+    setShowScrollbar(true);
+
+    // 기존 타이머 클리어
+    if (scrollbarTimerRef.current) {
+      clearTimeout(scrollbarTimerRef.current);
+    }
+
+    // 1.5초 후 스크롤바 숨김
+    scrollbarTimerRef.current = setTimeout(() => {
+      setShowScrollbar(false);
+    }, 1500);
+  }, []);
+
+  const handleContentMouseLeave = React.useCallback(() => {
+    setShowScrollbar(false);
+    if (scrollbarTimerRef.current) {
+      clearTimeout(scrollbarTimerRef.current);
+    }
+  }, []);
+
   if (!shouldRender && !carouselOpen) return null;
 
   return (
@@ -152,11 +181,15 @@ const Dashboard: React.FC<DashboardProps> = ({ isOpen, onClose, missingId }) => 
 
 
         {/* Content - Two rows layout */}
-        <div className={styles.contentContainer}>
+        <div
+          className={`${styles.contentContainer} ${showScrollbar ? styles.showScrollbar : ''}`}
+          onMouseMove={handleContentMouseMove}
+          onMouseLeave={handleContentMouseLeave}
+        >
           {isLoading ? (
             <div className={styles.loadingContainer}>
               <div className={styles.spinner}></div>
-              <Text as="div" size="sm" color="gray" style={{ marginTop: '1rem' }}>로딩 중...</Text>
+              <Text as="div" size="sm" color="darkMain" style={{ marginTop: '1rem' }}>로딩 중...</Text>
             </div>
           ) : missingDetail ? (
             <>
@@ -211,9 +244,9 @@ const Dashboard: React.FC<DashboardProps> = ({ isOpen, onClose, missingId }) => 
                   }}
                 >
                   <div className={styles.sectionContentAI}>
-                    <Text as="div" size="sm" weight="bold" className={styles.aiTitle}>AI 서포트 이미지</Text>
+                    <Text as="div" size="md" weight="bold" color="darkMain" className={styles.aiTitle}>AI 서포트 이미지</Text>
                     <div className={styles.aiImageWrapper}>
-                      <Text as="div" size="sm" color="gray" style={{ textAlign: 'center', padding: '2rem' }}>
+                      <Text as="div" size="xs" color="gray" style={{ textAlign: 'center', padding: '0 1.5rem 2rem' }}>
                         안전한 정보 활용을 위해 이미지 고도화 기능은 현재 준비 중입니다.
                       </Text>
                     </div>
@@ -226,18 +259,18 @@ const Dashboard: React.FC<DashboardProps> = ({ isOpen, onClose, missingId }) => 
                 {/* 첫번째 섹션: 기본 인적사항 */}
                 <div className={`${styles.section} ${styles.sectionSmall}`} style={{ backgroundColor: theme.colors.white }}>
                   <div className={styles.infoCard}>
-                    <Text as="div" size="sm" weight="bold" className={styles.infoLabel}>이름</Text>
-                    <Text as="div" size="md" className={styles.infoValue}>
-                      {missingDetail.personName}({missingDetail.gender === '남성' ? '남' : missingDetail.gender === '여성' ? '여' : '성별 미상'})
+                    <Text as="div" size="sm" weight="bold" color="darkMain" className={styles.infoLabel}>이름</Text>
+                    <Text as="div" size="md" color="darkMain" className={styles.infoValue}>
+                      {missingDetail.personName} ({missingDetail.gender === '남성' ? '남' : missingDetail.gender === '여성' ? '여' : '성별 미상'})
                     </Text>
 
-                    <Text as="div" size="sm" weight="bold" className={styles.infoLabel}>나이</Text>
-                    <Text as="div" size="md" className={styles.infoValue}>
-                      {missingDetail.ageAtTime}세 (현재나이 {calculateCurrentAge(missingDetail.occurredAt, missingDetail.ageAtTime)}세)
+                    <Text as="div" size="sm" weight="bold" color="darkMain" className={styles.infoLabel}>나이</Text>
+                    <Text as="div" size="md" color="darkMain" className={styles.infoValue}>
+                      {missingDetail.ageAtTime}세 (현재 {calculateCurrentAge(missingDetail.occurredAt, missingDetail.ageAtTime)}세)
                     </Text>
 
-                    <Text as="div" size="sm" weight="bold" className={styles.infoLabel}>발생일</Text>
-                    <Text as="div" size="md" className={styles.infoValue}>
+                    <Text as="div" size="sm" weight="bold" color="darkMain" className={styles.infoLabel}>발생일</Text>
+                    <Text as="div" size="md" color="darkMain" className={styles.infoValue}>
                       {(() => {
                         const date = new Date(missingDetail.occurredAt);
                         const year = date.getFullYear();
@@ -247,32 +280,32 @@ const Dashboard: React.FC<DashboardProps> = ({ isOpen, onClose, missingId }) => 
                       })()}
                     </Text>
 
-                    <Text as="div" size="sm" weight="bold" className={styles.infoLabel}>발생장소</Text>
-                    <Text as="div" size="md" className={styles.infoValue}>{missingDetail.occurredLocation}</Text>
+                    <Text as="div" size="sm" weight="bold" color="darkMain" className={styles.infoLabel}>발생장소</Text>
+                    <Text as="div" size="md" color="darkMain" className={styles.infoValue}>{missingDetail.occurredLocation}</Text>
                   </div>
                 </div>
 
                 {/* 두번째 섹션: 신체 정보 */}
                 <div className={`${styles.section} ${styles.sectionMedium}`} style={{ backgroundColor: theme.colors.white }}>
                   <div className={styles.infoCard}>
-                    <Text as="div" size="sm" weight="bold" className={styles.infoLabel}>신체정보</Text>
-                    <Text as="div" size="md" className={styles.infoValue}>
+                    <Text as="div" size="sm" weight="bold" color="darkMain" className={styles.infoLabel}>신체정보</Text>
+                    <Text as="div" size="md" color="darkMain" className={styles.infoValue}>
                       {missingDetail.heightCm ? `${missingDetail.heightCm}cm` : '-'} / {missingDetail.weightKg ? `${missingDetail.weightKg}kg` : '-'}
                     </Text>
 
-                    <Text as="div" size="sm" weight="bold" className={styles.infoLabel}>체형</Text>
-                    <Text as="div" size="md" className={styles.infoValue}>{missingDetail.bodyType || '-'}</Text>
+                    <Text as="div" size="sm" weight="bold" color="darkMain" className={styles.infoLabel}>체형</Text>
+                    <Text as="div" size="md" color="darkMain" className={styles.infoValue}>{missingDetail.bodyType || '-'}</Text>
 
-                    <Text as="div" size="sm" weight="bold" className={styles.infoLabel}>얼굴형</Text>
-                    <Text as="div" size="md" className={styles.infoValue}>{missingDetail.faceShape || '-'}</Text>
+                    <Text as="div" size="sm" weight="bold" color="darkMain" className={styles.infoLabel}>얼굴형</Text>
+                    <Text as="div" size="md" color="darkMain" className={styles.infoValue}>{missingDetail.faceShape || '-'}</Text>
 
-                    <Text as="div" size="sm" weight="bold" className={styles.infoLabel}>두발 형태</Text>
-                    <Text as="div" size="md" className={styles.infoValue}>
+                    <Text as="div" size="sm" weight="bold" color="darkMain" className={styles.infoLabel}>두발 형태</Text>
+                    <Text as="div" size="md" color="darkMain" className={styles.infoValue}>
                       {missingDetail.hairColor || '-'} / {missingDetail.hairStyle || '-'}
                     </Text>
 
-                    <Text as="div" size="sm" weight="bold" className={styles.infoLabel}>복장</Text>
-                    <Text as="div" size="md" className={styles.infoValue}>{missingDetail.clothingDesc || '-'}</Text>
+                    <Text as="div" size="sm" weight="bold" color="darkMain" className={styles.infoLabel}>복장</Text>
+                    <Text as="div" size="md" color="darkMain" className={styles.infoValue}>{missingDetail.clothingDesc || '-'}</Text>
                   </div>
                 </div>
 
@@ -285,25 +318,24 @@ const Dashboard: React.FC<DashboardProps> = ({ isOpen, onClose, missingId }) => 
                   }}
                 >
                   <div className={styles.sectionContentAI}>
-                    <Text as="div" size="sm" weight="bold" className={styles.aiTitle}>AI 서포트 정보</Text>
+                    <Text as="div" size="md" weight="bold" color="darkMain" className={styles.aiTitle}>AI 서포트 정보</Text>
                     <div className={styles.aiInfoWrapper}>
                       {missingDetail.aiSupport ? (
                         <>
                           {/* 우선순위 */}
                           <div className={styles.aiInfoSection}>
-                            <Text as="div" size="sm" weight="bold" className={styles.aiSubtitle}>우선순위</Text>
+                            <Text as="div" size="sm" weight="bold" color="darkMain" className={styles.aiSubtitle}>우선순위</Text>
                             <div className={styles.aiInfoItem}>
                               <Text as="span" size="xs" color="gray">1순위</Text>
-                              <Text as="span" size="sm">{missingDetail.aiSupport.top1Desc || '-'}</Text>
+                              <Text as="span" size="sm" color="darkMain">{missingDetail.aiSupport.top1Desc || '-'}</Text>
                             </div>
                             <div className={styles.aiInfoItem}>
                               <Text as="span" size="xs" color="gray">2순위</Text>
-                              <Text as="span" size="sm">{missingDetail.aiSupport.top2Desc || '-'}</Text>
+                              <Text as="span" size="sm" color="darkMain">{missingDetail.aiSupport.top2Desc || '-'}</Text>
                             </div>
-                            <Text as="div" size="xs" color="gray" style={{ marginTop: '0.2rem', textAlign: 'center', fontSize: '0.7rem' }}>
-                  ① AI 분석을 주요 정보를 우선적으로 정리한 내용으로, 
-                 <br/> 참고용으로 활용해주시기 바랍니다.
-                </Text>
+                            <Text as="div" size="xs" color="gray" style={{ textAlign: 'center', padding: '0 1.5rem 2rem' }}>
+                              ① AI 분석을 주요 정보를 우선적으로 정리한 내용으로, 참고용으로 활용해주시기 바랍니다.
+                            </Text>
                           </div>
                         </>
                       ) : (
@@ -316,7 +348,9 @@ const Dashboard: React.FC<DashboardProps> = ({ isOpen, onClose, missingId }) => 
               </div>
             </>
           ) : (
-            <div className={styles.emptyMessage}>실종자 정보를 찾을 수 없습니다.</div>
+            <Text as="div" size="sm" color="gray" className={styles.emptyMessage}>
+              실종자 정보를 찾을 수 없습니다.
+            </Text>
           )}
         </div>
 
@@ -324,61 +358,74 @@ const Dashboard: React.FC<DashboardProps> = ({ isOpen, onClose, missingId }) => 
         {/* Footer - 실종자 정보가 있을 때만 표시 */}
         {!isLoading && missingDetail && (
           <div className={styles.footer}>
-            <button
-              className={styles.reportButton}
-              style={{
-                backgroundColor: theme.colors.main,
-                color: 'white',
-              }}
-              onClick={(e) => {
-                e.stopPropagation(); // 카드 클릭 이벤트와 충돌 방지
-                // phoneNumber 수집: 직접 필드, caseContact, caseContacts 배열에서 모두 수집
-                const phoneNumbers: string[] = [];
-                
-                // 1. 직접 필드의 phoneNumber
-                if (missingDetail.phoneNumber) {
-                  if (Array.isArray(missingDetail.phoneNumber)) {
-                    phoneNumbers.push(...missingDetail.phoneNumber);
-                  } else {
-                    phoneNumbers.push(missingDetail.phoneNumber);
-                  }
-                }
-                
-                // 2. caseContact의 phoneNumber (하위 호환성)
-                const phoneNumberFromContact = (missingDetail.caseContact as { phoneNumber?: string | string[] } | undefined)?.phoneNumber;
-                if (phoneNumberFromContact) {
-                  if (Array.isArray(phoneNumberFromContact)) {
-                    phoneNumbers.push(...phoneNumberFromContact);
-                  } else {
-                    phoneNumbers.push(phoneNumberFromContact);
-                  }
-                }
-                
-                // 3. caseContacts 배열의 모든 phoneNumber
-                const caseContacts = (missingDetail as any).caseContacts as Array<{ organization?: string; phoneNumber?: string }> | undefined;
-                if (caseContacts && Array.isArray(caseContacts)) {
-                  caseContacts.forEach(contact => {
-                    if (contact.phoneNumber) {
-                      phoneNumbers.push(contact.phoneNumber);
+            <div className={styles.footerButtons}>
+              <Button
+                variant="primary"
+                size="small"
+                className={styles.reportButton}
+                onClick={(e) => {
+                  e.stopPropagation(); // 카드 클릭 이벤트와 충돌 방지
+                  // phoneNumber 수집: 직접 필드, caseContact, caseContacts 배열에서 모두 수집
+                  const phoneNumbers: string[] = [];
+
+                  // 1. 직접 필드의 phoneNumber
+                  if (missingDetail.phoneNumber) {
+                    if (Array.isArray(missingDetail.phoneNumber)) {
+                      phoneNumbers.push(...missingDetail.phoneNumber);
+                    } else {
+                      phoneNumbers.push(missingDetail.phoneNumber);
                     }
+                  }
+
+                  // 2. caseContact의 phoneNumber (하위 호환성)
+                  const phoneNumberFromContact = (missingDetail.caseContact as { phoneNumber?: string | string[] } | undefined)?.phoneNumber;
+                  if (phoneNumberFromContact) {
+                    if (Array.isArray(phoneNumberFromContact)) {
+                      phoneNumbers.push(...phoneNumberFromContact);
+                    } else {
+                      phoneNumbers.push(phoneNumberFromContact);
+                    }
+                  }
+
+                  // 3. caseContacts 배열의 모든 phoneNumber
+                  const caseContacts = (missingDetail as any).caseContacts as Array<{ organization?: string; phoneNumber?: string }> | undefined;
+                  if (caseContacts && Array.isArray(caseContacts)) {
+                    caseContacts.forEach(contact => {
+                      if (contact.phoneNumber) {
+                        phoneNumbers.push(contact.phoneNumber);
+                      }
+                    });
+                  }
+
+                  // 중복 제거 후 undefined 처리
+                  const actualPhoneNumbers = phoneNumbers.length > 0
+                    ? Array.from(new Set(phoneNumbers)) // 중복 제거
+                    : undefined;
+
+                  navigate(`/report?name=${encodeURIComponent(missingDetail.personName)}`, {
+                    state: {
+                      ...(missingDetail.id && { id: missingDetail.id }),
+                      ...(actualPhoneNumbers && { phoneNumber: actualPhoneNumbers }),
+                    },
                   });
-                }
-                
-                // 중복 제거 후 undefined 처리
-                const actualPhoneNumbers = phoneNumbers.length > 0 
-                  ? Array.from(new Set(phoneNumbers)) // 중복 제거
-                  : undefined;
-                
-                navigate(`/report?name=${encodeURIComponent(missingDetail.personName)}`, {
-                  state: {
-                    ...(missingDetail.id && { id: missingDetail.id }),
-                    ...(actualPhoneNumbers && { phoneNumber: actualPhoneNumbers }),
-                  },
-                });
-              }}
-            >
-              제보하기
-            </button>
+                }}
+              >
+                제보하기
+              </Button>
+              <Button
+                variant="secondary"
+                size="small"
+                className={styles.shareButton}
+                aria-label="공유"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  share(missingDetail);
+                }}
+                disabled={isSharing}
+              >
+                ↗
+              </Button>
+            </div>
           </div>
         )}
         </div>

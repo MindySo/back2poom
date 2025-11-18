@@ -28,7 +28,8 @@
   top: calc(90px + (100vh - 90px) / 2);
   transform: translateY(-50%);
   width: 40vw;
-  height: calc(100vh - 13vh);
+  height: calc(100vh - 90px - 3vh - 3vh); /* TopBar 높이 - 상단 여백 - 하단 여백 */
+  max-height: calc(100vh - 140px); /* 최대 높이 제한으로 여백 보장 */
   border-radius: 12px;
   display: flex;
   flex-direction: column;
@@ -122,12 +123,13 @@
 
 /* 로딩 스피너 */
 .loadingContainer {
+  grid-column: 1 / -1;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: 3rem 2rem;
-  min-height: 200px;
+  padding: 3rem 0;
+  height: 100%;
 }
 
 .spinner {
@@ -151,35 +153,42 @@
   text-align: center;
   padding: 3rem 0;
   height: 100%;
-  font-size: 1rem;
-  color: rgba(0, 0, 0, 0.6);
 }
 
 
-/* 스크롤바 스타일 - 동작 시에 thumbs만 보이도록 */
+/* 스크롤바 스타일 - 기본 상태 */
+.contentContainer {
+  scrollbar-width: thin; /* Firefox */
+  scrollbar-color: transparent transparent;
+  transition: scrollbar-color 0.6s ease;
+}
+
 .contentContainer::-webkit-scrollbar {
-  width: 8px;
+  width: 8px; /* Chrome/Safari */
 }
+
 .contentContainer::-webkit-scrollbar-track {
   background: transparent;
 }
+
 .contentContainer::-webkit-scrollbar-thumb {
   background: transparent;
   border-radius: 4px;
-}
-.contentContainer:hover::-webkit-scrollbar-thumb {
-  background: rgba(43, 58, 85, 0.3);
-}
-.contentContainer::-webkit-scrollbar-thumb:hover {
-  background: rgba(43, 58, 85, 0.5);
+  transition: background 0.6s ease; /* 부드러운 fade-out 효과 */
 }
 
-/* Firefox 스크롤바 */
-.contentContainer {
-  scrollbar-color: transparent transparent;
+/* 마우스 움직임이 있을 때만 스크롤바 표시 */
+.contentContainer.showScrollbar {
+  scrollbar-color: rgba(43, 58, 85, 0.3) transparent; /* Firefox */
 }
-.contentContainer:hover {
-  scrollbar-color: rgba(43, 58, 85, 0.3) transparent;
+
+.contentContainer.showScrollbar::-webkit-scrollbar-thumb {
+  background: rgba(43, 58, 85, 0.3);
+  transition: background 0.3s ease; /* 나타날 때는 빠르게 */
+}
+
+.contentContainer.showScrollbar::-webkit-scrollbar-thumb:hover {
+  background: rgba(43, 58, 85, 0.5);
 }
 
 
@@ -311,17 +320,16 @@
   padding: 0.8vw;
   display: grid;
   grid-template-columns: auto 1fr;
-  gap: 0.3vw 0.6vw;
+  gap: 0.3vw 1.2vw;
   align-items: center;
 }
 
 .infoLabel {
-  color: #6b7280;
   font-weight: 600;
 }
 
 .infoValue {
-  color: #1f2937;
+  /* 임시 */
 }
 
 /* AI 섹션 스타일 */
@@ -335,7 +343,6 @@
 }
 
 .aiTitle {
-  color: #1f2937;
   font-weight: 600;
 }
 
@@ -344,6 +351,9 @@
   border-radius: 8px;
   overflow: hidden;
   background: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .aiImage {
@@ -366,7 +376,6 @@
 }
 
 .aiSubtitle {
-  color: #1f2937;
   margin-bottom: 0.2vw;
 }
 
@@ -389,27 +398,39 @@
 }
 
 .footer {
-  padding: 1.04vw;
-  /* border-top: 1px solid rgba(0, 0, 0, 0.1); */
+  padding: 0.7vw 1.04vw 1.04vw;
+}
+
+.footerButtons {
+  display: flex;
+  align-items: center;
+  gap: 0.6vw;
+  width: 100%;
 }
 
 .reportButton {
+  height: 5vh !important;
+  padding: 0 1.04vw !important;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1vw !important;
+  flex: 1;
   width: 100%;
-  padding: 1.5vh 1.04vw;
-  border: none;
-  border-radius: 12px;
-  font-size: 0.83vw;
-  font-weight: 600;
-  cursor: pointer;
-  transition: opacity 0.2s;
 }
 
-.reportButton:hover {
-  opacity: 0.9;
-}
-
-.reportButton:active {
-  opacity: 0.8;
+.shareButton {
+  height: 5vh !important;
+  width: 6.67vh !important; /* 가로세로 비율 4:3 유지 (5vh * 4/3) */
+  padding: 0 !important;
+  flex: 0 0 auto;
+  min-width: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.2vw !important;
+  border: 1px solid rgba(43, 58, 85, 0.08) !important;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08) !important;
 }
 
 @media (max-width: 1024px) {
