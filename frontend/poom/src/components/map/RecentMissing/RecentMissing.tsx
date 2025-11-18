@@ -20,6 +20,7 @@ export interface RecentMissingProps {
   targetType?: string;
   className?: string;
   textColor?: 'white' | 'black' | 'darkMain' | 'gray';
+  isSelected?: boolean;
   onClick?: () => void;
 }
 
@@ -34,13 +35,14 @@ const RecentMissing: React.FC<RecentMissingProps> = ({
   targetType,
   className = '',
   textColor,
+  isSelected = false,
   onClick,
 }) => {
   // 실종 경과 시간을 실시간으로 업데이트
   const elapsedTime = useElapsedTime(occurredAt);
   return (
     <div
-      className={`${styles.card} ${className}`}
+      className={`${styles.card} ${isSelected ? styles.selected : ''} ${className}`}
       onClick={onClick}
       style={onClick ? { cursor: 'pointer' } : undefined}
     >
@@ -107,12 +109,13 @@ const RecentMissing: React.FC<RecentMissingProps> = ({
             weight="medium"
             color={textColor === 'white' ? 'white' : 'darkMain'}
           >
-            실종 장소
+            실종장소
           </Text>
           <Text
             size="md"
             weight="regular"
             color={textColor === 'white' ? 'white' : 'gray'}
+            className={styles.locationValue}
           >
             {location || '-'}
           </Text>
