@@ -89,15 +89,15 @@ public class MissingCaseService {
                 .map(this::toImageItem)
                 .collect(Collectors.toList());
 
-        List<MissingCaseDetailResponse.ImageItem> outputImages = inputImages.stream()
-                .map(input -> MissingCaseDetailResponse.ImageItem.builder()
+        // AI로 처리된 enhanced 이미지 경로 생성
+        List<MissingCaseDetailResponse.ImageItem> outputImages = List.of(
+                MissingCaseDetailResponse.ImageItem.builder()
                         .fileId(null)
                         .purpose("ENHANCED")
                         .contentType("image/jpeg")
                         .url(generateFileUrl("output/missing-person-" + mc.getId() + "/enhanced_image.jpg"))
                         .build()
-                )
-                .toList();
+        );
 
         List<MissingCaseDetailResponse.CaseContact> caseContacts;
 
@@ -221,4 +221,5 @@ public class MissingCaseService {
 
         return updatedCount;
     }
+
 }
