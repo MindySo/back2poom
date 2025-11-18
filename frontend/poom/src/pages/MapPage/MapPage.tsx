@@ -1,4 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import SideBar from '../../components/map/SideBar/SideBar';
 import useKakaoMap from '../../hooks/useKakaoMap';
 import Dashboard from '../../components/map/Dashboard/Dashboard';
@@ -16,6 +17,8 @@ const API_KEY = import.meta.env.VITE_KAKAO_JAVASCRIPT_KEY;
 
 const MapPage: React.FC = () => {
   const isMobile = useIsMobile(1024);
+  const [searchParams, setSearchParams] = useSearchParams();
+  const navigate = useNavigate();
 
   const isLoaded = useKakaoMap(API_KEY);
   const mapRef = useRef<HTMLDivElement | null>(null);
@@ -80,6 +83,57 @@ const MapPage: React.FC = () => {
       setMap(mapInstance);
     }
   }, [isLoaded]);
+
+  // URL 파라미터에서 missingId 읽어서 모달 열기 (초기 로드 시에만)
+  const urlProcessedRef = useRef(false);
+  useEffect(() => {
+    if (urlProcessedRef.current) return;
+    
+    const missingIdParam = searchParams.get('missingId');
+    if (missingIdParam && map && markerMissingList) {
+      const missingId = parseInt(missingIdParam, 10);
+      if (!isNaN(missingId)) {
+        // 해당 실종자가 마커 리스트에 있는지 확인
+        const person = markerMissingList.find((p) => p.id === missingId);
+        if (person) {
+          urlProcessedRef.current = true;
+          
+          // 모바일 환경
+          if (isMobile) {
+            setSelectedMissingId(missingId);
+            setIsInitialModalOpen(false);
+            setIsTestModalOpen(true);
+            // 모달을 half 상태로 열기
+            setTimeout(() => {
+              bottomSheetRef.current?.expandToHalf();
+            }, 100);
+            
+            // 해당 실종자의 위치로 지도 이동
+            if (person.latitude && person.longitude) {
+              moveMapToVisibleCenterMobile(person.latitude, person.longitude);
+              setSelectedRadiusPosition({ lat: person.latitude, lng: person.longitude });
+              setSelectedRadiusValue(1000);
+            }
+          } else {
+            // 데스크톱 환경
+            setSelectedMissingId(missingId);
+            setIsDashboardOpen(true);
+            
+            // 해당 실종자의 위치로 지도 이동
+            if (person.latitude && person.longitude) {
+              moveMapToVisibleCenter(person.latitude, person.longitude);
+              setSelectedRadiusPosition({ lat: person.latitude, lng: person.longitude });
+              setSelectedRadiusValue(1000);
+            }
+          }
+        } else {
+          urlProcessedRef.current = true;
+          navigate(`/list`);
+        }
+      }
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [map, markerMissingList, isMobile, navigate]);
 
   // 모바일에서 초기 진입 시 내 위치를 모달을 고려한 중앙에 배치
   useEffect(() => {
@@ -191,6 +245,8 @@ const MapPage: React.FC = () => {
         setIsInitialModalOpen(true);
         setSelectedRadiusPosition(null);
         setSelectedRadiusValue(0);
+        // URL에서 파라미터 제거
+        setSearchParams({});
       } else {
         // initial 상태거나 다른 마커를 클릭하면 내용 변경하고 half 상태로 확장
         setSelectedMissingId(id);
@@ -205,6 +261,9 @@ const MapPage: React.FC = () => {
         if (mobileModalState === 'initial') {
           bottomSheetRef.current?.expandToHalf();
         }
+
+        // URL 업데이트
+        setSearchParams({ missingId: id.toString() });
 
         // 해당 실종자의 위치로 지도 이동 (모바일 모달을 고려한 중앙 계산)
         if (map) {
@@ -229,10 +288,15 @@ const MapPage: React.FC = () => {
       setSelectedMissingId(null);
       setSelectedRadiusPosition(null);
       setSelectedRadiusValue(0);
+      // URL에서 파라미터 제거
+      setSearchParams({});
     } else {
       // 다른 카드를 클릭하면 해당 ID로 Dashboard 열기
       setSelectedMissingId(id);
       setIsDashboardOpen(true);
+      
+      // URL 업데이트
+      setSearchParams({ missingId: id.toString() });
 
       // 해당 실종자의 위치로 지도 이동
       if (map) {
@@ -358,6 +422,8 @@ const MapPage: React.FC = () => {
     setSelectedMissingId(null);
     setSelectedRadiusPosition(null);
     setSelectedRadiusValue(0);
+    // URL에서 파라미터 제거
+    setSearchParams({});
   };
 
   const handleMyLocation = () => {
@@ -489,6 +555,9 @@ const MapPage: React.FC = () => {
             personId={selectedMissingId}
             onGoBack={() => {
               setSelectedMissingId(null);
+              setIsInitialModalOpen(true);
+              // URL에서 파라미터 제거
+              setSearchParams({});
             }}
             onMarkerCardClick={handleMissingCardClick}
           />
