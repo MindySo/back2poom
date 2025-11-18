@@ -134,24 +134,35 @@ class LazyFluxFillPipeline:
         face_w, face_h = face_img.size
 
         # Create larger canvas: face in upper-center, expand in all directions
-        # Target full body proportions
-        target_w = max(int(face_w * 1.8), 768)  # 좌우로 넓게
-        target_h = int(face_h * 3.5)  # 전체 높이 (머리부터 발끝까지)
+        # Target full body proportions (reasonable size for FLUX)
+        target_w = 768  # 고정 너비
+        target_h = 1024  # 고정 높이 (표준 세로 비율)
+
+        # Resize face to fit proportionally
+        scale = min(target_w * 0.5 / face_w, target_h * 0.3 / face_h)  # 얼굴이 너비의 50%, 높이의 30% 정도
+        new_face_w = int(face_w * scale)
+        new_face_h = int(face_h * scale)
+        face_img_resized = face_img.resize((new_face_w, new_face_h), Image.Resampling.LANCZOS)
 
         # Create canvas and mask
         canvas = Image.new('RGB', (target_w, target_h), (255, 255, 255))
         mask = Image.new('L', (target_w, target_h), 255)  # 전체를 생성 영역으로
 
         # Paste face in upper-center area
-        paste_x = (target_w - face_w) // 2
-        paste_y = int(target_h * 0.15)  # 상단 15% 위치에 얼굴 배치
-        canvas.paste(face_img, (paste_x, paste_y))
+        paste_x = (target_w - new_face_w) // 2
+        paste_y = int(target_h * 0.1)  # 상단 10% 위치에 얼굴 배치
+        canvas.paste(face_img_resized, (paste_x, paste_y))
 
         # Mask: keep only the face area (0), generate everything else (255)
         mask_draw = ImageDraw.Draw(mask)
-        mask_draw.rectangle([paste_x, paste_y, paste_x + face_w, paste_y + face_h], fill=0)
+        mask_draw.rectangle([paste_x, paste_y, paste_x + new_face_w, paste_y + new_face_h], fill=0)
 
-        print(f"  Canvas: {canvas.size}, Face at: ({paste_x}, {paste_y}), size: {face_w}x{face_h}")
+        # Debug: save mask
+        debug_mask_path = output_path.replace('.jpg', '_mask.png')
+        mask.save(debug_mask_path)
+
+        print(f"  Canvas: {canvas.size}, Face at: ({paste_x}, {paste_y}), size: {new_face_w}x{new_face_h}")
+        print(f"  Mask saved to: {debug_mask_path}")
         print(f"  Outpainting body in all directions...")
 
         # Outpaint body
