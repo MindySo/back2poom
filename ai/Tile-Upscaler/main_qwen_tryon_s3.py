@@ -349,6 +349,15 @@ def process_missing_person_case_tryon(case_id):
         face_candidates = downloaded_files[:-1]
         face_image = select_best_face_image(face_candidates)
 
+        # Create debug directory to save intermediate results
+        debug_dir = os.path.join(os.path.dirname(__file__), "debug_output", case_id)
+        os.makedirs(debug_dir, exist_ok=True)
+
+        import shutil
+        shutil.copy(clothing_ref_image, os.path.join(debug_dir, "1_clothing_reference.jpg"))
+        shutil.copy(face_image, os.path.join(debug_dir, "2_original_face.jpg"))
+        print(f"  → Debug images will be saved to: {debug_dir}")
+
         # Step 1: Create face + body template
         face_body_template_path = os.path.join(temp_dir, "face_body_template.jpg")
         face_body_template, face_detected = create_face_with_body_template(
@@ -356,9 +365,15 @@ def process_missing_person_case_tryon(case_id):
             face_body_template_path
         )
 
+        # Save face + body template to debug
+        shutil.copy(face_body_template_path, os.path.join(debug_dir, "3_face_body_template.jpg"))
+
         # Step 2: Extract clothing from first image
         extracted_clothes_path = os.path.join(temp_dir, "extracted_clothes.png")
         lazy_qwen_tryon.extract_clothes(clothing_ref_image, extracted_clothes_path)
+
+        # Save extracted clothes to debug
+        shutil.copy(extracted_clothes_path, os.path.join(debug_dir, "4_extracted_clothes.png"))
 
         # Step 3: Try on clothing onto face+body template
         final_output = os.path.join(temp_dir, "final_result.jpg")
@@ -367,6 +382,9 @@ def process_missing_person_case_tryon(case_id):
             extracted_clothes_path,
             final_output
         )
+
+        # Save final result to debug
+        shutil.copy(final_output, os.path.join(debug_dir, "5_final_result.jpg"))
 
         # Step 4: Analysis result
         analysis_result = {
