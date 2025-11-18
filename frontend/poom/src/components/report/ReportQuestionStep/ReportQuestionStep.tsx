@@ -58,7 +58,7 @@ const ReportQuestionStep: React.FC<ReportQuestionStepProps> = ({
           <Text size="sm" color="gray" className={styles.readOnlyLabel}>
             {question.replace('을 선택해주세요.', '').replace('를 선택해주세요.', '')}
           </Text>
-          <Text size="md" weight="bold" color="black" className={styles.readOnlyValue}>
+          <Text size="md" weight="bold" color="darkMain" className={styles.readOnlyValue}>
             {selectedAnswer.label}
           </Text>
         </div>

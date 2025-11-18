@@ -128,7 +128,7 @@ const ReportLocationInput: React.FC<ReportLocationInputProps> = React.memo(({ co
           <Text size="sm" color="gray" className={styles.readOnlyLabel}>
             목격 위치
           </Text>
-          <Text size="md" weight="bold" color="black" className={styles.readOnlyValue}>
+          <Text size="md" weight="bold" color="darkMain" className={styles.readOnlyValue}>
             {location}
           </Text>
         </div>
