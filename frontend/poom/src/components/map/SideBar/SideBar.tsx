@@ -117,6 +117,7 @@ const SideBar: React.FC<SideBarProps> = ({ className = '', onMissingCardClick })
               occurredAt={person.crawledAt}
               targetType={person.targetType}
               isSelected={selectedId === person.id}
+              theme="light"
               onClick={() => {
                 // 같은 카드를 다시 클릭하면 선택 해제
                 setSelectedId(prev => prev === person.id ? null : person.id);

@@ -154,7 +154,7 @@ const PoliceDashboard: React.FC<PoliceDashboardProps> = ({ isOpen, onClose, miss
                     {/* 라벨 */}
                     <div className={styles.badgeContainer}>
                       {missingDetail.classificationCode && (
-                        <Badge variant="feature" size="small">{missingDetail.classificationCode}</Badge>
+                        <Badge variant="feature" size="small" theme="dark">{missingDetail.classificationCode}</Badge>
                       )}
                     </div>
 

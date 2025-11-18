@@ -19,9 +19,10 @@ export interface RecentMissingProps {
   occurredAt: string;
   targetType?: string;
   className?: string;
-  textColor?: 'white' | 'black' | 'darkMain' | 'gray';
+  textColor?: 'white' | 'black' | 'darkMain' | 'gray' | 'policeWhite' | 'policeLightGray' | 'policeGray';
   isSelected?: boolean;
   onClick?: () => void;
+  theme?: 'light' | 'dark';
 }
 
 const RecentMissing: React.FC<RecentMissingProps> = ({
@@ -37,6 +38,7 @@ const RecentMissing: React.FC<RecentMissingProps> = ({
   textColor,
   isSelected = false,
   onClick,
+  theme = 'light',
 }) => {
   // 실종 경과 시간을 실시간으로 업데이트
   const elapsedTime = useElapsedTime(occurredAt);
@@ -62,6 +64,7 @@ const RecentMissing: React.FC<RecentMissingProps> = ({
           <Badge
             variant="time"
             size="small"
+            theme={theme}
           >
             {elapsedTime}
           </Badge>
@@ -69,6 +72,7 @@ const RecentMissing: React.FC<RecentMissingProps> = ({
             <Badge
               variant="feature"
               size="small"
+              theme={theme}
             >
               {targetType}
             </Badge>
@@ -78,25 +82,34 @@ const RecentMissing: React.FC<RecentMissingProps> = ({
               key={index}
               variant={badge.variant || 'feature'}
               size="small"
+              theme={theme}
             >
               {badge.text}
             </Badge>
           ))}
         </div>
 
-        {/* 이름/성별/나이 */}
+        {/* 이름 & 성별/나이 */}
         <div className={styles.nameSection}>
+          {/* 1) 이름 */}
           <Text
             size="lg"
             weight="bold"
-            color={textColor === 'white' ? 'white' : 'darkMain'}
+            color={(textColor as any) || 'darkMain'}
           >
             {name || '-'}
           </Text>
+          {/* 2) 성별/나이 */}
           <Text
             size="sm"
             weight="regular"
-            color={textColor === 'white' ? 'white' : 'gray'}
+            color={
+              textColor === 'white'
+                ? 'gray'
+                : textColor === 'policeWhite'
+                ? 'policeGray'
+                : 'gray'
+            }
           >
             {gender} / {age || '- '}세
           </Text>
@@ -107,14 +120,20 @@ const RecentMissing: React.FC<RecentMissingProps> = ({
           <Text
             size="md"
             weight="medium"
-            color={textColor === 'white' ? 'white' : 'darkMain'}
+            color={(textColor as any) || 'darkMain'}
           >
             실종장소
           </Text>
           <Text
             size="md"
             weight="regular"
-            color={textColor === 'white' ? 'white' : 'gray'}
+            color={
+              textColor === 'white'
+                ? 'gray'
+                : textColor === 'policeWhite'
+                ? 'policeGray'
+                : 'gray'
+            }
             className={styles.locationValue}
           >
             {location || '-'}
