@@ -23,6 +23,7 @@ export interface StatusBoardProps {
   helpCaptionMargin?: string;
   helpCaptionTooltipCentered?: boolean;
   helpCaptionShowOverlay?: boolean;
+  helpContent?: React.ReactNode; // 도움말 내용 (전달하지 않으면 도움말 미표시)
 }
 
 const StatusBoard: React.FC<StatusBoardProps> = ({
@@ -38,6 +39,7 @@ const StatusBoard: React.FC<StatusBoardProps> = ({
   helpCaptionMargin = '0',
   helpCaptionTooltipCentered = false,
   helpCaptionShowOverlay = false,
+  helpContent,
 }) => {
   // 커스텀 훅 사용
   const { data: stats, isLoading } = useMissingStats();
@@ -77,32 +79,20 @@ const StatusBoard: React.FC<StatusBoardProps> = ({
         >
           실종자 현황판
         </Text>
-        <HelpCaption
-          inactiveColor={helpCaptionInactiveColor}
-          activeColor={helpCaptionActiveColor}
-          hoverColor={helpCaptionHoverColor}
-          tooltipBackgroundColor={helpCaptionTooltipBackgroundColor}
-          tooltipTextColor={helpCaptionTooltipTextColor}
-          margin={helpCaptionMargin}
-          tooltipCentered={helpCaptionTooltipCentered}
-          showOverlay={helpCaptionShowOverlay}
-        >
-          <Text size="sm" weight="semiBold" color="darkMain" as="p" style={{ marginBottom: '0.5rem' }}>
-            실종자 현황판 안내
-          </Text>
-          <Text size="xs" weight="regular" color="darkMain" as="p" style={{ marginBottom: '0.25rem' }}>
-            • <strong>금일 실종</strong>: 오늘 신고된 실종자 수
-          </Text>
-          <Text size="xs" weight="regular" color="darkMain" as="p" style={{ marginBottom: '0.25rem' }}>
-            • <strong>제보 건수</strong>: 오늘 접수된 제보 건수
-          </Text>
-          <Text size="xs" weight="regular" color="darkMain" as="p" style={{ marginBottom: '0.25rem' }}>
-            • <strong>해결 건수</strong>: 오늘 해결된 실종 사건 수
-          </Text>
-          <Text size="xs" weight="regular" color="darkMain" as="p" style={{ marginTop: '0.5rem', fontStyle: 'italic' }}>
-            ※ 모든 수치는 금일 기준입니다.
-          </Text>
-        </HelpCaption>
+        {helpContent && (
+          <HelpCaption
+            inactiveColor={helpCaptionInactiveColor}
+            activeColor={helpCaptionActiveColor}
+            hoverColor={helpCaptionHoverColor}
+            tooltipBackgroundColor={helpCaptionTooltipBackgroundColor}
+            tooltipTextColor={helpCaptionTooltipTextColor}
+            margin={helpCaptionMargin}
+            tooltipCentered={helpCaptionTooltipCentered}
+            showOverlay={helpCaptionShowOverlay}
+          >
+            {helpContent}
+          </HelpCaption>
+        )}
       </div>
 
       {/* 날짜 */}
