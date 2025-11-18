@@ -34,6 +34,9 @@ const MobileStatusBoard: React.FC<MobileStatusBoardProps> = ({
   const startXRef = useRef(0);
   const startScaleRef = useRef(MIN_SCALE);
   const lastTapTimeRef = useRef(0);
+  const lastContainerTapTimeRef = useRef(0);
+  const lastTouchTimeRef = useRef(0); // 터치 이벤트 추적용
+  const lastDoubleTapTimeRef = useRef(0); // 더블탭 발생 시간 추적
 
   // 터치 또는 마우스 이벤트에서 X 좌표 추출
   const getClientX = (e: React.TouchEvent | React.MouseEvent | TouchEvent | MouseEvent): number => {
@@ -49,17 +52,67 @@ const MobileStatusBoard: React.FC<MobileStatusBoardProps> = ({
     setScale(targetScale);
   };
 
+  // 전체 컨테이너 더블탭 핸들러
+  const handleContainerTap = (e: React.TouchEvent | React.MouseEvent) => {
+    const currentTime = Date.now();
+    const isTouchEvent = 'touches' in e;
+
+    // 최근 더블탭 후 500ms 이내면 모든 탭 무시 (중복 방지)
+    if (currentTime - lastDoubleTapTimeRef.current < 500) {
+      return;
+    }
+
+    // 터치 이벤트면 기록, 마우스 이벤트면 최근 터치 후 500ms 이내인지 확인
+    if (isTouchEvent) {
+      lastTouchTimeRef.current = currentTime;
+    } else {
+      // 최근에 터치 이벤트가 있었으면 마우스 이벤트 무시 (중복 방지)
+      if (currentTime - lastTouchTimeRef.current < 500) {
+        return;
+      }
+    }
+
+    const timeSinceLastTap = currentTime - lastContainerTapTimeRef.current;
+
+    // 더블탭 감지 (300ms 이내에 두 번 탭)
+    if (timeSinceLastTap < 300 && timeSinceLastTap > 0) {
+      handleDoubleTap();
+      lastDoubleTapTimeRef.current = currentTime; // 더블탭 시간 기록
+      lastContainerTapTimeRef.current = 0; // 탭 타이머 초기화
+    } else {
+      lastContainerTapTimeRef.current = currentTime;
+    }
+  };
+
   const handleResizeStart = (e: React.TouchEvent | React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
 
     const currentTime = Date.now();
+    const isTouchEvent = 'touches' in e;
+
+    // 최근 더블탭 후 500ms 이내면 모든 탭 무시 (중복 방지)
+    if (currentTime - lastDoubleTapTimeRef.current < 500) {
+      return;
+    }
+
+    // 터치 이벤트면 기록, 마우스 이벤트면 최근 터치 후 500ms 이내인지 확인
+    if (isTouchEvent) {
+      lastTouchTimeRef.current = currentTime;
+    } else {
+      // 최근에 터치 이벤트가 있었으면 마우스 이벤트 무시 (중복 방지)
+      if (currentTime - lastTouchTimeRef.current < 500) {
+        return;
+      }
+    }
+
     const timeSinceLastTap = currentTime - lastTapTimeRef.current;
 
     // 더블탭 감지 (300ms 이내에 두 번 탭)
     if (timeSinceLastTap < 300 && timeSinceLastTap > 0) {
       handleDoubleTap();
-      lastTapTimeRef.current = 0; // 더블탭 후 초기화
+      lastDoubleTapTimeRef.current = currentTime; // 더블탭 시간 기록
+      lastTapTimeRef.current = 0; // 탭 타이머 초기화
       return;
     }
 
@@ -126,6 +179,8 @@ const MobileStatusBoard: React.FC<MobileStatusBoardProps> = ({
         opacity: visible ? (isResizing ? 0.8 : 1) : 0,
         transition: isResizing ? 'opacity 0.3s ease' : 'transform 0.3s ease, opacity 0.3s ease',
       }}
+      onTouchStart={handleContainerTap}
+      onMouseDown={handleContainerTap}
     >
       {/* 콘텐츠 */}
       <div className={styles.content}>
@@ -161,7 +216,7 @@ const MobileStatusBoard: React.FC<MobileStatusBoardProps> = ({
                 ※ 모든 수치는 금일 기준입니다.
               </Text>
               <Text size="xs" weight="regular" color="darkMain" as="p" style={{ marginTop: '0.2rem' }}>
-                ※ 오른쪽 하단의 손잡이를 <strong>드래그</strong>하면 현황판의 크기 조절이 가능하며, <strong>더블탭</strong>하면 최소/최대 크기로 바꿀 수 있습니다.
+                ※ 현황판을 <strong>더블탭</strong>하거나 오른쪽 하단 손잡이를 <strong>드래그</strong>하면 크기 조절이 가능합니다.
               </Text>
             </>
           }
