@@ -1,0 +1,180 @@
+.helpContainer {
+  position: relative;
+  display: inline-block;
+}
+
+.helpButton {
+  border-radius: 50%;
+  background-color: transparent;
+  border-width: 1px;
+  border-style: solid;
+  cursor: pointer;
+  font-weight: bold;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+  padding: 0;
+}
+
+.helpButton:focus {
+  outline: none;
+}
+
+.helpButton:active {
+  transform: scale(0.95);
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+/* 기본 상태의 hover (active가 아닐 때만) */
+.helpButton:not(.active):hover {
+  background-color: transparent;
+  color: var(--hover-color, #767676);
+  border-color: var(--hover-color, #767676);
+  transform: scale(1.05);
+}
+
+/* 말풍선이 열려있을 때 활성화 스타일 */
+.helpButton.active {
+  background-color: transparent;
+}
+
+.helpButton.active:hover {
+  background-color: transparent;
+  transform: scale(1.05);
+}
+
+.helpButton.active:focus {
+  outline: none;
+  background-color: transparent;
+}
+
+.tooltip {
+  position: absolute;
+  top: -0.5rem;
+  left: calc(100% + 0.75rem);
+  z-index: 1100;
+  animation: slideIn 0.3s ease-out;
+}
+
+.tooltip.closing {
+  animation: slideOut 0.3s ease-out forwards;
+}
+
+.tooltipContent {
+  padding: 1rem;
+  border-radius: 0.5rem;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  min-width: 250px;
+  max-width: 350px;
+  position: relative;
+}
+
+/* 말풍선 꼬리 */
+.tooltipContent::before {
+  content: '';
+  position: absolute;
+  top: 0.5rem;
+  left: -0.5rem;
+  width: 0;
+  height: 0;
+  border-top: 0.5rem solid transparent;
+  border-bottom: 0.5rem solid transparent;
+  border-right: 0.5rem solid var(--tooltip-bg-color, #ffffff);
+}
+
+/* 오버레이 스타일 */
+.overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  z-index: 1050;
+  animation: overlayFadeIn 0.3s ease-out;
+}
+
+.overlay.overlayClosing {
+  animation: overlayFadeOut 0.3s ease-out forwards;
+}
+
+/* 중앙 배치 스타일 */
+.tooltipCentered {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 1100;
+  animation: fadeIn 0.3s ease-out;
+}
+
+.tooltipCentered.closing {
+  animation: fadeOut 0.3s ease-out forwards;
+}
+
+.tooltipContentCentered::before {
+  display: none; /* 중앙 배치 시 말풍선 꼬리 숨김 */
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateX(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(10px);
+  }
+}
+
+@keyframes slideOut {
+  from {
+    opacity: 1;
+    transform: translateX(10px);
+  }
+  to {
+    opacity: 0;
+    transform: translateX(-10px);
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1);
+  }
+}
+
+@keyframes fadeOut {
+  from {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1);
+  }
+  to {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(0.95);
+  }
+}
+
+@keyframes overlayFadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes overlayFadeOut {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}

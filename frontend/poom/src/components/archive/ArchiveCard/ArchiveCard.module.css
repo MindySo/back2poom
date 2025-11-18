@@ -1,0 +1,150 @@
+.archive-card {
+  background: #fff;
+  border-radius: 12px;
+  border: 1px solid #eef0f3;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.06);
+  padding: 16px 20px; /* outer padding */
+  width: 400px; /* fixed card width */
+  overflow: hidden; /* keep everything within the frame */
+}
+
+/* Prevent padding/border from causing unexpected overflow */
+.archive-card, .archive-card * { box-sizing: border-box; }
+
+.archive-card__content {
+  display: grid;
+  grid-template-columns: 160px 1fr; /* image left, content right */
+  align-items: stretch; /* make right side match image height */
+}
+
+.archive-card__imageWrap {
+  width: 140px;             /* fixed width */
+  height: 170px;            /* fixed height */
+  border-radius: 12px;
+  overflow: hidden;
+  align-self: start;        /* prevent stretching causing cropping */
+  flex: 0 0 160px;          /* prevent grid/flex resizing */
+}
+
+.archive-card__image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;        /* fill fixed box while preserving focal point */
+  object-position: center;
+  display: block;
+}
+
+.archive-card__right { display: flex; flex-direction: column; justify-content: space-between; }
+.archive-card__right { min-width: 0; } /* allow content to shrink and wrap in grid */
+.archive-card__main { flex: 1; display: flex; flex-direction: column; gap: 5px; min-height: 0; overflow: hidden; }
+.archive-card__actions { margin-top: auto; display: flex; gap: 12px; align-items: center; }
+
+.archive-card__header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.archive-card__elapsed {
+  display: inline-block;
+  font-size: 12px;
+  color: #2563eb;
+  background: #e8efff;
+  padding: 2px 8px;
+  border-radius: 999px;
+}
+
+.archive-card__code {
+  font-size: 12px;
+  color: #8b5cf6;
+  background: #efe9ff;
+  padding: 2px 8px;
+  border-radius: 999px;
+}
+
+.archive-card__row {
+  display: flex;
+  align-items: baseline;
+  gap: 15px;
+}
+
+.archive-card__name {
+  font-weight: 700;
+  color: #2f3846;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.archive-card__meta {
+  color: #6b7280;
+}
+
+.archive-card__info {
+  display: flex;
+  flex-direction: column;
+  gap: 4px; /* line spacing */
+}
+
+.archive-card__info-item {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+}
+
+.archive-card__label {
+  color: #9aa3af;
+  flex-shrink: 0;
+  min-width: 48px; /* 나이, 발생일, 발생장소가 같은 위치에서 시작하도록 */
+}
+
+.archive-card__value {
+  color: #374151;
+  max-width: 100%;
+  overflow-wrap: anywhere; /* wrap long addresses/words */
+  display: -webkit-box; /* clamp for long content */
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  line-clamp: 2;
+  overflow: hidden;
+}
+
+.archive-card__value--location {
+  display: block;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  overflow: hidden;
+  max-width: 100%;
+}
+
+.archive-card__actions {
+  margin-top: 12px; /* separation from info */
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+}
+
+.archive-card__primaryBtn {
+  height: 28px !important; /* match icon button height */
+  padding: 0 12px !important;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px !important;
+  flex: 4;
+  width: 100%;
+}
+
+.archive-card__iconBtn {
+  height: 28px !important;
+  padding: 0 !important;
+  flex: 1;
+  min-width: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+

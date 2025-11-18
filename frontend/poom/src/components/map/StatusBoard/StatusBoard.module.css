@@ -1,0 +1,30 @@
+.statusBoard {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.dateSection {
+  display: flex;
+  align-items: center;
+}
+
+.dataContainer {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-top: 0.5rem;
+}
+
+.dataItem {
+  display: flex;
+  flex-direction: column;
+  align-items: start;
+  flex: 1;
+}

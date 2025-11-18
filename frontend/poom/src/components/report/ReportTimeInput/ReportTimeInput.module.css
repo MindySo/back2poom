@@ -1,0 +1,96 @@
+.question {
+  font-size: 20px;
+  font-weight: 700;
+  line-height: 1.4;
+}
+
+.input {
+  width: 100%;
+  padding: 12px 90px 12px 0;
+  font-size: 16px;
+  border: none;
+  border-bottom: 2px solid #2B3A55;
+  border-radius: 0;
+  font-family: 'Pretendard, -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif';
+  outline: none;
+  background: transparent;
+}
+
+.input:focus {
+  border-bottom-color: #2B3A55;
+}
+
+.inputContainer {
+  margin-top: 16px;
+}
+
+.inputWrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.timeButton {
+  position: absolute;
+  right: 0;
+  background: #f5f5f5;
+  border: 1px solid #e0e0e0;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+  padding: 6px 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #666;
+  transition: all 0.2s;
+  white-space: nowrap;
+  font-family: 'Pretendard, -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif';
+}
+
+.timeButton:hover {
+  background: #e8e8e8;
+  color: #333;
+}
+
+.input.readOnly {
+  background-color: transparent;
+  cursor: default;
+  opacity: 0.7;
+}
+
+.readOnlyContainer {
+  margin-top: 16px;
+}
+
+.readOnlyLabel {
+  font-size: 14px;
+  color: #767676;
+  margin-bottom: 8px;
+  display: block;
+}
+
+.readOnlyValue {
+  font-size: 16px;
+  font-weight: 700;
+  color: #000000;
+  display: block;
+}
+
+.buttonContainer {
+  margin-top: 16px;
+  display: flex;
+  gap: 12px;
+}
+
+@media (max-width: 375px) {
+  .question {
+    font-size: 18px;
+  }
+
+  .input {
+    font-size: 14px;
+    padding: 14px 16px;
+  }
+}
+

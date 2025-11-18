@@ -1,0 +1,161 @@
+#############################
+#  NETWORKS & VOLUMES
+#############################
+networks:
+  topoom-network:
+    driver: bridge
+    name: topoom-network
+
+volumes:
+  mysql-data:
+    name: topoom-mysql-data
+  mysql-dev-data:
+    name: topoom-mysql-dev-data
+  redis-data:
+    name: topoom-redis-data
+  jenkins-home:
+    name: topoom-jenkins-home
+
+#############################
+#  SERVICES
+#############################
+services:
+  # MySQL (Production)
+  mysql:
+    image: mysql:8.0
+    container_name: topoom-mysql
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_DATABASE: ${MYSQL_DATABASE}
+      MYSQL_USER: ${MYSQL_USER}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+      TZ: Asia/Seoul
+    volumes:
+      - mysql-data:/var/lib/mysql
+      - ./mysql/init:/docker-entrypoint-initdb.d:ro  # 초기화 SQL
+    command:
+      - --character-set-server=utf8mb4
+      - --collation-server=utf8mb4_unicode_ci
+      - --default-time-zone=+09:00
+    ports:
+      - "3306:3306"
+    networks:
+      - topoom-network
+
+  # MySQL Dev (개발용)
+  mysql-dev:
+    image: mysql:8.0
+    container_name: topoom-mysql-dev
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_DATABASE: ${MYSQL_DATABASE}
+      MYSQL_USER: ${MYSQL_USER}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+      TZ: Asia/Seoul
+    volumes:
+      - mysql-dev-data:/var/lib/mysql
+      - ./mysql/init:/docker-entrypoint-initdb.d:ro  # 초기화 SQL
+    command:
+      - --character-set-server=utf8mb4
+      - --collation-server=utf8mb4_unicode_ci
+      - --default-time-zone=+09:00
+    ports:
+      - "3307:3306"
+    networks:
+      - topoom-network
+
+  # Redis  
+  redis:
+    image: redis:7.2
+    container_name: topoom-redis
+    restart: always
+    environment:
+      - TZ=Asia/Seoul
+      - REDIS_PASSWORD=${REDIS_PASSWORD}      
+    volumes:
+      - redis-data:/data
+      - ./redis/redis.conf:/usr/local/etc/redis/redis.conf:ro
+    command: >
+      sh -c "redis-server /usr/local/etc/redis/redis.conf --requirepass $${REDIS_PASSWORD}"
+    ports:
+      - "6379:6379"
+    networks:
+      - topoom-network
+
+  # Spring Boot
+  # Backend-main
+  spring:
+    image: ${REGISTRY}/topoom-spring:latest
+    container_name: topoom-spring
+    restart: always
+    environment:
+      - TZ=Asia/Seoul
+      - SPRING_PROFILES_ACTIVE=${SPRING_PROFILES_ACTIVE:-prod}
+      - RABBITMQ_HOST=${RABBITMQ_HOST}
+      - RABBITMQ_PORT=${RABBITMQ_PORT}
+      - RABBITMQ_USERNAME=${RABBITMQ_USERNAME}
+      - RABBITMQ_PASSWORD=${RABBITMQ_PASSWORD}
+    env_file:
+      - .env
+    depends_on:
+      - mysql
+      - redis
+    expose:
+      - "8080"
+    networks:
+      - topoom-network
+
+  # Backend-OCR
+  ocr:
+    image: ${REGISTRY}/topoom-ocr:latest
+    container_name: topoom-ocr
+    restart: always
+    environment:
+      - TZ=Asia/Seoul
+    env_file:
+      - .env
+    expose:
+      - "8081"
+    networks:
+      - topoom-network
+
+  # Jenkins
+  jenkins:
+    build:
+      context: ./jenkins
+      dockerfile: Dockerfile
+    container_name: topoom-jenkins
+    restart: always
+    environment:
+      - TZ=Asia/Seoul
+      - JENKINS_OPTS=--prefix=/admin/jenkins
+    expose:
+      - "8080"
+    volumes:
+      - jenkins-home:/var/jenkins_home
+      - /var/run/docker.sock:/var/run/docker.sock
+      - /etc/letsencrypt:/etc/letsencrypt:ro
+    networks:
+      - topoom-network
+
+  # nginx
+  nginx:
+    image: ${REGISTRY}/topoom-nginx:latest
+    container_name: topoom-nginx
+    restart: always
+    environment:
+      - TZ=Asia/Seoul
+    depends_on:
+      - spring
+      - jenkins
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./certbot/www:/var/www/certbot:ro
+      - ./certbot/conf:/etc/letsencrypt:ro
+    networks:
+      - topoom-network

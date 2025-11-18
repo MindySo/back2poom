@@ -9,7 +9,7 @@ pipeline {
         DOCKER_REGISTRY = 'mindyso'
         IMAGE_NAME = 'topoom-spring'
         IMAGE_TAG = 'latest'
-        COMPOSE_DIR = 'infra'
+        COMPOSE_DIR = 'infra/api-server'
         ENV_FILE     = '.env'
     }
 

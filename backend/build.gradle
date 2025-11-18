@@ -27,6 +27,10 @@ dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
 	implementation 'org.springframework.boot:spring-boot-starter-validation'
 	implementation 'org.springframework.boot:spring-boot-starter-data-redis'
+	implementation 'org.springframework.boot:spring-boot-starter-actuator'
+
+	// RabbitMQ
+	implementation 'org.springframework.boot:spring-boot-starter-amqp'
 
     implementation 'me.paulschwarz:spring-dotenv:4.0.0'
 
@@ -45,7 +49,7 @@ dependencies {
 
 	// JSoup (크롤링)
 	implementation 'org.jsoup:jsoup:1.17.2'
-	
+
 	// Selenium WebDriver (동적 크롤링)
 	implementation 'org.seleniumhq.selenium:selenium-java:4.15.0'
 	implementation 'io.github.bonigarcia:webdrivermanager:5.6.2'
@@ -54,11 +58,16 @@ dependencies {
 	implementation 'com.fasterxml.jackson.core:jackson-databind'
 	implementation 'com.fasterxml.jackson.datatype:jackson-datatype-jsr310'
 
+	// Apache POI (Excel 파일 처리)
+	implementation 'org.apache.poi:poi:5.2.5'
+	implementation 'org.apache.poi:poi-ooxml:5.2.5'
+
 	// Dev Tools
 	developmentOnly 'org.springframework.boot:spring-boot-devtools'
 
 	// Test
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
+	testImplementation 'org.springframework.amqp:spring-rabbit-test'
 	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 }
 

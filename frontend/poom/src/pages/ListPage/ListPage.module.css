@@ -1,0 +1,367 @@
+/* ListPage layout (excluding topbar and cards) */
+
+.list-page {
+  background: #f7f7f8; /* subtle light background */
+  min-height: 100vh;
+  padding: 0 0 48px; /* full-bleed hero, no side padding, 상단 padding 제거 */
+}
+
+/* 히어로 섹션 + 탭을 함께 감싸는 sticky wrapper */
+.sticky-wrapper {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  background: transparent; /* 투명하게 변경하여 backdrop-filter가 작동하도록 */
+  width: 100%;
+  flex-shrink: 0; /* 레이아웃 재계산 시 크기 고정 */
+  align-self: flex-start; /* flex 컨텍스트에서 위치 고정 */
+}
+
+/* Hero banner containing the header and search */
+.list-hero {
+  position: relative;
+  background-size: cover;
+  background-position: center;
+  border-radius: 0; /* edge-to-edge */
+  overflow: hidden;
+  height: 300px; /* 기본 높이, 인라인 스타일로 덮어씀 */
+  margin: 0; /* stick to tabs below */
+  transition: height 0.5s cubic-bezier(0.4, 0, 0.2, 1); /* 더 부드럽고 자연스러운 높이 변화 */
+  will-change: height; /* GPU 가속 힌트 */
+}
+
+.list-hero__overlay {
+  position: absolute;
+  inset: 0;
+}
+
+.list-header {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column; /* title on top, search below (same column) */
+  align-items: center;
+  justify-content: center;
+  gap: 24px;
+  max-width: 980px;
+  margin: 0 auto;
+  height: 100%;
+  padding: 0 24px;
+  color: #fff;
+  text-align: center;
+  transition: justify-content 0.3s ease-out, padding-top 0.3s ease-out;
+}
+
+/* hero 섹션이 줄어들었을 때 (sticky 상태) */
+.list-header-compact {
+  justify-content: center;
+  padding-top: 0;
+  gap: 0;
+}
+
+.list-header h2 {
+  margin: 0;
+  font-size: 23px;
+  font-weight: 500;
+  color: #767676;
+}
+
+.hero-title {
+  margin: 0;
+  font-weight: 700;
+  line-height: 1.4;
+  text-align: center;
+  transition: opacity 0.3s ease-out, transform 0.3s ease-out, font-size 0.3s ease-out, margin 0.3s ease-out;
+}
+
+/* hero 섹션이 줄어들었을 때 텍스트 숨기기 */
+.list-header-compact .hero-title {
+  display: none;
+}
+
+.search-bar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: #ffffff;
+  padding: 13px 20px;
+  border-radius: 16px;
+  border: 1.5px solid #e5e7eb;
+  width: 520px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  transition: all 0.3s ease;
+}
+
+.search-bar:focus-within {
+  border-color: #2B3A55;
+  box-shadow: 0 4px 16px rgba(43, 58, 85, 0.15);
+}
+
+.search-bar input {
+  flex: 1;
+  border: none;
+  outline: none;
+  font-size: 16px;
+  padding: 0;
+  background: transparent;
+  color: #1f2937;
+  font-family: 'Pretendard, -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif';
+  text-align: left;
+}
+
+/* 플레이스홀더가 보이고 포커스가 없을 때만 중앙 정렬 */
+.search-bar input:placeholder-shown:not(:focus) {
+  text-align: center;
+}
+
+/* 포커스 시 무조건 왼쪽 정렬 */
+.search-bar input:focus {
+  text-align: left;
+}
+
+.search-bar input::placeholder {
+  color: #9ca3af;
+  text-align: center;
+}
+
+.search-bar button,
+.search-button {
+  padding: 10px 20px;
+  border-radius: 10px;
+  border: none;
+  background: #6b7280;
+  color: #ffffff;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-family: 'Pretendard, -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif';
+  white-space: nowrap;
+  box-shadow: 0 2px 4px rgba(107, 114, 128, 0.2);
+}
+
+.search-button:hover {
+  background: #4b5563;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(107, 114, 128, 0.3);
+}
+
+.search-button:active {
+  background: #374151;
+  transform: translateY(0);
+  box-shadow: 0 2px 4px rgba(107, 114, 128, 0.2);
+}
+
+/* Tabs */
+.list-tabs {
+  display: flex;
+  justify-content: center;
+  gap: 50px;
+  background: rgba(246, 244, 239, 0.6); /* 더 투명한 배경 */
+  backdrop-filter: blur(5px); /* 덜 흐린 블러 효과 */
+  -webkit-backdrop-filter: blur(5px); /* Safari 지원 */
+  color: #9fa8b3;
+  padding: 8px 0;
+  margin: 0;
+}
+
+.list-tabs button {
+  position: relative;
+  background: transparent;
+  border: none;
+  color: inherit;
+  padding: 2px 4px;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+.list-tabs button:global(.active) {
+  color: #333333;
+}
+
+.list-tabs button:global(.active)::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  bottom: -10px;
+  width: 36px;
+  height: 3px;
+  background: #E89A59; /* orange underline like screenshot */
+  border-radius: 2px;
+}
+
+/* Grid area (cards themselves are external) */
+.list-grid {
+  max-width: 1300px;
+  margin: 0 auto; /* 중앙 정렬 */
+  display: grid;
+  grid-template-columns: repeat(auto-fit, 400px); /* fixed card columns */
+  justify-content: center; /* center rows when not full */
+  gap: 28px 36px;
+  padding-top: 20px;
+}
+
+/* 모바일 버전 스타일 (1024px 이하) */
+.list-page.mobile {
+  padding: 10px 30px;
+  background: #f7f7f8;
+}
+
+/* 모바일 탭 스타일 - 상단에 배치, 밝은 회색 배경 위에 개별 버튼 */
+.list-tabs.mobile-tabs {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 8px;
+  background: #f7f7f8; /* 밝은 회색 배경 */
+  margin: 0;
+  border-radius: 0;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+/* 모바일 탭의 버튼 기본 스타일 초기화 및 캡슐 모양 적용 */
+.list-tabs.mobile-tabs button {
+  position: static; /* 기본 position: relative 초기화 */
+  flex: 1; /* 모든 버튼이 동일한 너비 */
+  padding: 10px 10px;
+  border: 50px;
+  border-radius: 10px; /* 캡슐 모양 */
+  cursor: pointer;
+  transition: all 0.2s;
+  white-space: nowrap; /* 텍스트 줄바꿈 방지 */
+}
+
+/* active 상태의 ::after 제거 */
+.list-tabs.mobile-tabs button.active::after {
+  display: none;
+}
+
+/* .mobile-tab과 .mobile-tab-active는 tsx에서 인라인 스타일로 처리하므로 
+   여기서는 스타일을 선언하지 않습니다. 
+   필요한 경우에만 레이아웃 관련 스타일을 추가하세요. */
+
+/* 모바일 그리드 */
+.mobile-grid {
+  width: 100%;
+  max-width: 100%;
+  grid-template-columns: repeat(2, 1fr); /* 최대 2열로 고정 */
+  gap: 16px;
+  margin: 0px auto 0;
+  justify-items: stretch; /* 그리드 아이템이 셀 전체를 채우도록 */
+  align-items: start; /* 카드가 독립적으로 높이를 가지도록 */
+  box-sizing: border-box;
+  /* 탭/검색바와 동일한 너비를 위해 패딩 컨테이너와 동일한 너비 사용 */
+}
+
+/* 작은 화면에서는 1열로 */
+@media (max-width: 620px) {
+  .mobile-grid {
+    grid-template-columns: 1fr; /* 620px 이하에서는 1열 */
+  }
+}
+
+/* 그리드 아이템이 최대 너비를 사용하도록 */
+.mobile-grid > * {
+  width: 100%;
+  max-width: 100%;
+}
+
+/* 화면 크기 기준으로 min/max 설정 */
+@media (max-width: 320px) {
+  .mobile-grid {
+    min-width: calc(100vw - 60px); /* 320px 화면에서 패딩(30px * 2) 제외 */
+  }
+}
+
+/* 큰 화면에서도 계속 늘어나도록 제한 제거 */
+/* @media (min-width: 795px) {
+  .mobile-grid {
+    max-width: calc(795px - 60px);
+  }
+} */
+
+/* 모바일 검색바 - 탭 바로 아래, 캡슐 모양 */
+.search-bar.mobile-search {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  border-radius: 12px;
+  background: #ffffff;
+  margin: 0;
+  width: 100%;
+  box-sizing: border-box;
+  padding: 12px 16px;
+  border: 1.5px solid #e5e7eb;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+  transition: all 0.3s ease;
+}
+
+.search-bar.mobile-search:focus-within {
+  border-color: #2B3A55;
+  box-shadow: 0 4px 12px rgba(43, 58, 85, 0.12);
+}
+
+.search-bar.mobile-search input {
+  flex: 1;
+  border: none;
+  border-radius: 0;
+  padding: 0;
+  font-size: 15px;
+  background: transparent;
+  outline: none;
+  color: #1f2937;
+  font-family: 'Pretendard, -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif';
+  text-align: left;
+}
+
+/* 플레이스홀더가 보이고 포커스가 없을 때만 중앙 정렬 */
+.search-bar.mobile-search input:placeholder-shown:not(:focus) {
+  text-align: center;
+}
+
+/* 포커스 시 무조건 왼쪽 정렬 */
+.search-bar.mobile-search input:focus {
+  text-align: left;
+}
+
+.search-bar.mobile-search .search-button {
+  padding: 10px 18px;
+  font-size: 14px;
+  font-weight: 600;
+  margin-left: 0;
+  box-shadow: 0 2px 4px rgba(43, 58, 85, 0.2);
+}
+
+.search-bar.mobile-search input::placeholder {
+  color: #9ca3af;
+  text-align: center;
+}
+
+.mobile-menu-button {
+  width: 40px;
+  height: 40px;
+  border: none;
+  background: transparent;
+  font-size: 20px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+}
+
+/* 데스크톱 버전 스타일 */
+.list-page.desktop {
+  padding: 0; /* Footer가 마지막 요소이므로 하단 padding 제거 */
+}
+
+/* 기존 미디어 쿼리는 유지 (CSS만으로도 스타일 조정 가능) */
+@media (max-width: 640px) {
+  .list-page { padding: 16px; }
+  .list-header { flex-direction: column; align-items: stretch; gap: 12px; }
+  .search-bar { width: 100%; }
+}
+
+

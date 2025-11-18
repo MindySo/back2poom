@@ -96,15 +96,14 @@ public class BlogS3ImageUploadService {
             }
             
             CaseFile saved = caseFileRepository.save(caseFile);
-            log.info("CaseFile 저장 OK -> id={}, bucket={}, key={}", 
+            log.info("CaseFile 저장 OK -> id={}, bucket={}, key={}",
                     saved.getId(), saved.getS3Bucket(), saved.getS3Key());
-            
-            // 마지막 이미지인 경우 바로 OCR 처리 시작
+
+            // 큐 방식으로 변경: OCR 처리는 Consumer에서 수행
             if (Boolean.TRUE.equals(isLastImage) && caseId != null) {
-                log.info("마지막 이미지 업로드 완료, OCR 처리 시작: caseId={}", caseId);
-                caseOcrService.processLastImage(caseId);
+                log.info("마지막 이미지 업로드 완료: caseId={}, s3Key={}", caseId, saved.getS3Key());
             }
-            
+
             return saved;
                     
         } catch (Exception e) {

@@ -1,0 +1,75 @@
+.sideBar {
+  position: fixed;
+  left: 0;
+  top: 5.625rem;
+  width: 22.5rem;
+  bottom: 0;
+  box-sizing: border-box;
+  z-index: 50;
+  display: flex;
+  flex-direction: column;
+}
+
+/* 최신 실종자 제목 */
+.recentMissingHeader {
+  padding: 1.5rem 1.5rem 0;
+  margin-bottom: 1rem;
+  flex-shrink: 0;
+}
+
+/* 최신 실종자 목록 */
+.recentMissingList {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  padding: 0 1rem 1.5rem 1rem;
+  overflow-y: auto;
+  flex: 1;
+}
+
+/* 스크롤바 스타일 */
+.recentMissingList::-webkit-scrollbar {
+  width: 0.5rem;
+}
+
+.recentMissingList::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.recentMissingList::-webkit-scrollbar-thumb {
+  background: transparent;
+  border-radius: 0.25rem;
+}
+
+.recentMissingList:hover::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.3);
+}
+
+.recentMissingList::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.5);
+}
+
+/* Firefox 스크롤바 */
+.recentMissingList {
+  scrollbar-color: transparent transparent;
+}
+
+.recentMissingList:hover {
+  scrollbar-color: rgba(255, 255, 255, 0.3) transparent;
+}
+
+/* 빈 상태 메시지 */
+.emptyMessage {
+  display: flex;
+  justify-content: center;
+  padding: 2rem 0;
+  flex: 1;
+}
+
+/* 1024px 이하 (모바일/태블릿)에서는 숨기기 */
+@media (max-width: 1024px) {
+  .sideBar {
+    display: none;
+  }
+}
+

@@ -1,19 +1,21 @@
 /*
- * Jenkins Pipeline - Frontend (React/Vue/etc)
+ * Jenkins Pipeline - Frontend (S3 + CloudFront)
  * Triggers: Changes in frontend/ directory on dev branch
  */
 pipeline {
-    agent any
+    agent none
 
     environment {
-        DOCKER_REGISTRY = 'mindyso'
-        IMAGE_NAME = 'topoom-nginx'
-        IMAGE_TAG = 'latest'
-        COMPOSE_DIR = 'infra'
+        S3_PROD_BUCKET = 'topoom-prod-s3-bucket'
+        S3_REGION = 'ap-southeast-2'
+        CLOUDFRONT_DISTRIBUTION_ID = 'E2RFJP5707A0DX'
+        CLOUDFRONT_REGION = 'us-east-1'
+        HOME = '/tmp'
     }
 
     options {
-        skipDefaultCheckout()
+        skipDefaultCheckout(true)
+        skipStagesAfterUnstable()
         timestamps()
     }
 
@@ -21,6 +23,7 @@ pipeline {
 
         /* -------------------------------------------------- */
         stage('Checkout') {
+            agent any
             steps {
                 checkout([
                     $class: 'GitSCM',
@@ -28,13 +31,15 @@ pipeline {
                     userRemoteConfigs: [[
                         url: 'https://lab.ssafy.com/s13-final/S13P31A706',
                         credentialsId: 'gitlab-jenkins-token'
-                    ]]
+                    ]],
+                    extensions: [[$class: 'CloneOption', noTags: false, shallow: false, depth: 0]]
                 ])
             }
         }
 
         /* -------------------------------------------------- */
         stage('Check Changes') {
+            agent any
             steps {
                 script {
                     def changes = sh(
@@ -42,9 +47,9 @@ pipeline {
                         returnStdout: true
                     ).trim()
 
-                    if (!changes.contains('frontend/') && !changes.contains('infra/nginx/')) {
+                    if (!changes.contains('frontend/')) {
                         currentBuild.result = 'NOT_BUILT'
-                        error('No changes in frontend/ or infra/nginx/ - skipping build')
+                        error('No changes in frontend/ - skipping build')
                     }
                     echo "Frontend changes detected: proceeding with build"
                 }
@@ -52,61 +57,86 @@ pipeline {
         }
 
         /* -------------------------------------------------- */
-        stage('Docker Login') {
+        stage('Build Frontend') {
+            agent {
+                docker {
+                    image 'node:20-alpine'
+                    args '-u 1000:1000'  // Jenkins user와 동일한 UID/GID
+                    reuseNode true
+                }
+            }
             steps {
-                withCredentials([usernamePassword(
-                    credentialsId: 'docker-hub-cred',
-                    usernameVariable: 'DOCKER_USER',
-                    passwordVariable: 'DOCKER_PASS')]) {
+                // env-fe secret file을 환경 변수로 로드
+                withCredentials([file(credentialsId: 'env-fe', variable: 'ENV_FILE')]) {
+                    dir('frontend/poom') {
+                        sh '''
+                            # env-fe 파일을 .env로 복사
+                            cp $ENV_FILE .env
 
-                    sh 'echo "$DOCKER_PASS" | docker login -u "$DOCKER_USER" --password-stdin'
+                            # 이전 빌드 결과물 정리 (Docker container 내부 실행)
+                            rm -rf node_modules dist || true
+
+                            # 환경 변수 확인 (디버깅용 - API KEY는 마스킹)
+                            echo "=== Building with environment variables ==="
+                            cat .env | grep -v "API_KEY" | grep -v "REST_API" || true
+
+                            npm ci
+                            npm run build
+                        '''
+                    }
                 }
             }
         }
 
         /* -------------------------------------------------- */
-        stage('Build & Push Nginx Image') {
+        stage('Deploy to S3') {
+            agent {
+                docker {
+                    image 'amazon/aws-cli:latest'
+                    args '-u 1000:1000 --entrypoint=""'
+                    reuseNode true
+                }
+            }
             steps {
-                sh """
-                    # 프로젝트 루트에서 빌드 (전체 컨텍스트 접근 가능)
-                    docker build -f infra/nginx/Dockerfile -t ${DOCKER_REGISTRY}/${IMAGE_NAME}:${IMAGE_TAG} .
-                    docker push ${DOCKER_REGISTRY}/${IMAGE_NAME}:${IMAGE_TAG}
-                """
+                withCredentials([[$class: 'AmazonWebServicesCredentialsBinding',
+                                  credentialsId: 'aws-credentials']]) {
+                    dir('frontend/poom') {
+                        sh """
+                            # S3 버킷에 빌드 파일 업로드
+                            aws s3 sync dist/ s3://\${S3_PROD_BUCKET}/ \\
+                                --region \${S3_REGION} \\
+                                --delete \\
+                                --cache-control 'public,max-age=31536000,immutable' \\
+                                --exclude 'index.html'
+
+                            # index.html은 캐시 없이 업로드
+                            aws s3 cp dist/index.html s3://\${S3_PROD_BUCKET}/index.html \\
+                                --region \${S3_REGION} \\
+                                --cache-control 'public,max-age=0,must-revalidate'
+                        """
+                    }
+                }
             }
         }
 
         /* -------------------------------------------------- */
-        stage('Deploy Nginx Container') {
+        stage('Invalidate CloudFront') {
+            agent {
+                docker {
+                    image 'amazon/aws-cli:latest'
+                    args '-u 1000:1000 --entrypoint=""'
+                    reuseNode true
+                }
+            }
             steps {
-                withCredentials([file(credentialsId: 'env', variable: 'ENV_FILE')]) {
+                withCredentials([[$class: 'AmazonWebServicesCredentialsBinding',
+                                  credentialsId: 'aws-credentials']]) {
                     sh """
-                        cp "\$ENV_FILE" "${COMPOSE_DIR}/.env"
-
-                        cd ${COMPOSE_DIR}
-
-                        # Rolling Update
-                        echo "새 이미지 다운로드 중..."
-                        docker compose pull nginx
-
-                        echo "Nginx 컨테이너 Rolling Update 시작..."
-                        docker compose up -d --no-deps nginx
-
-                        # 헬스체크 (최대 30초 대기)
-                        echo "헬스체크 시작..."
-                        for i in \$(seq 1 15); do
-                            if curl -f http://localhost:80 >/dev/null 2>&1; then
-                                echo "Nginx 서버 정상 실행 중"
-                                break
-                            fi
-                            echo "대기 중... (\$i/15)"
-                            sleep 2
-                        done
-
-                        # 최종 헬스체크
-                        curl -f http://localhost:80 || {
-                            echo "헬스체크 실패 - 배포 중단"
-                            exit 1
-                        }
+                        # CloudFront 캐시 무효화
+                        aws cloudfront create-invalidation \\
+                            --distribution-id \${CLOUDFRONT_DISTRIBUTION_ID} \\
+                            --paths '/*' \\
+                            --region \${CLOUDFRONT_REGION}
                     """
                 }
             }
@@ -116,16 +146,32 @@ pipeline {
     /* ------------------------------------------------------ */
     post {
         success {
-            echo '✅ Frontend/Nginx 배포 성공'
+            script {
+                node {
+                    echo '✅ Frontend S3 배포 성공'
+                }
+            }
         }
         failure {
-            echo '❌ Frontend/Nginx 배포 실패 — 콘솔 로그 확인'
+            script {
+                node {
+                    echo '❌ Frontend S3 배포 실패 — 콘솔 로그 확인'
+                }
+            }
         }
         notBuilt {
-            echo '⏭️  Frontend 변경사항 없음 - 빌드 스킵'
+            script {
+                node {
+                    echo '⏭️  Frontend 변경사항 없음 - 빌드 스킵'
+                }
+            }
         }
         always {
-            cleanWs(deleteDirs: true, disableDeferredWipeout: true)
+            script {
+                node {
+                    cleanWs(deleteDirs: true, disableDeferredWipeout: true)
+                }
+            }
         }
     }
 }

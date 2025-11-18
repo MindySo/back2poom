@@ -1,0 +1,125 @@
+import React from 'react';
+import Text from '../../common/atoms/Text';
+import Badge from '../../common/atoms/Badge';
+import { useElapsedTime } from '../../../hooks';
+import styles from './RecentMissing.module.css';
+
+export interface Badge {
+  text: string;
+  variant?: 'time' | 'feature' | 'solved' | 'alert' | 'ai';
+}
+
+export interface RecentMissingProps {
+  image: string;
+  badges: Badge[];
+  name: string;
+  gender: string;
+  age: number;
+  location: string;
+  occurredAt: string;
+  targetType?: string;
+  className?: string;
+  textColor?: 'white' | 'black' | 'darkMain' | 'gray';
+  onClick?: () => void;
+}
+
+const RecentMissing: React.FC<RecentMissingProps> = ({
+  image,
+  badges,
+  name,
+  gender,
+  age,
+  location,
+  occurredAt,
+  targetType,
+  className = '',
+  textColor,
+  onClick,
+}) => {
+  // 실종 경과 시간을 실시간으로 업데이트
+  const elapsedTime = useElapsedTime(occurredAt);
+  return (
+    <div
+      className={`${styles.card} ${className}`}
+      onClick={onClick}
+      style={onClick ? { cursor: 'pointer' } : undefined}
+    >
+      {/* 왼쪽: 사진 프레임 */}
+      <div className={styles.imageFrame}>
+        <img
+          src={image}
+          alt={name}
+          className={styles.image}
+        />
+      </div>
+
+      {/* 오른쪽: 정보 영역 */}
+      <div className={styles.infoSection}>
+        {/* 라벨 */}
+        <div className={styles.labelContainer}>
+          <Badge
+            variant="time"
+            size="small"
+          >
+            {elapsedTime}
+          </Badge>
+          {targetType && (
+            <Badge
+              variant="feature"
+              size="small"
+            >
+              {targetType}
+            </Badge>
+          )}
+          {badges.slice(1).map((badge, index) => (
+            <Badge
+              key={index}
+              variant={badge.variant || 'feature'}
+              size="small"
+            >
+              {badge.text}
+            </Badge>
+          ))}
+        </div>
+
+        {/* 이름/성별/나이 */}
+        <div className={styles.nameSection}>
+          <Text
+            size="lg"
+            weight="bold"
+            color={textColor === 'white' ? 'white' : 'darkMain'}
+          >
+            {name || '-'}
+          </Text>
+          <Text
+            size="sm"
+            weight="regular"
+            color={textColor === 'white' ? 'white' : 'gray'}
+          >
+            {gender} / {age || '- '}세
+          </Text>
+        </div>
+
+        {/* 실종장소 */}
+        <div className={styles.locationSection}>
+          <Text
+            size="md"
+            weight="medium"
+            color={textColor === 'white' ? 'white' : 'darkMain'}
+          >
+            실종 장소
+          </Text>
+          <Text
+            size="md"
+            weight="regular"
+            color={textColor === 'white' ? 'white' : 'gray'}
+          >
+            {location || '-'}
+          </Text>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default RecentMissing;

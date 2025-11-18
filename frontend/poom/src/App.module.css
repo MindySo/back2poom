@@ -1,0 +1,23 @@
+.appContainer {
+  margin-top: 90px; /* TopBar 높이만큼 여백 */
+  height: calc(100dvh - 90px); /* 전체 높이에서 헤더 높이 제외 */
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+.appContainer.mobile {
+  margin-top: 48px; /* MobileTopBar 높이만큼 여백 (padding 10px + 로고 28px + padding 10px) */
+  height: calc(100dvh - 48px); /* 전체 높이에서 헤더 높이 제외 */
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+.appContainer.noScroll {
+  overflow: hidden;
+}
+
+.appContainer.noTopBar {
+  margin-top: 0;
+  height: 100dvh;
+}
+

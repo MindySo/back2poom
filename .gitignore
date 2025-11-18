@@ -12,10 +12,10 @@ redis-data/
 *.env
 
 ### certbot ###
-infra/certbot/conf/*
-infra/certbot/www/*
-!infra/certbot/conf/.gitkeep
-!infra/certbot/www/.gitkeep
+**/certbot/conf/*
+**/certbot/www/*
+!**/certbot/conf/.gitkeep
+!**/certbot/www/.gitkeep
 
 ### STS ###
 .apt_generated

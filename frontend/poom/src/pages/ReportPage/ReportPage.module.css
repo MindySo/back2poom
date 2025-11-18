@@ -1,0 +1,110 @@
+@media (min-width: 1024px) {
+  .container {
+    padding: 40px 120px;
+    max-width: 1400px;
+    margin: 0 auto;
+  }
+}
+
+.container {
+  display: flex;
+  flex-direction: column;
+  padding: 40px 24px;
+  height: 100%;
+  max-height: 100%;
+  overflow: hidden;
+  box-sizing: border-box;
+}
+
+@media (max-width: 1023px) {
+  .container {
+    padding-top: 16px;
+  }
+}
+
+
+.stepWrapper {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+}
+
+.stepContent {
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.stepContentWithSpaceBetween {
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.nextButtonContainer {
+  margin-top: auto;
+  padding-top: 20px;
+  position: sticky;
+  bottom: 0;
+  background-color: white;
+}
+
+.nextButtonContainerStatic {
+  padding-top: 20px;
+  position: relative;
+  padding-bottom: 20px;
+}
+
+.nextButtonContainer button,
+.nextButtonContainerStatic button {
+  min-height: 45px;
+  padding: 15px 20px;
+  font-size: 16px;
+}
+
+.context {
+  font-size: 16px;
+  line-height: 1.5;
+  margin-bottom: 12px;
+}
+
+.backButton {
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  width: 24px;
+  height: 24px;
+  margin-bottom: 16px;
+}
+
+.backButton img {
+  width: 50%;
+  height: 100%;
+  object-fit: contain;
+  filter: grayscale(100%) brightness(0.6) opacity(0.7);
+}
+
+@media (max-width: 375px) {
+  .container {
+    padding: 16px 20px;
+  }
+
+  .context {
+    font-size: 14px;
+  }
+
+  .backButton {
+    width: 20px;
+    height: 20px;
+    margin-bottom: 12px;
+  }
+}
+

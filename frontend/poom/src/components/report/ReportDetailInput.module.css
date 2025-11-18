@@ -1,0 +1,74 @@
+.question {
+  font-size: 20px;
+  font-weight: 700;
+  line-height: 1.4;
+}
+
+
+.inputContainer {
+  margin-top: 16px;
+}
+
+.textarea {
+  width: 100%;
+  padding: 12px 0;
+  margin: 0;
+  font-size: 16px;
+  border: none;
+  border-bottom: 2px solid #2B3A55;
+  border-radius: 0;
+  font-family: 'Pretendard, -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif';
+  outline: none;
+  resize: none;
+  overflow: hidden;
+  line-height: 1.5;
+  background: transparent;
+}
+
+.textarea:focus {
+  border-bottom-color: #2B3A55;
+  outline: none;
+}
+
+.textarea.readOnly {
+  background-color: transparent;
+  cursor: default;
+  opacity: 0.7;
+}
+
+.readOnlyContainer {
+  margin-top: 16px;
+}
+
+.readOnlyLabel {
+  font-size: 14px;
+  color: #767676;
+  margin-bottom: 8px;
+  display: block;
+}
+
+.readOnlyValue {
+  font-size: 16px;
+  font-weight: 700;
+  color: #000000;
+  display: block;
+}
+
+.buttonContainer {
+  margin-top: 16px;
+  display: flex;
+  gap: 12px;
+}
+
+@media (max-width: 375px) {
+  .question {
+    font-size: 18px;
+  }
+
+  .textarea {
+    font-size: 14px;
+    padding: 14px 16px;
+    min-height: 100px;
+  }
+}
+

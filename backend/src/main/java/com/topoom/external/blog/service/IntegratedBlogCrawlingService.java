@@ -1,6 +1,7 @@
 package com.topoom.external.blog.service;
 
 import com.topoom.external.blog.dto.BlogPostInfo;
+import com.topoom.external.blog.dto.CrawlResult;
 import com.topoom.external.blog.dto.ExtractedImageInfo;
 import com.topoom.external.blog.entity.BlogPost;
 import com.topoom.external.blog.repository.BlogPostRepository;
@@ -25,6 +26,7 @@ import java.util.*;
 import java.util.function.Function;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -52,7 +54,7 @@ public class IntegratedBlogCrawlingService {
 
 
     /** 카테고리 목록만 크롤링 & 저장 */
-    public List<BlogPostInfo> crawlCategoryPostsWithSelenium(String blogId, String categoryNo) {
+    public CrawlResult crawlCategoryPostsWithSelenium(String blogId, String categoryNo) {
         return withDriver(driver -> {
             String categoryUrl = String.format(
                     "https://blog.naver.com/PostList.naver?blogId=%s&categoryNo=%s",
@@ -65,7 +67,28 @@ public class IntegratedBlogCrawlingService {
             List<BlogPostInfo> blogPosts = crawlBlogPostList(driver, blogId, categoryNo);
             List<BlogPost> saved = saveBlogPostsToDatabase(blogPosts);
             log.info("카테고리 크롤링 완료: found={}, saved={}", blogPosts.size(), saved.size());
-            return blogPosts;
+
+            // 수동 관리 케이스 URL 목록 조회
+            Set<String> manualManagedUrls = new HashSet<>(missingCaseRepository.findSourceUrlsByManualManaged());
+            log.info("수동 관리 케이스 제외: {}건", manualManagedUrls.size());
+
+            // 새로 저장된 BlogPost에 해당하는 BlogPostInfo만 필터링
+            Set<String> savedUrls = saved.stream()
+                    .map(BlogPost::getSourceUrl)
+                    .collect(Collectors.toSet());
+
+            // 새로운 게시글 중 수동 관리 케이스 제외
+            List<BlogPostInfo> newPosts = blogPosts.stream()
+                    .filter(info -> savedUrls.contains(info.getPostUrl()))
+                    .filter(info -> !manualManagedUrls.contains(info.getPostUrl()))
+                    .collect(Collectors.toList());
+
+            log.info("새로운 게시글: {}건 (전체 {}건 중, 수동 관리 제외 후)", newPosts.size(), blogPosts.size());
+
+            return CrawlResult.builder()
+                    .allPosts(blogPosts)   // 전체 크롤링 결과 (삭제 프로세스용)
+                    .newPosts(newPosts)    // 새로운 게시글만 (큐 발행용)
+                    .build();
         });
     }
 
@@ -88,9 +111,9 @@ public class IntegratedBlogCrawlingService {
                     String sourceTitle = driver.getTitle(); // 페이지 제목 가져오기
                     Integer sourceSeq = i + 1; // 이미지 순서 (1부터 시작)
                     Boolean isLastImage = (i == extractedImages.size() - 1); // 마지막 이미지 여부
-                    
+
                     CaseFile saved = blogS3ImageUploadService
-                            .downloadAndUploadImage(img.getImageUrl(), postUrl, caseId, 
+                            .downloadAndUploadImage(img.getImageUrl(), postUrl, caseId,
                                     sourceTitle, sourceSeq, isLastImage);
                     uploadedFiles.add(saved);
                     imageSuccess++;
@@ -292,7 +315,7 @@ public class IntegratedBlogCrawlingService {
         try {
             // 1단계: tel: 링크에서 전화번호 직접 추출
             List<WebElement> phoneLinks = driver.findElements(By.cssSelector("a[href^='tel:']"));
-            
+
             for (WebElement link : phoneLinks) {
                 String phoneNumber = link.getAttribute("href").replace("tel:", "").trim();
                 if (isValidPhoneNumber(phoneNumber)) {
@@ -306,22 +329,22 @@ public class IntegratedBlogCrawlingService {
             // 2단계: 네이버 블로그 본문 구조에 맞는 상세 검색
             // 실제 HTML 구조: .se-main-container > .se-component > .se-component-content > .se-section > .se-module > .se-text-paragraph
             String[] detailedSelectors = {
-                ".se-main-container .se-text-paragraph",
-                ".se-component-content .se-text-paragraph", 
-                ".se-section-text .se-text-paragraph",
-                ".se-module-text .se-text-paragraph",
-                ".post-view .se-text-paragraph",
-                ".wrap_rabbit .se-text-paragraph"
+                    ".se-main-container .se-text-paragraph",
+                    ".se-component-content .se-text-paragraph",
+                    ".se-section-text .se-text-paragraph",
+                    ".se-module-text .se-text-paragraph",
+                    ".post-view .se-text-paragraph",
+                    ".wrap_rabbit .se-text-paragraph"
             };
-            
+
             Set<WebElement> processedParagraphs = new HashSet<>();
-            
+
             for (String selector : detailedSelectors) {
                 List<WebElement> paragraphs = driver.findElements(By.cssSelector(selector));
                 for (WebElement paragraph : paragraphs) {
                     if (processedParagraphs.contains(paragraph)) continue;
                     processedParagraphs.add(paragraph);
-                    
+
                     try {
                         String text = paragraph.getText();
                         if (text == null || text.trim().isEmpty()) continue;
@@ -334,7 +357,7 @@ public class IntegratedBlogCrawlingService {
                                 boolean alreadyExtracted = contacts.stream()
                                         .anyMatch(c -> normalizePhoneNumber(c.getPhoneNumber())
                                                 .equals(normalizePhoneNumber(phoneNumber)));
-                                
+
                                 if (!alreadyExtracted) {
                                     String organization = extractOrganizationFromText(text);
                                     CaseContact contact = createCaseContact(organization, phoneNumber, postUrl, sourceTitle, caseId);
@@ -381,7 +404,7 @@ public class IntegratedBlogCrawlingService {
         try {
             // 1단계: 같은 <p> 태그 내에서 이전 <span> 요소들에서 조직명 찾기
             WebElement paragraph = phoneElement.findElement(By.xpath("./ancestor::p[@class='se-text-paragraph'][1]"));
-            
+
             // 전화번호 링크가 포함된 span의 이전 span들에서 조직명 검색
             List<WebElement> spans = paragraph.findElements(By.tagName("span"));
             for (WebElement span : spans) {
@@ -393,11 +416,11 @@ public class IntegratedBlogCrawlingService {
                     }
                 }
             }
-            
+
             // 2단계: 전체 paragraph 텍스트에서 조직명 추출
             String fullText = paragraph.getText();
             return extractOrganizationFromText(fullText);
-            
+
         } catch (Exception e) {
             // 3단계: fallback - 조상 요소에서 조직명 찾기
             try {
@@ -438,7 +461,7 @@ public class IntegratedBlogCrawlingService {
                 return result;
             }
         }
-        
+
         // "경기남부 분당경찰서" 형태
         if (text.contains("경찰서")) {
             Pattern policePattern = Pattern.compile("([가-힣]+\\s+[가-힣]+경찰서|[가-힣]+경찰서)");
@@ -454,7 +477,7 @@ public class IntegratedBlogCrawlingService {
         if (text.contains("실종수사팀")) return "실종수사팀";
         if (text.contains("수사팀")) return "수사팀";
         if (text.contains("파출소")) return "파출소";
-        
+
         return "연락처";
     }
 
@@ -494,14 +517,14 @@ public class IntegratedBlogCrawlingService {
         }
     }
 
-    /** BlogPost 저장 (URL 기준 중복 방지) 및 새 게시글 처리 */
+    /** BlogPost 저장 (URL 기준 중복 방지) - 큐 방식으로 변경 */
     private List<BlogPost> saveBlogPostsToDatabase(List<BlogPostInfo> infos) {
         List<BlogPost> saved = new ArrayList<>();
         for (BlogPostInfo info : infos) {
             try {
                 String urlHash = generateUrlHash(info.getPostUrl());
                 if (!blogPostRepository.existsByUrlHash(urlHash)) {
-                    // 1. BlogPost 저장
+                    // BlogPost만 저장 (나머지 처리는 큐에서 수행)
                     BlogPost entity = BlogPost.builder()
                             .sourceTitle(info.getTitle())
                             .sourceUrl(info.getPostUrl())
@@ -510,15 +533,7 @@ public class IntegratedBlogCrawlingService {
                             .build();
                     BlogPost savedPost = blogPostRepository.save(entity);
                     saved.add(savedPost);
-                    
-                    // 2. 새 게시글 발견 -> MissingCase 생성 및 이미지 크롤링
-                    try {
-                        Long caseId = createMissingCaseFromBlogPost(info);
-                        crawlImagesForNewPost(info.getPostUrl(), caseId);
-                        log.info("새 게시글 처리 완료: title={}, caseId={}", info.getTitle(), caseId);
-                    } catch (Exception e) {
-                        log.error("새 게시글 처리 실패: title={}, url={}", info.getTitle(), info.getPostUrl(), e);
-                    }
+                    log.info("새 게시글 발견: title={}, url={}", info.getTitle(), info.getPostUrl());
                 }
             } catch (Exception e) {
                 log.error("BlogPost 저장 실패: title={}, url={}", info.getTitle(), info.getPostUrl(), e);
@@ -528,7 +543,7 @@ public class IntegratedBlogCrawlingService {
     }
 
     /** 새 게시글로부터 MissingCase 생성 (크롤링 정보만) */
-    private Long createMissingCaseFromBlogPost(BlogPostInfo info) {
+    public Long createMissingCaseFromBlogPost(BlogPostInfo info) {
         try {
             // 크롤링 정보만으로 MissingCase 생성 (나머지 필드는 null)
             MissingCase missingCase = MissingCase.builder()
@@ -536,7 +551,7 @@ public class IntegratedBlogCrawlingService {
                     .sourceUrl(info.getPostUrl())
                     .sourceTitle(info.getTitle())
                     .crawledAt(info.getCrawledAt())
-                    
+
                     // 모든 필드를 null로 설정 (isDeleted만 false)
                     .personName(null)
                     .targetType(null)
@@ -561,17 +576,17 @@ public class IntegratedBlogCrawlingService {
                     .missingId(null)
                     .mainFile(null)
                     .build();
-            
+
             MissingCase saved = missingCaseRepository.save(missingCase);
-            log.info("MissingCase 생성 완료: id={}, title={}", saved.getId(), info.getTitle());
+                log.info("MissingCase 생성 완료: id={}, title={}", saved.getId(), info.getTitle());
             return saved.getId();
-            
+
         } catch (Exception e) {
             log.error("MissingCase 생성 실패: title={}", info.getTitle(), e);
             throw new RuntimeException("MissingCase 생성 실패", e);
         }
     }
-    
+
     /** 새 게시글의 연락처 + 이미지 크롤링 및 저장 */
     private void crawlImagesForNewPost(String postUrl, Long caseId) {
         // extractAndUploadImagesWithContacts를 재사용

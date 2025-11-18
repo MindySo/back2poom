@@ -1,0 +1,315 @@
+.container {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  width: 100%;
+  overflow: hidden;
+  background: linear-gradient(135deg, #1a2332 0%, #2B3A55 100%);
+}
+
+.threeColumnLayout {
+  display: flex;
+  flex: 1;
+  height: 100%;
+  gap: 1.25rem;
+  padding: 1.25rem;
+  overflow: hidden;
+}
+
+/* 첫 번째 열: 2 (20%) */
+.column1 {
+  flex: 2;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+
+.column1 .section {
+  flex: 1;
+  min-height: 100%;
+  overflow-y: auto;
+}
+
+.column1 .section::-webkit-scrollbar {
+  width: 6px;
+}
+
+.column1 .section::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 3px;
+}
+
+.column1 .section::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 3px;
+}
+
+.column1 .section::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.3);
+}
+
+/* 두 번째 열: 5 (50%) */
+.column2 {
+  flex: 5;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+
+.column2 .section {
+  flex: 1;
+  min-height: 100%;
+  overflow-y: auto;
+}
+
+.column2 .section::-webkit-scrollbar {
+  width: 6px;
+}
+
+.column2 .section::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 3px;
+}
+
+.column2 .section::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 3px;
+}
+
+.column2 .section::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.3);
+}
+
+/* 세 번째 열: 3 (30%) */
+.column3 {
+  flex: 3;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+
+.column3 .section {
+  flex: 1;
+  min-height: 100%;
+  overflow-y: auto;
+}
+
+.column3 .section::-webkit-scrollbar {
+  width: 6px;
+}
+
+.column3 .section::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 3px;
+}
+
+.column3 .section::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 3px;
+}
+
+.column3 .section::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.3);
+}
+
+.section {
+  background: rgba(43, 58, 85, 0.6);
+  backdrop-filter: blur(10px);
+  padding: 1.75rem;
+  border-radius: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 1.75rem;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+}
+
+.sectionTitle {
+  margin-bottom: 0;
+  padding-bottom: 1.25rem;
+  border-bottom: 2px solid rgba(255, 255, 255, 0.15);
+  letter-spacing: 0.5px;
+}
+
+/* 대표사진 컨테이너 */
+.mainImageContainer {
+  display: flex;
+  flex-direction: column;
+  gap: 0.875rem;
+}
+
+.badgeContainer {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.mainImageWrapper {
+  width: 100%;
+  aspect-ratio: 3 / 4;
+  border-radius: 10px;
+  overflow: hidden;
+  background: rgba(255, 255, 255, 0.08);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4), 0 0 0 1px rgba(255, 255, 255, 0.1);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.mainImageWrapper:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(255, 255, 255, 0.15);
+}
+
+.mainImage {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.3s ease;
+}
+
+.mainImageWrapper:hover .mainImage {
+  transform: scale(1.02);
+}
+
+.infoCard {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 0.875rem 1.25rem;
+  align-items: start;
+  flex: 1;
+  padding: 0.5rem 0;
+}
+
+.infoLabel {
+  opacity: 0.75;
+  white-space: nowrap;
+  font-weight: 600;
+  letter-spacing: 0.3px;
+}
+
+.infoValue {
+  word-break: break-word;
+  line-height: 1.5;
+  opacity: 0.95;
+}
+
+.loadingMessage,
+.errorMessage {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  font-size: 1.2rem;
+  color: rgba(255, 255, 255, 0.8);
+  text-align: center;
+}
+
+.errorMessage {
+  color: #ff6b6b;
+}
+
+/* CCTV 탐지 결과 그리드 */
+.detectionGrid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1.25rem;
+  flex: 1;
+  overflow-y: auto;
+  padding-right: 0.5rem;
+}
+
+.detectionGrid::-webkit-scrollbar {
+  width: 6px;
+}
+
+.detectionGrid::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 3px;
+}
+
+.detectionGrid::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 3px;
+}
+
+.detectionGrid::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.3);
+}
+
+.detectionCard {
+  display: flex;
+  flex-direction: column;
+  background: rgba(255, 255, 255, 0.06);
+  border-radius: 10px;
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.2);
+  transition: all 0.3s ease;
+  cursor: pointer;
+}
+
+.detectionCard:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.35);
+  border-color: rgba(255, 255, 255, 0.2);
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.detectionImageWrapper {
+  width: 100%;
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+  background: rgba(0, 0, 0, 0.4);
+  position: relative;
+}
+
+.detectionImageWrapper::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(to bottom, transparent 0%, rgba(0, 0, 0, 0.1) 100%);
+  pointer-events: none;
+}
+
+.detectionImage {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.4s ease;
+}
+
+.detectionCard:hover .detectionImage {
+  transform: scale(1.05);
+}
+
+.detectionInfo {
+  padding: 0.875rem 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  flex-shrink: 0;
+  background: rgba(0, 0, 0, 0.2);
+}
+
+.detectionInfoItem {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+}
+
+.detectionLabel {
+  opacity: 0.7;
+  font-weight: 600;
+  letter-spacing: 0.2px;
+  font-size: 0.75rem;
+}
+
+.detectionValue {
+  word-break: break-word;
+  line-height: 1.4;
+  opacity: 0.95;
+}
+

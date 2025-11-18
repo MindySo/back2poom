@@ -3,6 +3,8 @@ spring:
     name: topoom
   profiles:
     active: local
+  lifecycle:
+    timeout-per-shutdown-phase: 30s  # Graceful shutdown timeout
 
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
@@ -16,13 +18,39 @@ spring:
       port: 6379
       password: ${REDIS_PASSWORD}
 
+  # RabbitMQ 설정
+  rabbitmq:
+    host: ${RABBITMQ_HOST}
+    port: ${RABBITMQ_PORT}
+    username: ${RABBITMQ_USERNAME}
+    password: ${RABBITMQ_PASSWORD}
+    listener:
+      simple:
+        acknowledge-mode: auto
+        retry:
+          enabled: true
+          initial-interval: 2000
+          max-attempts: 5  # OCR 실패 시 최대 5회 재시도
+          multiplier: 2.0
+          max-interval: 10000
+        default-requeue-rejected: false
+        concurrency: 3
+        max-concurrency: 10
+      direct:
+        shutdown-timeout: 30000  # Listener shutdown timeout (30초)
+    template:
+      retry:
+        enabled: true
+        initial-interval: 1000
+        max-attempts: 3
+
   cloud:
     aws:
       credentials:
         access-key: ${S3_ACCESS_KEY_ID}
         secret-key: ${S3_SECRET_ACCESS_KEY}
       s3:
-        bucket: topoom-s3-bucket
+        bucket: ${S3_BUCKET}
       region:
         static: ap-southeast-2
       stack:
@@ -38,6 +66,13 @@ spring:
         format_sql: true
         default_batch_fetch_size: 100
     open-in-view: false
+    defer-datasource-initialization: true  # JPA 테이블 생성 후 init.sql 실행
+
+  sql:
+    init:
+      mode: always  # 서비스 시작 시 SQL 스크립트 자동 실행
+      data-locations: classpath:init.sql  # init.sql 실행
+      continue-on-error: false  # SQL 실행 실패 시 애플리케이션 시작 중단
 
   servlet:
     multipart:
@@ -64,8 +99,27 @@ kakao:
   api:
     key: ${KAKAO_API_KEY}
 
+openapi:
+  crosswalk:
+    service-key: ${CROSSWALK_API_KEY}
+    url: http://api.data.go.kr/openapi/tn_pubr_public_crosswalk_api
+
+ocr:
+  server:
+    url: ${OCR_SERVER_URL}
+
 server:
   port: 8080
+  shutdown: graceful  # Graceful shutdown 활성화
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+  endpoint:
+    health:
+      show-details: when-authorized
 
 logging:
   level:

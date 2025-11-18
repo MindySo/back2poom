@@ -1,0 +1,77 @@
+.container {
+  position: absolute;
+  top: 0;
+  left: 0;
+  border-radius: 12px;
+  padding: 0;
+  z-index: 5;
+  width: 25rem;
+  background-color: rgba(43, 58, 85, 0.9);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+  transform-origin: top left;
+  transition: transform 0.3s ease, opacity 0.3s ease;
+  user-select: none;
+  pointer-events: auto;
+  max-width: calc(100vw - 2rem);
+  max-height: calc(100vh - 2rem);
+  box-sizing: border-box;
+}
+
+.container.hidden {
+  pointer-events: none;
+}
+
+.content {
+  position: relative;
+  overflow: hidden;
+}
+
+.backButton {
+  position: absolute;
+  top: 1.5rem;
+  left: 1.2rem;
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 1rem;
+  height: auto;
+  z-index: 5;
+}
+
+.backButton img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  filter: brightness(0) saturate(100%) invert(100%);
+}
+
+.resizeHandle {
+  position: absolute;
+  bottom: 0.5rem;
+  right: 0.5rem;
+  width: 2rem;
+  height: 2rem;
+  cursor: nwse-resize;
+  touch-action: none;
+  z-index: 20;
+}
+
+.resizeHandle::after {
+  content: '';
+  position: absolute;
+  bottom: 0.4rem;
+  right: 0.4rem;
+  width: 0.6rem;
+  height: 0.6rem;
+  background: repeating-linear-gradient(
+    -45deg,
+    rgba(255, 255, 255, 0.8),
+    rgba(255, 255, 255, 0.8) 0.2rem,
+    transparent 0.2rem,
+    transparent 0.4rem
+  );
+}

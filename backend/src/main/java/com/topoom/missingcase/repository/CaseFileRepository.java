@@ -17,4 +17,6 @@ public interface CaseFileRepository extends JpaRepository<CaseFile, Long> {
     Optional<CaseFile> findByMissingCaseIdAndIsLastImage(Long caseId, Boolean isLastImage);
 
     Optional<CaseFile> findByMissingCaseIdAndSourceSeq(Long caseId, Integer sourceSeq);
+
+    Optional<CaseFile> findTopByMissingCaseIdOrderBySourceSeqAsc(Long caseId);
 }

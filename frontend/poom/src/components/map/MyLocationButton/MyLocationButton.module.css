@@ -1,0 +1,69 @@
+.myLocationButton {
+  position: fixed;
+  right: 24px;
+  bottom: 24px;
+  width: 48px;
+  height: 48px;
+  background-color: rgba(43, 58, 85, 0.9); /* darkMain with transparency */
+  border: none;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  transition: all 0.2s ease;
+  z-index: 100;
+}
+
+.myLocationButton:hover {
+  background-color: rgba(43, 58, 85, 0.95);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2);
+  transform: translateY(-2px);
+}
+
+.myLocationButton:active {
+  background-color: rgba(43, 58, 85, 1);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  transform: translateY(0);
+}
+
+.myLocationButton:disabled {
+  background-color: rgba(43, 58, 85, 0.5);
+  cursor: not-allowed;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+}
+
+.myLocationButton:disabled:hover {
+  transform: none;
+}
+
+.icon {
+  width: 24px;
+  height: 24px;
+  object-fit: contain;
+}
+
+/* 모바일 대응 */
+@media (max-width: 1024px) {
+  .myLocationButton {
+    right: 16px;
+    bottom: 56px; /* BottomSheet 손잡이 위에 배치 */
+    width: 44px;
+    height: 44px;
+  }
+
+  .icon {
+    width: 22px;
+    height: 22px;
+  }
+}
+
+/* 터치 디바이스 대응 */
+@media (hover: none) and (pointer: coarse) {
+  .myLocationButton:active {
+    background-color: rgba(43, 58, 85, 1);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+    transform: scale(0.95);
+  }
+}

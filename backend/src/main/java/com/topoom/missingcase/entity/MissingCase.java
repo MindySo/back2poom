@@ -101,6 +101,10 @@ public class MissingCase extends BaseTimeEntity {
     @Column(name = "is_deleted", nullable = false)
     private boolean isDeleted = false;
 
+    @Builder.Default
+    @Column(name = "is_manual_managed", nullable = false)
+    private boolean isManualManaged = false;
+
     @OneToMany(mappedBy = "missingCase", cascade = CascadeType.ALL, orphanRemoval = true)
     @Fetch(FetchMode.SUBSELECT)
     private Set<CaseFile> files;
