@@ -506,24 +506,24 @@ const MapPage: React.FC = () => {
         )}
 
         {/* 선택된 마커의 이동 반경 표시 */}
-        {/* {map && selectedRadiusPosition && selectedRadiusValue > 0 && selectedMissingId && (
+        {map && selectedRadiusPosition && selectedRadiusValue > 0 && selectedMissingId && (
           <MovementRadius
             map={map}
             position={selectedRadiusPosition}
             radius={selectedRadiusValue}
             missingId={selectedMissingId}
           />
-        )} */}
+        )}
 
         {/* 내 위치 버튼 (MobileModal 위에 표시) */}
-        {map && isMobile && (
+        {/*map && isMobile && (
           <div className={styles.myLocationButtonWrapper}>
             <MyLocationButton
               onClick={handleMyLocation}
               disabled={isLoadingLocation}
             />
           </div>
-        )}
+        )}*/
 
         {/* 내 위치 버튼 (데스크톱) */}
         {map && !isMobile && (

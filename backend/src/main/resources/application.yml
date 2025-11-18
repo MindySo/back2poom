@@ -93,6 +93,15 @@ kakao:
   api:
     key: ${KAKAO_API_KEY}
 
+openapi:
+  crosswalk:
+    service-key: ${CROSSWALK_API_KEY}
+    url: http://api.data.go.kr/openapi/tn_pubr_public_crosswalk_api
+
+ocr:
+  server:
+    url: ${OCR_SERVER_URL}
+
 server:
   port: 8080
   shutdown: graceful  # Graceful shutdown 활성화
