@@ -27,9 +27,28 @@ const PoliceSideBar: React.FC<PoliceSideBarProps> = ({ className = '', onMissing
       }}
     >
       {/* 현황판 */}
-      <StatusBoard 
+      <StatusBoard
         textColor="white"
         borderColor="rgba(255, 255, 255, 0.3)"
+        helpContent={
+          <>
+            <Text size="sm" weight="semiBold" color="darkMain" as="p" style={{ marginBottom: '0.5rem' }}>
+              실종자 현황판 안내
+            </Text>
+            <Text size="xs" weight="regular" color="darkMain" as="p" style={{ marginBottom: '0.25rem' }}>
+              • <strong>금일 실종</strong>: 오늘 신고된 실종자 수
+            </Text>
+            <Text size="xs" weight="regular" color="darkMain" as="p" style={{ marginBottom: '0.25rem' }}>
+              • <strong>제보 건수</strong>: 오늘 접수된 제보 건수
+            </Text>
+            <Text size="xs" weight="regular" color="darkMain" as="p" style={{ marginBottom: '0.25rem' }}>
+              • <strong>해결 건수</strong>: 오늘 해결된 실종 사건 수
+            </Text>
+            <Text size="xs" weight="regular" color="darkMain" as="p" style={{ marginTop: '0.5rem', fontStyle: 'italic' }}>
+              ※ 모든 수치는 금일 기준입니다.
+            </Text>
+          </>
+        }
       />
 
       {/* 최신 실종자 */}
