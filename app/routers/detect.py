@@ -1,4 +1,5 @@
 from fastapi import APIRouter, Form
+from pydantic import BaseModel
 import cv2
 import numpy as np
 import requests
@@ -15,6 +16,12 @@ from app.utils.s3 import upload_image_to_s3
 
 router = APIRouter()
 
+class DetectRequest(BaseModel):
+    video_url: str
+    image_url: str
+    case_id: int
+    cctv_id: int
+
 def download_video_to_tempfile(url):
     response = requests.get(url, stream=True)
     response.raise_for_status()
@@ -25,19 +32,13 @@ def download_video_to_tempfile(url):
         return tmp.name
     
 @router.post("/detect")
-async def detect(
-    video_url: str = Form(...),
-    text_query: str = Form(None),
-    image_url: str = Form(None),
-    case_id: int = Form(None),
-    cctv_id: int = Form(None)                         
-):
-    if image_url and text_query:
-        query_mode = 3   # 이미지 + 텍스트
-    elif image_url:
+async def detect(req: DetectRequest):
+    video_url = req.video_url
+    image_url = req.image_url
+    case_id = req.case_id
+    cctv_id = req.cctv_id
+    if image_url:
         query_mode = 1   # 이미지만
-    elif text_query:
-        query_mode = 2   # 텍스트만
     else:
         return {"error": "No query provided. Please provide image_url and/or text_query."}
     
@@ -55,7 +56,7 @@ async def detect(
     query_features = []
 
     # (1) Image Query
-    if query_mode in [1, 3] and image_url:
+    if image_url:
 
         img_bytes = requests.get(image_url).content
         nparr = np.frombuffer(img_bytes, np.uint8)
@@ -71,15 +72,6 @@ async def detect(
 
         combined = 0.7 * reid_feat + 0.3 * clip_feat
         query_features.append(combined)
-
-    # (2) Text Query
-    if query_mode in [2, 3] and text_query:
-        query_features.append(extract_clip_text(text_query))
-
-    # 평균 가중치
-    if len(query_features) == 2:
-        query_feat = 0.6 * query_features[0] + 0.4 * query_features[1]
-    else:
         query_feat = query_features[0]
 
     # ---- Extract features from video ----
