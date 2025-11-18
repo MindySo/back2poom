@@ -101,6 +101,16 @@ export const colors = {
   green: '#8EB69B',
   yellow: '#F6C90E',
 
+  // 경찰페이지 전용
+  policeWhite: '#EEF1F6',
+  policeGray: '#bebebeff',
+  policeLightGray: '#FFFFFFBF',
+
+  policeBlue: '#62a1eeff',
+  policePink: '#EBC0BA',
+  policeGreen: '#A8D1B7',
+  policeYellow: '#FFD74A',
+
 } as const;
 
 // 스페이싱 토큰

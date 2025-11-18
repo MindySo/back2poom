@@ -7,6 +7,7 @@ export interface BadgeProps {
   size?: 'xs' | 'small' | 'medium' | 'large';
   className?: string;
   style?: React.CSSProperties;
+  theme?: 'light' | 'dark';
 }
 
 const Badge: React.FC<BadgeProps> = ({
@@ -15,32 +16,33 @@ const Badge: React.FC<BadgeProps> = ({
   size = 'medium',
   className = '',
   style,
+  theme: themeMode = 'light',
 }) => {
   const getVariantStyles = () => {
     switch (variant) {
       case 'time':
         return {
-          backgroundColor: theme.colors.blue + '33',
-          color: theme.colors.blue,
-          border: `2px solid ${theme.colors.blue}`,
+          backgroundColor: themeMode === 'dark' ? theme.colors.policeBlue + '33' : theme.colors.blue + '33',
+          color: themeMode === 'dark' ? theme.colors.policeBlue : theme.colors.blue,
+          border: `2px solid ${themeMode === 'dark' ? theme.colors.policeBlue : theme.colors.blue}`,
         };
       case 'solved':
         return {
-          backgroundColor: theme.colors.green + '33',
-          color: theme.colors.green,
-          border: `2px solid ${theme.colors.green}`,
+          backgroundColor: themeMode === 'dark' ? theme.colors.policeGreen + '33' : theme.colors.green + '33',
+          color: themeMode === 'dark' ? theme.colors.policeGreen : theme.colors.green,
+          border: `2px solid ${themeMode === 'dark' ? theme.colors.policeGreen : theme.colors.green}`,
         };
       case 'feature':
         return {
-          backgroundColor: theme.colors.pink + '33',
-          color: theme.colors.pink,
-          border: `2px solid ${theme.colors.pink}`,
+          backgroundColor: themeMode === 'dark' ? theme.colors.policePink + '33' : theme.colors.pink + '33',
+          color: themeMode === 'dark' ? theme.colors.policePink : theme.colors.pink,
+          border: `2px solid ${themeMode === 'dark' ? theme.colors.policePink : theme.colors.pink}`,
         };
       case 'alert':
         return {
-          backgroundColor: theme.colors.yellow + '33',
-          color: theme.colors.yellow,
-          border: `2px solid ${theme.colors.yellow}`,
+          backgroundColor: themeMode === 'dark' ? theme.colors.policeYellow + '33' : theme.colors.yellow + '33',
+          color: themeMode === 'dark' ? theme.colors.policeYellow : theme.colors.yellow,
+          border: `2px solid ${themeMode === 'dark' ? theme.colors.policeYellow : theme.colors.yellow}`,
         };
       case 'ai':
         return {
@@ -50,9 +52,9 @@ const Badge: React.FC<BadgeProps> = ({
         };
       default:
         return {
-          backgroundColor: theme.colors.blue + '33',
-          color: theme.colors.blue,
-          border: `1px solid ${theme.colors.blue}`,
+          backgroundColor: themeMode === 'dark' ? theme.colors.policeBlue + '33' : theme.colors.blue + '33',
+          color: themeMode === 'dark' ? theme.colors.policeBlue : theme.colors.blue,
+          border: `1px solid ${themeMode === 'dark' ? theme.colors.policeBlue : theme.colors.blue}`,
         };
     }
   };

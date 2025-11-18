@@ -29,7 +29,7 @@ const PoliceDetailPage = () => {
                 <div className={styles.mainImageContainer}>
                   <div className={styles.badgeContainer}>
                     {missingDetail.classificationCode && (
-                      <Badge variant="feature" size="small">{missingDetail.classificationCode}</Badge>
+                      <Badge variant="feature" size="small" theme="dark">{missingDetail.classificationCode}</Badge>
                     )}
                   </div>
                   <div className={styles.mainImageWrapper}>
