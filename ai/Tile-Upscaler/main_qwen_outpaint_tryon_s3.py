@@ -159,8 +159,8 @@ class LazyFluxFillPipeline:
             prompt="standing person, full body, neutral background",
             image=canvas,
             mask_image=mask,
-            height=canvas_h,
-            width=canvas_w,
+            height=target_h,
+            width=target_w,
             guidance_scale=30,
             num_inference_steps=50
         ).images[0]
