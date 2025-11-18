@@ -1,0 +1,25 @@
+spring:
+  application:
+    name: topoom
+  profiles:
+    active: local
+  lifecycle:
+    timeout-per-shutdown-phase: 30s  # Graceful shutdown timeout
+
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: ${DB_URL}
+    username: ${MYSQL_USER}
+    password: ${MYSQL_PASSWORD}
+
+  jpa:
+    database: mysql
+    hibernate:
+      ddl-auto: update
+    properties:
+      hibernate:
+        show_sql: false
+        format_sql: true
+        default_batch_fetch_size: 100
+    open-in-view: false
+    defer-datasource-initialization: true  # JPA 테이블 생성 후 init.sql 실행

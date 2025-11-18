@@ -1,5 +1,0 @@
-package com.topoom.detection.dto;
-
-public class AnalyzeResponse {
-
-}
