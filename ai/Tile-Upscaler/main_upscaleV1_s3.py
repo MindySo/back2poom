@@ -48,21 +48,21 @@ class S3Handler:
         self.bucket_name = S3_CONFIG['bucket_name']
     
     def list_missing_person_cases(self):
-        """List all missing person case folders in INPUT directory"""
+        """List all missing person case folders in input directory"""
         try:
             response = self.s3_client.list_objects_v2(
                 Bucket=self.bucket_name,
-                Prefix='INPUT/',
+                Prefix='input/',
                 Delimiter='/'
             )
-            
+
             cases = []
             if 'CommonPrefixes' in response:
                 for prefix in response['CommonPrefixes']:
-                    folder_name = prefix['Prefix'].replace('INPUT/', '').replace('/', '')
-                    if folder_name.startswith('missing_person_'):
+                    folder_name = prefix['Prefix'].replace('input/', '').replace('/', '')
+                    if folder_name.startswith('missing-person-'):
                         cases.append(folder_name)
-            
+
             return cases
         except ClientError as e:
             print(f"Error listing cases: {e}")
@@ -78,7 +78,7 @@ class S3Handler:
             # List all objects in the case folder
             response = self.s3_client.list_objects_v2(
                 Bucket=self.bucket_name,
-                Prefix=f'INPUT/{case_id}/'
+                Prefix=f'input/{case_id}/'
             )
             
             downloaded_files = []
@@ -103,15 +103,15 @@ class S3Handler:
             return []
     
     def upload_processed_results(self, case_id, enhanced_image_path, analysis_json):
-        """Upload processed results to OUTPUT folder"""
+        """Upload processed results to output folder"""
         try:
             # Upload enhanced image
-            enhanced_key = f'OUTPUT/{case_id}/enhanced_image.jpg'
+            enhanced_key = f'output/{case_id}/enhanced_image.jpg'
             self.s3_client.upload_file(enhanced_image_path, self.bucket_name, enhanced_key)
             print(f"Uploaded enhanced image: {enhanced_key}")
             
             # Upload analysis JSON
-            json_key = f'OUTPUT/{case_id}/analysis_result.json'
+            json_key = f'output/{case_id}/analysis_result.json'
             json_content = json.dumps(analysis_json, indent=2, ensure_ascii=False)
             self.s3_client.put_object(
                 Bucket=self.bucket_name,
