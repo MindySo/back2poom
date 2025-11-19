@@ -25,7 +25,7 @@ import java.util.List;
  * 공공데이터포털 API 및 엑셀 파일을 통해 횡단보도 정보를 수집하여 DB에 저장
  */
 @Slf4j
-@Service
+// @Service  // Crosswalk 기능 비활성화 - Apache POI 의존성 문제로 인해 주석 처리
 @RequiredArgsConstructor
 public class CrosswalkDataService {
 

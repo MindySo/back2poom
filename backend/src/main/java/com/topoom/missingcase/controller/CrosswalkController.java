@@ -11,7 +11,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 @Slf4j
-@RestController
+// @RestController  // Crosswalk 기능 비활성화 - Apache POI 의존성 문제로 인해 주석 처리
 @RequestMapping("/api/crosswalk")
 @RequiredArgsConstructor
 public class CrosswalkController {
