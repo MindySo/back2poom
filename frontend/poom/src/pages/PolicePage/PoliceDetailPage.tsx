@@ -1,8 +1,11 @@
 import { useSearchParams } from 'react-router-dom';
+import { useState } from 'react';
 import { useMissingDetail } from '../../hooks';
+import { useCctvDetection } from '../../hooks/useCctvDetection';
 import Text from '../../components/common/atoms/Text';
 import Badge from '../../components/common/atoms/Badge';
 import ReportList from '../../components/police/ReportList/ReportList';
+import VideoModal from '../../components/police/VideoModal/VideoModal';
 import tempImg from '../../assets/TempImg.png';
 import styles from './PoliceDetailPage.module.css';
 
@@ -10,6 +13,19 @@ const PoliceDetailPage = () => {
   const [searchParams] = useSearchParams();
   const missingId = searchParams.get('id') ? parseInt(searchParams.get('id')!, 10) : null;
   const { data: missingDetail, isLoading } = useMissingDetail(missingId);
+  const { data: cctvDetections, isLoading: isCctvLoading } = useCctvDetection(missingId);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [videoUrl, setVideoUrl] = useState<string | null>(null);
+
+   const handleOpenModal = (url: string) => {
+    setVideoUrl(url);
+    setIsModalOpen(true);
+  };
+
+  const handleCloseModal = () => {
+    setVideoUrl(null);
+    setIsModalOpen(false);
+  };
 
   return (
     <div className={styles.container}>
@@ -96,54 +112,66 @@ const PoliceDetailPage = () => {
               </div>
             </div>
           </div>
-
+          
           {/* 두 번째 열: CCTV DETECTION (5) */}
           <div className={styles.column2}>
             <div className={styles.section}>
               <Text as="h2" size="lg" weight="bold" color="white" className={styles.sectionTitle}>
                 CCTV DETECTION
               </Text>
-              
-              {/* CCTV 탐지 결과 그리드 */}
+          
+              {isCctvLoading && (
+                <div className={styles.loadingMessage}>CCTV 탐지 결과 불러오는 중...</div>
+              )}
+          
+              {!isCctvLoading && (!cctvDetections || cctvDetections.length === 0) && (
+                <div className={styles.noDetectionMessage}>
+                  CCTV 탐지 결과가 없습니다.
+                </div>
+              )}
+          
               <div className={styles.detectionGrid}>
-                {/* 임시 데이터 - 나중에 실제 데이터로 교체 */}
-                {[1, 2, 3, 4].map((item) => (
-                  <div key={item} className={styles.detectionCard}>
-                    {/* CCTV 사진 */}
+                {cctvDetections?.map((det) => (
+                  <div key={det.id} className={styles.detectionCard}>
                     <div className={styles.detectionImageWrapper}>
-                      <img
-                        src={tempImg}
-                        alt={`CCTV 탐지 ${item}`}
-                        className={styles.detectionImage}
-                      />
+                      <div
+                        className={styles.detectionImageWrapper}
+                        onClick={() => 1 && handleOpenModal("https://cdn.back2poom.site/videos/1.mp4")}
+                        style={{ cursor: 1 ? 'pointer' : 'default' }}
+                      >
+                        <img
+                          src={det.cctvImageUrl ?? tempImg}
+                          alt={`CCTV Detection ${det.id}`}
+                          className={styles.detectionImage}
+                        />
+                      </div>
                     </div>
-                    
-                    {/* 탐지 정보 */}
+          
                     <div className={styles.detectionInfo}>
                       <div className={styles.detectionInfoItem}>
                         <Text as="div" size="xs" weight="bold" color="white" className={styles.detectionLabel}>
                           정확도
                         </Text>
                         <Text as="div" size="sm" color="white" className={styles.detectionValue}>
-                          52%
+                          {Math.round(det.similarityScore)}%
                         </Text>
                       </div>
-                      
+          
                       <div className={styles.detectionInfoItem}>
                         <Text as="div" size="xs" weight="bold" color="white" className={styles.detectionLabel}>
                           CCTV 위치
                         </Text>
                         <Text as="div" size="sm" color="white" className={styles.detectionValue}>
-                          서울시 강남역 블라블라
+                          {det.cctvLocation || '-'}
                         </Text>
                       </div>
-                      
+          
                       <div className={styles.detectionInfoItem}>
                         <Text as="div" size="xs" weight="bold" color="white" className={styles.detectionLabel}>
-                          발견시간
+                          발견 시간
                         </Text>
                         <Text as="div" size="sm" color="white" className={styles.detectionValue}>
-                          2020년 12월 3일 19:00
+                          {new Date(det.detectedAt).toLocaleString('ko-KR')}
                         </Text>
                       </div>
                     </div>
@@ -166,6 +194,8 @@ const PoliceDetailPage = () => {
       ) : (
         <div className={styles.errorMessage}>실종자 정보를 찾을 수 없습니다.</div>
       )}
+      {/* Video Modal */}
+      <VideoModal isOpen={isModalOpen} videoUrl={videoUrl} onClose={handleCloseModal} />
     </div>
   );
 };
