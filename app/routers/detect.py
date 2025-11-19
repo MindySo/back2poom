@@ -37,6 +37,7 @@ async def detect(req: DetectRequest):
     image_url = req.image_url
     case_id = req.case_id
     cctv_id = req.cctv_id
+    
     if image_url:
         query_mode = 1   # 이미지만
     else:
@@ -78,11 +79,14 @@ async def detect(req: DetectRequest):
     features = []
     detections = []
     crops = []
+    frames = []
 
     while True:
         ret, frame = cap.read()
         if not ret:
             break
+
+        frames.append(frame.copy())
 
         for x1, y1, x2, y2 in detect_person(frame):
             crop = frame[y1:y2, x1:x2]
@@ -98,8 +102,9 @@ async def detect(req: DetectRequest):
             features.append(combined[0])
             detections.append({
                 "box": [x1, y1, x2, y2],
-                "frame": len(detections)
+                "frame": len(frames) - 1
             })
+     
 
     cap.release()
     features = np.array(features)
@@ -112,18 +117,10 @@ async def detect(req: DetectRequest):
     for idx in ranked_idx[:10]:
         crop = crops[idx]
         det = detections[idx]
-
-        x1, y1, x2, y2 = det["box"]
         frame_idx = det["frame"]
+        full_frame = frames[frame_idx].copy()  # 이미 저장된 프레임 사용
+        x1, y1, x2, y2 = det["box"]
 
-        cap.set(cv2.CAP_PROP_POS_FRAMES, frame_idx)
-        ret, frame = cap.read()
-
-        if not ret:
-            continue
-
-         # ---- 전체 프레임에 박스 그리기 ----
-        full_frame = frame.copy()
         cv2.rectangle(full_frame, (x1, y1), (x2, y2), (0, 255, 0), 3)
 
         # ---- PIL 변환 ----
