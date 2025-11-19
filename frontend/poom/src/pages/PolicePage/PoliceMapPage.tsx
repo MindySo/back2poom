@@ -3,7 +3,10 @@ import PoliceSideBar from '../../components/police/PoliceSideBar/PoliceSideBar';
 import useKakaoMap from '../../hooks/useKakaoMap';
 import { useRecentMissing } from '../../hooks';
 import Marker from '../../components/map/Marker/Marker';
+import CctvMarker from '../../components/police/CctvMarker/CctvMarker';
 import PoliceDashboard from '../../components/police/PoliceDashboard/PoliceDashboard';
+import { getCctvByMissingId } from '../../apis';
+import type { CctvDetection } from '../../types/cctv';
 import styles from './PoliceMapPage.module.css';
 
 const API_KEY = import.meta.env.VITE_KAKAO_JAVASCRIPT_KEY;
@@ -14,6 +17,8 @@ const PoliceMapPage: React.FC = () => {
   const [map, setMap] = useState<kakao.maps.Map | null>(null);
   const [isDashboardOpen, setIsDashboardOpen] = useState(false);
   const [selectedMissingId, setSelectedMissingId] = useState<number | null>(null);
+  const [cctvDetections, setCctvDetections] = useState<CctvDetection[]>([]);
+  const [isLoadingCctv, setIsLoadingCctv] = useState(false);
 
   // 최근 72시간 내 실종자 데이터 가져오기 (마커용)
   const { data: recentMissingList } = useRecentMissing(72);
@@ -66,10 +71,11 @@ const PoliceMapPage: React.FC = () => {
     map.panTo(adjustedLatLng);
   };
 
-  const handleMissingCardClick = (id: number) => {
+  const handleMissingCardClick = async (id: number) => {
     if (selectedMissingId === id && isDashboardOpen) {
       setIsDashboardOpen(false);
       setSelectedMissingId(null);
+      setCctvDetections([]); // CCTV 마커 제거
       return;
     }
 
@@ -81,11 +87,24 @@ const PoliceMapPage: React.FC = () => {
     if (person && person.latitude && person.longitude) {
       moveMapToVisibleCenter(person.latitude, person.longitude);
     }
+
+    // CCTV API 호출
+    setIsLoadingCctv(true);
+    try {
+      const cctvData = await getCctvByMissingId(id);
+      setCctvDetections(cctvData);
+    } catch (error) {
+      console.error('CCTV 데이터를 가져오는 중 오류가 발생했습니다:', error);
+      setCctvDetections([]);
+    } finally {
+      setIsLoadingCctv(false);
+    }
   };
 
   const handleCloseDashboard = () => {
     setIsDashboardOpen(false);
     setSelectedMissingId(null);
+    setCctvDetections([]); // CCTV 마커 제거
   };
 
   return (
@@ -112,6 +131,16 @@ const PoliceMapPage: React.FC = () => {
           }
           return null;
         })}
+
+        {/* CCTV 마커 */}
+        {map && cctvDetections.map((cctv) => (
+          <CctvMarker
+            key={cctv.id}
+            map={map}
+            position={{ lat: cctv.latitude, lng: cctv.longitude }}
+            isDetected={cctv.similarityScore >= 70} // 유사도 70점 이상이면 감지된 것으로 표시
+          />
+        ))}
       </div>
       <PoliceDashboard
         isOpen={isDashboardOpen}
