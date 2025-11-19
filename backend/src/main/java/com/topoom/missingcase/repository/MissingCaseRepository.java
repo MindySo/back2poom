@@ -20,6 +20,7 @@ public interface MissingCaseRepository extends JpaRepository<MissingCase, Long> 
         FROM MissingCase mc
         LEFT JOIN FETCH mc.mainFile mf
         WHERE mc.isDeleted = false
+        AND mc.personName IS NOT NULL
         ORDER BY mc.occurredAt DESC
     """)
         /* AND mc.aiSupport IS NOT NULL */
@@ -38,7 +39,7 @@ public interface MissingCaseRepository extends JpaRepository<MissingCase, Long> 
 
     Optional<MissingCase> findByMissingId(Integer missingId);
 
-    List<MissingCase> findByIsDeletedFalseAndCrawledAtAfterOrderByCrawledAtDesc(LocalDateTime since);
+    List<MissingCase> findByCrawledAtAfterAndPersonNameIsNotNullOrderByCrawledAtDesc(LocalDateTime since);
 
     List<MissingCase> findByCrawledAtBefore(LocalDateTime cutoffDate);
 
