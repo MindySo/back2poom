@@ -558,27 +558,29 @@ const MapPage: React.FC = () => {
         )}
 
         {/* 실종자 마커 */}
-        {map && markerMissingList && markerMissingList.map((person) => {
-          // latitude와 longitude가 있는 경우만 마커 렌더링
-          if (person.latitude && person.longitude) {
-            // 최대 범위 초과 여부 확인
-            const speed = person.aiSupport?.speed ?? 3.14;
-            const maxExceeded = isMaxRadiusExceeded(person.occurredAt, speed);
+        {map && markerMissingList && (
+          markerMissingList.map((person) => {
+            // latitude와 longitude가 있는 경우만 마커 렌더링
+            if (person.latitude && person.longitude) {
+              // 최대 범위 초과 여부 확인
+              const speed = person.aiSupport?.speed ?? 3.14;
+              const maxExceeded = isMaxRadiusExceeded(person.occurredAt, speed);
 
-            return (
-              <Marker
-                key={person.id}
-                map={map}
-                position={{ lat: person.latitude, lng: person.longitude }}
-                imageUrl={person.mainImage?.url}
-                size="medium"
-                onClick={() => handleMissingCardClick(person.id)}
-                label={maxExceeded ? '예측 반경 초과' : undefined}
-              />
-            );
-          }
-          return null;
-        })}
+              return (
+                <Marker
+                  key={person.id}
+                  map={map}
+                  position={{ lat: person.latitude, lng: person.longitude }}
+                  imageUrl={person.mainImage?.url}
+                  size="medium"
+                  onClick={() => handleMissingCardClick(person.id)}
+                  label={maxExceeded ? '예측 반경 초과' : undefined}
+                />
+              );
+            }
+            return null;
+          })
+        )}
 
         {/* 내 위치 마커 */}
         {map && myLocation && (
