@@ -3,10 +3,7 @@ package com.topoom.missingcase.controller;
 import com.topoom.common.ApiResponse;
 import com.topoom.external.openapi.Safe182Client;
 import com.topoom.missingcase.dto.*;
-import com.topoom.missingcase.service.CaseOcrService;
-import com.topoom.missingcase.service.CaseReportService;
-import com.topoom.missingcase.service.MissingCaseService;
-import com.topoom.missingcase.service.MissingCaseSyncService;
+import com.topoom.missingcase.service.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -25,6 +22,7 @@ public class MissingCaseController {
     private final MissingCaseSyncService missingCaseSyncService;
     private final CaseReportService caseReportService;
     private final CaseOcrService caseOcrService;
+    private final CaseDetectionService caseDetectionService;
 
     @GetMapping
     public ResponseEntity<ApiResponse<List<MissingCaseListResponse>>> getAllCases() {
@@ -85,4 +83,11 @@ public class MissingCaseController {
             ));
         }
     }
+
+    @GetMapping("/cctv/{id}")
+    public ResponseEntity<ApiResponse<List<CaseDetectionResponse>>> getDetection(@PathVariable Long id) {
+        return ResponseEntity.ok(ApiResponse.success(caseDetectionService.getDetection(id)));
+    }
+
+
 }
