@@ -5,6 +5,7 @@ import com.topoom.detection.dto.FastApiRequest;
 import com.topoom.detection.dto.FastApiResponse;
 import com.topoom.detection.entity.CaseDetection;
 import com.topoom.detection.repository.CaseDetectionRepository;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -17,6 +18,7 @@ public class CaseDetectionService {
     private final FastApiClient fastApiClient;
     private final CaseDetectionRepository detectionRepository;
 
+    @Transactional
     public FastApiResponse detect(Long caseId, Integer cctvId, String imageUrl) throws Exception {
 
         String videoUrl = "https://cdn.back2poom.site/videos/" + cctvId + ".mp4";
@@ -40,7 +42,7 @@ public class CaseDetectionService {
                     .similarityScore(item.getScore())
                     .s3Key(item.getImageUrl())// crop 이미지 URL
                     .build();
-
+            System.out.println("Saving entity: " + entity);
             detectionRepository.save(entity);
         }
 
