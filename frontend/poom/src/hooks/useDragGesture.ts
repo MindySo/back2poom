@@ -107,6 +107,9 @@ export const useDragGesture = ({
   const handleTouchMove = useCallback((e: TouchEvent) => {
     if (!dragStateRef.current.isDragging) return;
 
+    // 터치 이벤트의 기본 동작 차단 (지도 드래그, Pull-to-Refresh 등)
+    e.preventDefault();
+
     const diff = dragStateRef.current.startY - e.touches[0].clientY;
 
     // 5px 이상 이동했을 때만 실제 드래그로 간주
@@ -199,13 +202,13 @@ export const useDragGesture = ({
 
     window.addEventListener('mousemove', handleMouseMove);
     window.addEventListener('mouseup', handleMouseUp);
-    window.addEventListener('touchmove', handleTouchMove);
+    window.addEventListener('touchmove', handleTouchMove, { passive: false });
     window.addEventListener('touchend', handleTouchEnd);
 
     return () => {
       window.removeEventListener('mousemove', handleMouseMove);
       window.removeEventListener('mouseup', handleMouseUp);
-      window.removeEventListener('touchmove', handleTouchMove);
+      window.removeEventListener('touchmove', handleTouchMove, { passive: false } as any);
       window.removeEventListener('touchend', handleTouchEnd);
     };
   }, [isDragging, handleMouseMove, handleMouseUp, handleTouchMove, handleTouchEnd]);
