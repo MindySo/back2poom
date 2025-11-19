@@ -1,5 +1,6 @@
 package com.topoom.detection.dto;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
 
 import java.util.List;
@@ -8,6 +9,7 @@ import java.util.List;
 public class DetectionResponse {
     private Double score;
     private Detection detection;
+    @JsonProperty("image_url")
     private String ImageUrl;
 
     @Data

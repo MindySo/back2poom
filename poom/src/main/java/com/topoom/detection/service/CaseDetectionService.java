@@ -38,7 +38,7 @@ public class CaseDetectionService {
                     .cctvId(req.getCctvId())
                     .detectedAt(LocalDateTime.now())          // 필요 시 영상 시간으로 변경 가능
                     .similarityScore(item.getScore())
-                    .s3Key(item.getImageUrl())               // crop 이미지 URL
+                    .s3Key(item.getImageUrl())// crop 이미지 URL
                     .build();
 
             detectionRepository.save(entity);
