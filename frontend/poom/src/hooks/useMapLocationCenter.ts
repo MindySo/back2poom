@@ -60,8 +60,8 @@ export const useMapLocationCenter = ({ map, mapContainerRef, isMobile }: UseMapL
   );
 
   /**
-   * 데스크톱의 SideBar를 제외한 위치 센터링
-   * SideBar 너비를 제외하고 나머지 지도 영역의 중앙에 배치
+   * 데스크톱의 SideBar와 TopBar를 제외한 위치 센터링
+   * SideBar 너비와 TopBar 높이를 제외하고 나머지 지도 영역의 중앙에 배치
    */
   const moveMapToVisibleCenterDesktop = useCallback(
     (lat: number, lng: number) => {
@@ -70,16 +70,19 @@ export const useMapLocationCenter = ({ map, mapContainerRef, isMobile }: UseMapL
       const mapWidth = mapContainerRef.current.offsetWidth;
       const mapHeight = mapContainerRef.current.offsetHeight;
 
-      // SideBar 너비: 380px
+      // SideBar 너비: 380px, TopBar 높이: 90px
       const SIDEBAR_WIDTH = 380;
+      const TOPBAR_HEIGHT = 90;
 
       // 실제 보이는 지도 영역 계산
       const visibleLeft = SIDEBAR_WIDTH;
+      const visibleTop = TOPBAR_HEIGHT;
       const visibleWidth = mapWidth - SIDEBAR_WIDTH;
+      const visibleHeight = mapHeight - TOPBAR_HEIGHT;
 
       // 보이는 영역의 중앙 픽셀 좌표
       const centerX = visibleLeft + visibleWidth / 2;
-      const centerY = mapHeight / 2;
+      const centerY = visibleTop + visibleHeight / 2;
 
       // 지도 컨테이너의 중앙 픽셀 좌표
       const mapCenterX = mapWidth / 2;
@@ -87,7 +90,8 @@ export const useMapLocationCenter = ({ map, mapContainerRef, isMobile }: UseMapL
 
       // 오프셋 계산
       const offsetX = centerX - mapCenterX;
-      const offsetY = centerY - mapCenterY;
+      // Y축 오프셋을 조정하여 시각적으로 더 위로 배치 (60px 상향)
+      const offsetY = centerY - mapCenterY - 60;
 
       // 목표 좌표
       const targetLatLng = new kakao.maps.LatLng(lat, lng);
