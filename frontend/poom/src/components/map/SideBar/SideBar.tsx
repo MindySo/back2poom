@@ -19,8 +19,8 @@ const SideBar: React.FC<SideBarProps> = ({ className = '', onMissingCardClick, s
   const [showScrollbar, setShowScrollbar] = useState(false);
   const scrollbarTimerRef = useRef<NodeJS.Timeout | null>(null);
 
-  // 최근 72시간 내 실종자 데이터 가져오기
-  const hours = 72;
+  // 최근 48시간 내 실종자 데이터 가져오기
+  const hours = 48;
   const { data: recentList, isLoading } = useRecentMissing(hours);
 
   // 스크롤바 표시 타이머 관리
@@ -125,7 +125,7 @@ const SideBar: React.FC<SideBarProps> = ({ className = '', onMissingCardClick, s
           ))
         ) : (
           <div className={styles.emptyMessage}>
-            <Text size="md" color="gray">최근 {hours}시간 내 실종자가 없습니다.</Text>
+            <Text size="md" color="gray">최근 48시간 내 실종자가 없습니다.</Text>
           </div>
         )}
       </div>

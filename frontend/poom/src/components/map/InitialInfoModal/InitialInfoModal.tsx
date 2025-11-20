@@ -10,7 +10,7 @@ interface InitialInfoModalProps {
 }
 
 const InitialInfoModal: React.FC<InitialInfoModalProps> = ({ onMarkerCardClick }) => {
-  const { data: markerMissingList, isLoading: isMarkerLoading } = useRecentMissing(1000);
+  const { data: markerMissingList, isLoading: isMarkerLoading } = useRecentMissing(48);
 
   return (
     <div className={styles.container}>
@@ -21,7 +21,7 @@ const InitialInfoModal: React.FC<InitialInfoModalProps> = ({ onMarkerCardClick }
         </Text>
         <div className={styles.guideNotice}>
           <Text as="p" size="sm" color="gray" className={styles.guideDescription}>
-            • 지도에는 <strong>최근 24시간 이내</strong>의 실종 신고자들의 정보가 마커로 표시되어 있습니다. 
+            • 지도에는 <strong>최근 48시간 이내</strong>의 실종 신고자들의 정보가 마커로 표시되어 있습니다.
           </Text>
           <Text as="p" size="sm" color="gray" className={styles.guideDescription}>
             • 아래의 목록에서 실종자를 선택하거나, 지도의 마커를 직접 클릭하여 더 자세한 정보를 확인할 수 있습니다.

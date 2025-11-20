@@ -67,8 +67,8 @@ const MapPage: React.FC = () => {
   // 지도 탭 감지를 위한 상태
   const tapStartRef = useRef<{ x: number; y: number; time: number } | null>(null);
 
-  // 최근 24시간 내 실종자 데이터 가져오기 (Marker용)
-  const { data: markerMissingList, isLoading: isMarkerLoading, isError: isMarkerError, error: markerError } = useRecentMissing(1000);
+  // 최근 48시간 내 실종자 데이터 가져오기 (Marker용)
+  const { data: markerMissingList, isLoading: isMarkerLoading, isError: isMarkerError, error: markerError } = useRecentMissing(48);
 
   useEffect(() => {
     if (!isLoaded || !mapRef.current) return;
