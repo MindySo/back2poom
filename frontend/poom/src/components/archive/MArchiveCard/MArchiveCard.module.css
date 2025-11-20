@@ -4,7 +4,7 @@
   border-radius: 12px;
   border: 1px solid #eef0f3;
   box-shadow: 0 4px 12px rgba(0,0,0,0.06);
-  padding: 12px 16px;
+  padding: 20px 16px 12px;
   width: 100%;
   margin: 0;
   overflow: hidden;
@@ -27,7 +27,7 @@
   display: grid;
   grid-template-columns: 120px 1fr;
   gap: 12px;
-  align-items: start;
+  align-items: stretch;
 }
 
 @media (max-width: 365px) {
@@ -39,16 +39,15 @@
 
 .m-archive-card__imageWrap {
   width: 120px;
-  height: 150px;
+  max-height: 178px;
   border-radius: 8px;
   overflow: hidden;
-  align-self: start;
 }
 
 @media (max-width: 365px) {
   .m-archive-card__imageWrap {
     width: 100px;
-    height: 133px;
+    max-height: 156px;
   }
 }
 
@@ -60,9 +59,9 @@
   display: block;
 }
 
-.m-archive-card__right { 
-  display: flex; 
-  flex-direction: column; 
+.m-archive-card__right {
+  display: flex;
+  flex-direction: column;
   gap: 8px;
   min-width: 0;
 }
@@ -79,14 +78,16 @@
   flex-direction: column;
   gap: 6px;
   flex: 1;
+  padding-left: 4px;
 }
 
 .m-archive-card__header {
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: 4px;
   flex-wrap: nowrap;
   overflow: hidden;
+  padding-top: 2px;
 }
 
 .m-archive-card__row {
@@ -111,7 +112,7 @@
 .m-archive-card__info {
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 8px;
 }
 
 .m-archive-card__info-item {
@@ -211,7 +212,7 @@
 }
 
 .m-archive-card__expandedContent {
-  padding: 16px;
+  padding: 16px 4px;
   display: flex;
   flex-direction: column;
   gap: 16px;
@@ -291,11 +292,14 @@
 }
 
 .m-archive-card__aiImageWrapper {
-  width: 100%;
-  aspect-ratio: 1 / 1;
-  border-radius: 6px;
+  flex: 1;
+  min-height: 120px;
+  border-radius: 8px;
   overflow: hidden;
-  background: #f5f5f5;
+  background: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .m-archive-card__aiImageWrapper img {
@@ -334,12 +338,14 @@
 .m-archive-card__aiInfoLabel {
   color: #1f2937;
   margin-bottom: 4px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid #e5e7eb;
 }
 
 .m-archive-card__aiInfoItem {
   display: flex;
-  flex-direction: row;
-  align-items: center;
+  flex-direction: column;
+  align-items: flex-start;
   gap: 8px;
 }
 

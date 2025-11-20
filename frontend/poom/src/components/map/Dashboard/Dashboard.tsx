@@ -1,4 +1,5 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
+import { createPortal } from 'react-dom';
 import { theme } from '../../../theme';
 import { useMissingDetail } from '../../../hooks';
 import { useShareMissingPerson } from '../../../hooks/useShareMissingPerson';
@@ -26,6 +27,8 @@ const Dashboard: React.FC<DashboardProps> = ({ isOpen, onClose, missingId }) => 
   const [shouldRender, setShouldRender] = React.useState(false);
   const [carouselOpen, setCarouselOpen] = React.useState(false);
   const [initialImageIndex, setInitialImageIndex] = React.useState(0);
+  const [aiImageOpen, setAiImageOpen] = React.useState(false);
+  const [aiImageZoom, setAiImageZoom] = React.useState(1);
 
   // 스크롤바 표시 상태 관리
   const [showScrollbar, setShowScrollbar] = React.useState(false);
@@ -67,22 +70,12 @@ const Dashboard: React.FC<DashboardProps> = ({ isOpen, onClose, missingId }) => 
   const getAllImages = (): ImageFile[] => {
     if (!missingDetail) return [];
     const images: ImageFile[] = [];
-    
-    // 메인 이미지
-    if (missingDetail.mainImage) {
-      images.push(missingDetail.mainImage);
-    }
-    
+
     // 추가 등록 사진들
     if (missingDetail.inputImages && missingDetail.inputImages.length > 0) {
       images.push(...missingDetail.inputImages);
     }
-    
-    // AI 서포트 이미지들
-    if (missingDetail.outputImages && missingDetail.outputImages.length > 0) {
-      images.push(...missingDetail.outputImages);
-    }
-    
+
     return images;
   };
 
@@ -168,13 +161,13 @@ const Dashboard: React.FC<DashboardProps> = ({ isOpen, onClose, missingId }) => 
           >
             <Text as="div" size="xs" weight="bold">지도 범례</Text>
             <Text as="div" size="xs" style={{ marginTop: '0.4rem', lineHeight: '1.4' }}>
-              • 마커와 이동반경은 실종 후 <strong>24시간 이내</strong>인 경우만 표시됩니다.
+              • 마커와 이동반경은 실종 후 <strong>48시간 이내</strong>인 경우만 표시됩니다.
             </Text>
             <Text as="div" size="xs" style={{ marginTop: '0.4rem', lineHeight: '1.4' }}>
               • 이동반경은 최초 실종 장소에서 시작해 <strong>반경 15km 이내</strong>인 경우만 표시되며, 각 실종자의 특성에 따른 속도를 바탕으로 합니다.
             </Text>
             <Text as="div" size="xs" style={{ marginTop: '0.4rem', lineHeight: '1.4' }}>
-              • 사이드바의 최근 실종자 목록는 <strong>72시간 이내</strong>의 사람을 표시하므로, 마커가 표시되지 않는 경우가 있습니다.
+              • 사이드바의 최근 실종자 목록는 <strong>48시간 이내</strong>의 사람을 표시하므로, 마커가 표시되지 않는 경우가 있습니다.
             </Text>
           </HelpCaption>
         </div>
@@ -193,7 +186,16 @@ const Dashboard: React.FC<DashboardProps> = ({ isOpen, onClose, missingId }) => 
             </div>
           ) : missingDetail ? (
             <>
-              {/* 왼쪽 줄 */}
+              {(() => {
+                const aiImageDisplayIds = [50000, 50020, 50040, 50041];
+                const hasAIImages = aiImageDisplayIds.includes(missingDetail.id) &&
+                                    missingDetail.outputImages &&
+                                    missingDetail.outputImages.length > 0;
+                const aiImageUrl = hasAIImages ? missingDetail.outputImages[0].url : null;
+
+                return (
+                  <>
+                    {/* 왼쪽 줄 */}
               <div className={styles.leftColumn}>
                 {/* 첫번째 섹션: 썸네일 */}
                 <div className={`${styles.section} ${styles.sectionXLarge}`} style={{ backgroundColor: theme.colors.white }}>
@@ -246,10 +248,25 @@ const Dashboard: React.FC<DashboardProps> = ({ isOpen, onClose, missingId }) => 
                   <div className={styles.sectionContentAI}>
                     <Text as="div" size="md" weight="bold" color="darkMain" className={styles.aiTitle}>AI 서포트 이미지</Text>
                     <div className={styles.aiImageWrapper}>
-                      <Text as="div" size="xs" color="gray" style={{ textAlign: 'center', padding: '0 1.5rem 2rem' }}>
-                        안전한 정보 활용을 위해 이미지 고도화 기능은 현재 준비 중입니다.
-                      </Text>
+                      {aiImageUrl ? (
+                        <img
+                          src={aiImageUrl}
+                          alt="AI 서포트 이미지"
+                          style={{ width: '100%', height: '100%', objectFit: 'cover', cursor: 'pointer' }}
+                          onClick={() => {
+                            setAiImageOpen(true);
+                            setAiImageZoom(1);
+                          }}
+                        />
+                      ) : (
+                        <Text as="div" size="sm" color="gray" style={{ textAlign: 'center', padding: '2rem', display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%' }}>
+                          안전한 AI 정보 활용을 위해 개인정보 수집 동의가 필요합니다.
+                        </Text>
+                      )}
                     </div>
+                    <Text as="div" size="xs" color="gray" className={styles.aiCaption}>
+                      ① CCTV 이미지 및 실종자 데이터 기반으로 AI가 예측한 이미지입니다.
+                    </Text>
                   </div>
                 </div>
               </div>
@@ -321,31 +338,33 @@ const Dashboard: React.FC<DashboardProps> = ({ isOpen, onClose, missingId }) => 
                     <Text as="div" size="md" weight="bold" color="darkMain" className={styles.aiTitle}>AI 서포트 정보</Text>
                     <div className={styles.aiInfoWrapper}>
                       {missingDetail.aiSupport ? (
-                        <>
-                          {/* 우선순위 */}
-                          <div className={styles.aiInfoSection}>
-                            <Text as="div" size="sm" weight="bold" color="darkMain" className={styles.aiSubtitle}>우선순위</Text>
-                            <div className={styles.aiInfoItem}>
-                              <Text as="span" size="xs" color="gray">1순위</Text>
-                              <Text as="span" size="sm" color="darkMain">{missingDetail.aiSupport.top1Desc || '-'}</Text>
-                            </div>
-                            <div className={styles.aiInfoItem}>
-                              <Text as="span" size="xs" color="gray">2순위</Text>
-                              <Text as="span" size="sm" color="darkMain">{missingDetail.aiSupport.top2Desc || '-'}</Text>
-                            </div>
-                            <Text as="div" size="xs" color="gray" style={{ textAlign: 'center', padding: '0 1.5rem 2rem' }}>
-                              ① AI 분석을 주요 정보를 우선적으로 정리한 내용으로, 참고용으로 활용해주시기 바랍니다.
-                            </Text>
+                        <div className={styles.aiInfoSection}>
+                          <Text as="div" size="sm" weight="bold" color="darkMain" className={styles.aiSubtitle}>우선순위</Text>
+                          <div className={styles.aiInfoItem}>
+                            <Text as="span" size="xs" color="gray">1순위</Text>
+                            <Text as="span" size="sm" color="darkMain">{missingDetail.aiSupport.top1Desc || '-'}</Text>
                           </div>
-                        </>
+                          <div className={styles.aiInfoItem}>
+                            <Text as="span" size="xs" color="gray">2순위</Text>
+                            <Text as="span" size="sm" color="darkMain">{missingDetail.aiSupport.top2Desc || '-'}</Text>
+                          </div>
+                        </div>
                       ) : (
-                        <Text as="div" size="sm" color="gray">AI 정보가 없습니다.</Text>
+                        <div className={styles.aiInfoSection}>
+                          <Text as="div" size="sm" color="gray">AI 정보가 없습니다.</Text>
+                        </div>
                       )}
                     </div>
+                    <Text as="div" size="xs" color="gray" className={styles.aiCaption}>
+                      ① AI 분석을 주요 정보를 우선적으로 정리한 내용으로, 참고용으로 활용해주시기 바랍니다.
+                    </Text>
                   </div>
                 </div>
                 
               </div>
+                  </>
+                );
+              })()}
             </>
           ) : (
             <Text as="div" size="sm" color="gray" className={styles.emptyMessage}>
@@ -440,6 +459,155 @@ const Dashboard: React.FC<DashboardProps> = ({ isOpen, onClose, missingId }) => 
           onClose={handleCloseCarousel}
         />
       )}
+
+      {/* AI 서포트 이미지 Fullscreen 뷰어 - Portal로 렌더링 */}
+      {aiImageOpen && (() => {
+        const aiImageDisplayIds = [50000, 50020, 50040, 50041];
+        const hasAIImages = aiImageDisplayIds.includes(missingDetail?.id || 0) &&
+                           missingDetail?.outputImages &&
+                           missingDetail.outputImages.length > 0;
+        const aiImageUrl = hasAIImages ? missingDetail?.outputImages?.[0]?.url : null;
+
+        const viewer = aiImageUrl ? (
+          <div
+            style={{
+              position: 'fixed',
+              top: 0,
+              left: 0,
+              right: 0,
+              bottom: 0,
+              backgroundColor: 'rgba(0, 0, 0, 0.9)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              zIndex: 99999,
+              animation: 'fadeIn 0.3s ease-out',
+            }}
+            onClick={() => setAiImageOpen(false)}
+            onWheel={(e) => {
+              e.preventDefault();
+              const delta = e.deltaY > 0 ? 0.9 : 1.1;
+              setAiImageZoom(prev => {
+                const newZoom = prev * delta;
+                return Math.max(1, Math.min(5, newZoom));
+              });
+            }}
+            onTouchMove={(e) => {
+              if (e.touches.length === 2) {
+                e.preventDefault();
+                const touch1 = e.touches[0];
+                const touch2 = e.touches[1];
+                const distance = Math.hypot(
+                  touch2.clientX - touch1.clientX,
+                  touch2.clientY - touch1.clientY
+                );
+
+                const key = '_initialDistance';
+                const container = e.currentTarget as any;
+
+                if (!container[key]) {
+                  container[key] = distance;
+                } else {
+                  const delta = distance / container[key];
+                  setAiImageZoom(prev => {
+                    const newZoom = prev * delta;
+                    return Math.max(1, Math.min(5, newZoom));
+                  });
+                  container[key] = distance;
+                }
+              }
+            }}
+          >
+            <style>
+              {`
+                @keyframes fadeIn {
+                  from {
+                    opacity: 0;
+                  }
+                  to {
+                    opacity: 1;
+                  }
+                }
+              `}
+            </style>
+
+            <div
+              style={{
+                position: 'relative',
+                width: '90vw',
+                height: '90vh',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                overflow: 'hidden',
+              }}
+              onClick={(e) => e.stopPropagation()}
+            >
+              <img
+                src={aiImageUrl}
+                alt="AI 서포트 이미지"
+                style={{
+                  width: '100%',
+                  height: '100%',
+                  objectFit: 'contain',
+                  transform: `scale(${aiImageZoom})`,
+                  transition: 'transform 0.1s ease-out',
+                  cursor: aiImageZoom > 1 ? 'grab' : 'pointer',
+                  userSelect: 'none',
+                }}
+                draggable={false}
+              />
+            </div>
+
+            <button
+              style={{
+                position: 'absolute',
+                top: '20px',
+                right: '20px',
+                width: '40px',
+                height: '40px',
+                backgroundColor: 'transparent',
+                border: 'none',
+                color: 'white',
+                fontSize: '28px',
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                transition: 'opacity 0.2s',
+                opacity: 0.8,
+              }}
+              onClick={() => setAiImageOpen(false)}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.opacity = '1';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.opacity = '0.8';
+              }}
+            >
+              ✕
+            </button>
+
+            <div
+              style={{
+                position: 'absolute',
+                bottom: '20px',
+                left: '20px',
+                color: 'white',
+                fontSize: '13px',
+                backgroundColor: 'rgba(0, 0, 0, 0.6)',
+                padding: '8px 12px',
+                borderRadius: '4px',
+                userSelect: 'none',
+              }}
+            >
+              {(aiImageZoom * 100).toFixed(0)}% | 스크롤/핀치로 확대/축소
+            </div>
+          </div>
+        ) : null;
+
+        return createPortal(viewer, document.body);
+      })()}
     </>
   );
 };

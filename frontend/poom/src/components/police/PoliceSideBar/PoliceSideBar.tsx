@@ -11,8 +11,8 @@ export interface PoliceSideBarProps {
 }
 
 const PoliceSideBar: React.FC<PoliceSideBarProps> = ({ className = '', onMissingCardClick }) => {
-  // 최근 72시간 내 실종자 데이터 가져오기
-  const hours = 72;
+  // 최근 48시간 내 실종자 데이터 가져오기
+  const hours = 48;
   const { data: recentList, isLoading } = useRecentMissing(hours);
   
   // 경찰서 페이지용 색상
