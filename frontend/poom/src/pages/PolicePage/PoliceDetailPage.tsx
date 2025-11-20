@@ -1,5 +1,5 @@
 import { useSearchParams } from 'react-router-dom';
-import { useState } from 'react';
+import { useState, useRef, useCallback } from 'react';
 import { useMissingDetail } from '../../hooks';
 import { useCctvDetection } from '../../hooks/useCctvDetection';
 import Text from '../../components/common/atoms/Text';
@@ -16,6 +16,30 @@ const PoliceDetailPage = () => {
   const { data: cctvDetections, isLoading: isCctvLoading } = useCctvDetection(missingId);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [videoUrl, setVideoUrl] = useState<string | null>(null);
+  const [showScrollbar, setShowScrollbar] = useState(false);
+  const scrollbarTimerRef = useRef<NodeJS.Timeout | null>(null);
+
+  // 스크롤바 표시 타이머 관리
+  const handleMouseMove = useCallback(() => {
+    setShowScrollbar(true);
+
+    // 기존 타이머 클리어
+    if (scrollbarTimerRef.current) {
+      clearTimeout(scrollbarTimerRef.current);
+    }
+
+    // 1.5초 후 스크롤바 숨김
+    scrollbarTimerRef.current = setTimeout(() => {
+      setShowScrollbar(false);
+    }, 1500);
+  }, []);
+
+  const handleMouseLeave = useCallback(() => {
+    setShowScrollbar(false);
+    if (scrollbarTimerRef.current) {
+      clearTimeout(scrollbarTimerRef.current);
+    }
+  }, []);
 
    const handleOpenModal = (url: string) => {
     setVideoUrl(url);
@@ -35,8 +59,12 @@ const PoliceDetailPage = () => {
         <div className={styles.threeColumnLayout}>
           {/* 첫 번째 열: 실종자 정보 (2) */}
           <div className={styles.column1}>
-            <div className={styles.section}>
-              <Text as="h2" size="lg" weight="bold" color="white" className={styles.sectionTitle}>
+            <div
+              className={`${styles.section} ${showScrollbar ? styles.showScrollbar : ''}`}
+              onMouseMove={handleMouseMove}
+              onMouseLeave={handleMouseLeave}
+            >
+              <Text as="h2" size="lg" weight="bold" color="policeWhite" className={styles.sectionTitle}>
                 실종자 정보
               </Text>
               
@@ -59,18 +87,18 @@ const PoliceDetailPage = () => {
               )}
 
               <div className={styles.infoCard}>
-                <Text as="div" size="sm" weight="bold" color="white" className={styles.infoLabel}>이름</Text>
-                <Text as="div" size="md" color="white" className={styles.infoValue}>
+                <Text as="div" size="sm" weight="bold" color="policeWhite" className={styles.infoLabel}>이름</Text>
+                <Text as="div" size="md" color="policeWhite" className={styles.infoValue}>
                   {missingDetail.personName}({missingDetail.gender === '남성' ? '남' : missingDetail.gender === '여성' ? '여' : '성별 미상'})
                 </Text>
 
-                <Text as="div" size="sm" weight="bold" color="white" className={styles.infoLabel}>나이</Text>
-                <Text as="div" size="md" color="white" className={styles.infoValue}>
+                <Text as="div" size="sm" weight="bold" color="policeWhite" className={styles.infoLabel}>나이</Text>
+                <Text as="div" size="md" color="policeWhite" className={styles.infoValue}>
                   {missingDetail.ageAtTime}세 {missingDetail.currentAge ? `(현재 ${missingDetail.currentAge}세)` : ''}
                 </Text>
 
-                <Text as="div" size="sm" weight="bold" color="white" className={styles.infoLabel}>발생일</Text>
-                <Text as="div" size="md" color="white" className={styles.infoValue}>
+                <Text as="div" size="sm" weight="bold" color="policeWhite" className={styles.infoLabel}>발생일</Text>
+                <Text as="div" size="md" color="policeWhite" className={styles.infoValue}>
                   {(() => {
                     const date = new Date(missingDetail.occurredAt);
                     const year = date.getFullYear();
@@ -80,33 +108,33 @@ const PoliceDetailPage = () => {
                   })()}
                 </Text>
 
-                <Text as="div" size="sm" weight="bold" color="white" className={styles.infoLabel}>발생장소</Text>
-                <Text as="div" size="md" color="white" className={styles.infoValue}>
+                <Text as="div" size="sm" weight="bold" color="policeWhite" className={styles.infoLabel}>발생장소</Text>
+                <Text as="div" size="md" color="policeWhite" className={styles.infoValue}>
                   {missingDetail.occurredLocation}
                 </Text>
 
-                <Text as="div" size="sm" weight="bold" color="white" className={styles.infoLabel}>신체정보</Text>
-                <Text as="div" size="md" color="white" className={styles.infoValue}>
+                <Text as="div" size="sm" weight="bold" color="policeWhite" className={styles.infoLabel}>신체정보</Text>
+                <Text as="div" size="md" color="policeWhite" className={styles.infoValue}>
                   {missingDetail.heightCm ? `${missingDetail.heightCm}cm` : '-'} / {missingDetail.weightKg ? `${missingDetail.weightKg}kg` : '-'}
                 </Text>
 
-                <Text as="div" size="sm" weight="bold" color="white" className={styles.infoLabel}>체형</Text>
-                <Text as="div" size="md" color="white" className={styles.infoValue}>
+                <Text as="div" size="sm" weight="bold" color="policeWhite" className={styles.infoLabel}>체형</Text>
+                <Text as="div" size="md" color="policeWhite" className={styles.infoValue}>
                   {missingDetail.bodyType || '-'}
                 </Text>
 
-                <Text as="div" size="sm" weight="bold" color="white" className={styles.infoLabel}>얼굴형</Text>
-                <Text as="div" size="md" color="white" className={styles.infoValue}>
+                <Text as="div" size="sm" weight="bold" color="policeWhite" className={styles.infoLabel}>얼굴형</Text>
+                <Text as="div" size="md" color="policeWhite" className={styles.infoValue}>
                   {missingDetail.faceShape || '-'}
                 </Text>
 
-                <Text as="div" size="sm" weight="bold" color="white" className={styles.infoLabel}>두발 형태</Text>
-                <Text as="div" size="md" color="white" className={styles.infoValue}>
+                <Text as="div" size="sm" weight="bold" color="policeWhite" className={styles.infoLabel}>두발 형태</Text>
+                <Text as="div" size="md" color="policeWhite" className={styles.infoValue}>
                   {missingDetail.hairColor || '-'} / {missingDetail.hairStyle || '-'}
                 </Text>
 
-                <Text as="div" size="sm" weight="bold" color="white" className={styles.infoLabel}>복장</Text>
-                <Text as="div" size="md" color="white" className={styles.infoValue}>
+                <Text as="div" size="sm" weight="bold" color="policeWhite" className={styles.infoLabel}>복장</Text>
+                <Text as="div" size="md" color="policeWhite" className={styles.infoValue}>
                   {missingDetail.clothingDesc || '-'}
                 </Text>
               </div>
@@ -116,7 +144,7 @@ const PoliceDetailPage = () => {
           {/* 두 번째 열: CCTV DETECTION (5) */}
           <div className={styles.column2}>
             <div className={styles.section}>
-              <Text as="h2" size="lg" weight="bold" color="white" className={styles.sectionTitle}>
+              <Text as="h2" size="lg" weight="bold" color="policeWhite" className={styles.sectionTitle}>
                 CCTV DETECTION
               </Text>
           
@@ -149,28 +177,28 @@ const PoliceDetailPage = () => {
           
                     <div className={styles.detectionInfo}>
                       <div className={styles.detectionInfoItem}>
-                        <Text as="div" size="xs" weight="bold" color="white" className={styles.detectionLabel}>
+                        <Text as="div" size="xs" weight="bold" color="policeWhite" className={styles.detectionLabel}>
                           정확도
                         </Text>
-                        <Text as="div" size="sm" color="white" className={styles.detectionValue}>
+                        <Text as="div" size="sm" color="policeWhite" className={styles.detectionValue}>
                           {Math.round(det.similarityScore)}%
                         </Text>
                       </div>
           
                       <div className={styles.detectionInfoItem}>
-                        <Text as="div" size="xs" weight="bold" color="white" className={styles.detectionLabel}>
+                        <Text as="div" size="xs" weight="bold" color="policeWhite" className={styles.detectionLabel}>
                           CCTV 위치
                         </Text>
-                        <Text as="div" size="sm" color="white" className={styles.detectionValue}>
+                        <Text as="div" size="sm" color="policeWhite" className={styles.detectionValue}>
                           {det.cctvLocation || '-'}
                         </Text>
                       </div>
           
                       <div className={styles.detectionInfoItem}>
-                        <Text as="div" size="xs" weight="bold" color="white" className={styles.detectionLabel}>
+                        <Text as="div" size="xs" weight="bold" color="policeWhite" className={styles.detectionLabel}>
                           발견 시간
                         </Text>
-                        <Text as="div" size="sm" color="white" className={styles.detectionValue}>
+                        <Text as="div" size="sm" color="policeWhite" className={styles.detectionValue}>
                           {new Date(det.detectedAt).toLocaleString('ko-KR')}
                         </Text>
                       </div>
@@ -184,7 +212,7 @@ const PoliceDetailPage = () => {
           {/* 세 번째 열: 제보리스트 (3) */}
           <div className={styles.column3}>
             <div className={styles.section}>
-              <Text as="h2" size="lg" weight="bold" color="white" className={styles.sectionTitle}>
+              <Text as="h2" size="lg" weight="bold" color="policeWhite" className={styles.sectionTitle}>
                 제보리스트
               </Text>
               <ReportList />
