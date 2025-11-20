@@ -5,6 +5,7 @@ import useKakaoMap from '../../hooks/useKakaoMap';
 import { useRecentMissing, useCctvDetection } from '../../hooks';
 import Marker from '../../components/map/Marker/Marker';
 import CctvMarker from '../../components/police/CctvMarker/CctvMarker';
+import MovementRadius from '../../components/map/MovementRadius/MovementRadius';
 import PoliceDashboard from '../../components/police/PoliceDashboard/PoliceDashboard';
 import styles from './PoliceMapPage.module.css';
 import { useSearchParams } from 'react-router-dom';
@@ -219,6 +220,16 @@ const PoliceMapPage: React.FC = () => {
             isDetected={cctv.similarityScore >= 70} // 유사도 70점 이상이면 감지된 것으로 표시
           />
         ))}
+
+        {/* 선택된 마커의 이동 반경 표시 */}
+        {map && selectedRadiusPosition && selectedRadiusValue > 0 && selectedMissingId && (
+          <MovementRadius
+            map={map}
+            position={selectedRadiusPosition}
+            radius={selectedRadiusValue}
+            missingId={selectedMissingId}
+          />
+        )}
       </div>
       <PoliceDashboard
         isOpen={isDashboardOpen}
