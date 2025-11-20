@@ -189,8 +189,8 @@ const Dashboard: React.FC<DashboardProps> = ({ isOpen, onClose, missingId }) => 
               {(() => {
                 const aiImageDisplayIds = [50000, 50020, 50040, 50041];
                 const hasAIImages = aiImageDisplayIds.includes(missingDetail.id) &&
-                                   missingDetail.outputImages &&
-                                   missingDetail.outputImages.length > 0;
+                                    missingDetail.outputImages &&
+                                    missingDetail.outputImages.length > 0;
                 const aiImageUrl = hasAIImages ? missingDetail.outputImages[0].url : null;
 
                 return (
