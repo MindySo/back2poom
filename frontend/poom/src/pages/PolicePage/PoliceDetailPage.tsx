@@ -136,7 +136,7 @@ const PoliceDetailPage = () => {
                     <div className={styles.detectionImageWrapper}>
                       <div
                         className={styles.detectionImageWrapper}
-                        onClick={() => 1 && handleOpenModal("https://cdn.back2poom.site/videos/1.mp4")}
+                        onClick={() => 1 && handleOpenModal(`https://cdn.back2poom.site/videos/${det.id}.mp4`)}
                         style={{ cursor: 1 ? 'pointer' : 'default' }}
                       >
                         <img
