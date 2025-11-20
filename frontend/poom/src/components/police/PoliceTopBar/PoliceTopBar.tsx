@@ -2,7 +2,7 @@ import React from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { theme } from '../../../theme';
 import styles from './PoliceTopBar.module.css';
-import logoFull from '../../../assets/poom_logo_full_police.png';
+import logoFull from '../../../assets/poom_logo_full_police.svg';
 
 export interface PoliceTopBarProps {
   className?: string;
@@ -83,8 +83,8 @@ const PoliceTopBar: React.FC<PoliceTopBarProps> = ({ className = '' }) => {
                 <span
                   className={`${styles.activeIndicator} ${(isActive || isHovered) ? styles.show : ''}`}
                   style={{
-                    backgroundColor: isActive ? `rgba(15, 180, 219, 0.7)` : `rgba(232, 154, 89, 0.7)`,
-                    boxShadow: isActive ? `4px 4px 12px rgba(15, 180, 219, 0.5)` : `4px 4px 12px rgba(232, 154, 89, 0.5)`,
+                    backgroundColor: `rgba(15, 180, 219, 0.5)`,
+                    boxShadow: `4px 4px 12px rgba(15, 180, 219, 0.3)`,
                   }}
                 ></span>
                 <span
