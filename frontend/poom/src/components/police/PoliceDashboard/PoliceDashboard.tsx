@@ -3,7 +3,7 @@ import { createPortal } from 'react-dom';
 import { theme } from '../../../theme';
 import { useMissingDetail } from '../../../hooks';
 import styles from './PoliceDashboard.module.css';
-import close from '../../../assets/back_icon.svg';
+import close from '../../../assets/back_icon_police.svg';
 import logo from '../../../assets/logo_police.png';
 import { useNavigate } from 'react-router-dom';
 import Text from '../../common/atoms/Text';
@@ -246,6 +246,9 @@ const PoliceDashboard: React.FC<PoliceDashboardProps> = ({ isOpen, onClose, miss
                             </Text>
                           )}
                         </div>
+                        <Text as="div" size="xs" color="policeGray" className={styles.aiCaption}>
+                          ① AI 분석을 주요 정보를 우선적으로 정리한 내용으로, 참고용으로 활용해주시기 바랍니다.
+                        </Text>
                       </div>
                     </div>
                   );

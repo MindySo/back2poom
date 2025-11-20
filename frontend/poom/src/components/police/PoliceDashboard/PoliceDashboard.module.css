@@ -82,7 +82,6 @@
   align-items: center;
   justify-content: center;
   transition: opacity 0.2s;
-  filter: invert(0.9) brightness(0.8); /* policeWhite 색상으로 변경 */
 }
 
 .closeButton:hover {
