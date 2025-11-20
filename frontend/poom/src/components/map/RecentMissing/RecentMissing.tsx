@@ -23,6 +23,7 @@ export interface RecentMissingProps {
   isSelected?: boolean;
   onClick?: () => void;
   theme?: 'light' | 'dark';
+  activeColor?: string;
 }
 
 const RecentMissing: React.FC<RecentMissingProps> = ({
@@ -39,14 +40,25 @@ const RecentMissing: React.FC<RecentMissingProps> = ({
   isSelected = false,
   onClick,
   theme = 'light',
+  activeColor,
 }) => {
   // 실종 경과 시간을 실시간으로 업데이트
   const elapsedTime = useElapsedTime(occurredAt);
+
+  // 선택된 카드의 스타일 결정
+  const selectedStyle = isSelected && activeColor ? {
+    backgroundColor: `${activeColor}1a`, // 16진수로 약 10% 투명도
+    borderRightColor: activeColor,
+  } : undefined;
+
   return (
     <div
-      className={`${styles.card} ${isSelected ? styles.selected : ''} ${className}`}
+      className={`${styles.card} ${isSelected ? (theme === 'dark' && !activeColor ? styles.selectedDark : styles.selected) : ''} ${className}`}
       onClick={onClick}
-      style={onClick ? { cursor: 'pointer' } : undefined}
+      style={{
+        ...(onClick ? { cursor: 'pointer' } : {}),
+        ...selectedStyle,
+      }}
     >
       {/* 왼쪽: 사진 프레임 */}
       <div className={styles.imageFrame}>

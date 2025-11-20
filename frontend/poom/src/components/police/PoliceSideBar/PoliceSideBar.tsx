@@ -1,4 +1,5 @@
-import React from 'react';
+import React, { useState, useRef, useCallback } from 'react';
+import { theme } from '../../../theme';
 import Text from '../../common/atoms/Text';
 import StatusBoard from '../../map/StatusBoard/StatusBoard';
 import RecentMissing from '../../map/RecentMissing/RecentMissing';
@@ -8,12 +9,40 @@ import styles from './PoliceSideBar.module.css';
 export interface PoliceSideBarProps {
   className?: string;
   onMissingCardClick?: (id: number) => void;
+  selectedMissingId?: number | null;
+  isDashboardOpen?: boolean;
 }
 
-const PoliceSideBar: React.FC<PoliceSideBarProps> = ({ className = '', onMissingCardClick }) => {
+const PoliceSideBar: React.FC<PoliceSideBarProps> = ({ className = '', onMissingCardClick, selectedMissingId, isDashboardOpen }) => {
+  // 스크롤바 표시 상태 관리
+  const [showScrollbar, setShowScrollbar] = useState(false);
+  const scrollbarTimerRef = useRef<NodeJS.Timeout | null>(null);
+
   // 최근 48시간 내 실종자 데이터 가져오기
   const hours = 48;
   const { data: recentList, isLoading } = useRecentMissing(hours);
+
+  // 스크롤바 표시 타이머 관리
+  const handleMouseMove = useCallback(() => {
+    setShowScrollbar(true);
+
+    // 기존 타이머 클리어
+    if (scrollbarTimerRef.current) {
+      clearTimeout(scrollbarTimerRef.current);
+    }
+
+    // 1.5초 후 스크롤바 숨김
+    scrollbarTimerRef.current = setTimeout(() => {
+      setShowScrollbar(false);
+    }, 1500);
+  }, []);
+
+  const handleMouseLeave = useCallback(() => {
+    setShowScrollbar(false);
+    if (scrollbarTimerRef.current) {
+      clearTimeout(scrollbarTimerRef.current);
+    }
+  }, []);
   
   // 경찰서 페이지용 색상
   const policeColor = '#2B3A55'; // darkMain 색상
@@ -64,7 +93,11 @@ const PoliceSideBar: React.FC<PoliceSideBarProps> = ({ className = '', onMissing
       </div>
 
       {/* 최신 실종자 목록 */}
-      <div className={styles.recentMissingList}>
+      <div
+        className={`${styles.recentMissingList} ${showScrollbar ? styles.showScrollbar : ''}`}
+        onMouseMove={handleMouseMove}
+        onMouseLeave={handleMouseLeave}
+      >
         {isLoading ? (
           <div className={styles.emptyMessage}>
             <Text size="md" color="policeGray">로딩 중...</Text>
@@ -81,6 +114,7 @@ const PoliceSideBar: React.FC<PoliceSideBarProps> = ({ className = '', onMissing
               location={person.occurredLocation}
               occurredAt={person.crawledAt}
               targetType={person.targetType}
+              isSelected={selectedMissingId === person.id && isDashboardOpen}
               textColor="policeWhite"
               theme="dark"
               onClick={() => onMissingCardClick?.(person.id)}

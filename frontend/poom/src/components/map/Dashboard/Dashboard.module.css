@@ -225,7 +225,7 @@
   flex: none;
 }
 .sectionLarge {
-  height: 30vh;
+  height: 35vh;
   flex: none;
 }
 .sectionXLarge {
@@ -356,6 +356,15 @@
   justify-content: center;
 }
 
+.aiImageWrapper img {
+  transition: transform 0.2s ease, filter 0.2s ease;
+}
+
+.aiImageWrapper:hover img {
+  transform: scale(1.05);
+  filter: brightness(0.9);
+}
+
 .aiImage {
   width: 100%;
   height: 100%;
@@ -377,17 +386,17 @@
 
 
 .aiCaption {
-  margin-top: 1rem;
+  margin-top: 1.5rem;
   padding-top: 0.8vw;
   border-top: 1px solid #e5e7eb;
   text-align: center;
   padding: 0.8vw 0.8vw 0;
   word-break: keep-all;
+  font-style: italic;
   box-sizing: border-box;
   width: 100%;
   max-width: 100%;
   overflow-wrap: break-word;
-  font-style: italic;
 }
 
 .aiInfoItem {
