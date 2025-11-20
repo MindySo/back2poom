@@ -65,7 +65,7 @@ const PoliceTopBar: React.FC<PoliceTopBarProps> = ({ className = '' }) => {
         {/* 네비게이션 영역 */}
         <nav className={styles.navbar}>
           {navItems.map((item) => {
-            const isActive = location.pathname === item.path;
+            const isActive = location.pathname === item.path || location.pathname.startsWith('/police/map');
             const isHovered = hoveredPath === item.path;
             const labelColor = (isActive || isHovered) ? '#ffffffff' : 'rgba(255, 255, 255, 0.75)';
             return (
