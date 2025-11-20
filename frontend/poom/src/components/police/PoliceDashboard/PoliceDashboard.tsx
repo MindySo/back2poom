@@ -1,4 +1,5 @@
 import React from 'react';
+import { createPortal } from 'react-dom';
 import { theme } from '../../../theme';
 import { useMissingDetail } from '../../../hooks';
 import styles from './PoliceDashboard.module.css';
@@ -22,6 +23,8 @@ const PoliceDashboard: React.FC<PoliceDashboardProps> = ({ isOpen, onClose, miss
   const [shouldRender, setShouldRender] = React.useState(false);
   const [carouselOpen, setCarouselOpen] = React.useState(false);
   const [initialImageIndex, setInitialImageIndex] = React.useState(0);
+  const [aiImageOpen, setAiImageOpen] = React.useState(false);
+  const [aiImageZoom, setAiImageZoom] = React.useState(1);
 
   // missingId가 있을 때만 API 호출
   const { data: missingDetail, isLoading } = useMissingDetail(missingId);
@@ -63,20 +66,10 @@ const PoliceDashboard: React.FC<PoliceDashboardProps> = ({ isOpen, onClose, miss
   const getAllImages = (): ImageFile[] => {
     if (!missingDetail) return [];
     const images: ImageFile[] = [];
-    
-    // 메인 이미지
-    if (missingDetail.mainImage) {
-      images.push(missingDetail.mainImage);
-    }
-    
+
     // 추가 등록 사진들
     if (missingDetail.inputImages && missingDetail.inputImages.length > 0) {
       images.push(...missingDetail.inputImages);
-    }
-    
-    // AI 서포트 이미지들
-    if (missingDetail.outputImages && missingDetail.outputImages.length > 0) {
-      images.push(...missingDetail.outputImages);
     }
 
     return images;
@@ -189,22 +182,44 @@ const PoliceDashboard: React.FC<PoliceDashboardProps> = ({ isOpen, onClose, miss
                 </div>
 
                 {/* 두번째 섹션: AI 서포트 이미지 */}
-                <div
-                  className={`${styles.section} ${styles.sectionLarge}`}
-                  style={{
-                    background: `linear-gradient(${policeColor}, ${policeColor}) padding-box, ${theme.colors.rainbow} border-box`,
-                    border: '3px solid transparent',
-                  }}
-                >
-                  <div className={styles.sectionContentAI}>
-                    <Text as="div" size="sm" weight="bold" color="white" className={styles.aiTitle}>AI 서포트 이미지</Text>
-                    <div className={styles.aiImageWrapper}>
-                      <Text as="div" size="sm" color="white" style={{ textAlign: 'center', padding: '2rem' }}>
-                        안전한 정보 활용을 위해 이미지 고도화 기능은 현재 준비 중입니다.
-                      </Text>
+                {(() => {
+                  const aiImageDisplayIds = [50000, 50020, 50040, 50041];
+                  const hasAIImages = aiImageDisplayIds.includes(missingDetail?.id || 0) &&
+                                     missingDetail?.outputImages &&
+                                     missingDetail.outputImages.length > 0;
+                  const aiImageUrl = hasAIImages ? missingDetail?.outputImages?.[0]?.url : null;
+
+                  return (
+                    <div
+                      className={`${styles.section} ${styles.sectionLarge}`}
+                      style={{
+                        background: `linear-gradient(${policeColor}, ${policeColor}) padding-box, ${theme.colors.rainbow} border-box`,
+                        border: '3px solid transparent',
+                      }}
+                    >
+                      <div className={styles.sectionContentAI}>
+                        <Text as="div" size="sm" weight="bold" color="white" className={styles.aiTitle}>AI 서포트 이미지</Text>
+                        <div className={styles.aiImageWrapper}>
+                          {aiImageUrl ? (
+                            <img
+                              src={aiImageUrl}
+                              alt="AI 서포트 이미지"
+                              style={{ width: '100%', height: '100%', objectFit: 'cover', cursor: 'pointer' }}
+                              onClick={() => {
+                                setAiImageOpen(true);
+                                setAiImageZoom(1);
+                              }}
+                            />
+                          ) : (
+                            <Text as="div" size="sm" color="white" style={{ textAlign: 'center', padding: '2rem', display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%' }}>
+                              안전한 AI 정보 활용을 위해 개인정보 수집 동의가 필요합니다.
+                            </Text>
+                          )}
+                        </div>
+                      </div>
                     </div>
-                  </div>
-                </div>
+                  );
+                })()}
               </div>
 
               {/* 오른쪽 줄 */}
@@ -219,7 +234,7 @@ const PoliceDashboard: React.FC<PoliceDashboardProps> = ({ isOpen, onClose, miss
 
                     <Text as="div" size="sm" weight="bold" color="white" className={styles.infoLabel}>나이</Text>
                     <Text as="div" size="md" color="white" className={styles.infoValue}>
-                      {missingDetail.ageAtTime}세 (현재나이 {calculateCurrentAge(missingDetail.occurredAt, missingDetail.ageAtTime)}세)
+                      {missingDetail.ageAtTime}세 (현재 {calculateCurrentAge(missingDetail.occurredAt, missingDetail.ageAtTime)}세)
                     </Text>
 
                     <Text as="div" size="sm" weight="bold" color="white" className={styles.infoLabel}>발생일</Text>
@@ -338,6 +353,155 @@ const PoliceDashboard: React.FC<PoliceDashboardProps> = ({ isOpen, onClose, miss
           onClose={handleCloseCarousel}
         />
       )}
+
+      {/* AI 서포트 이미지 Fullscreen 뷰어 - Portal로 렌더링 */}
+      {aiImageOpen && (() => {
+        const aiImageDisplayIds = [50000, 50020, 50040, 50041];
+        const hasAIImages = aiImageDisplayIds.includes(missingDetail?.id || 0) &&
+                           missingDetail?.outputImages &&
+                           missingDetail.outputImages.length > 0;
+        const aiImageUrl = hasAIImages ? missingDetail?.outputImages?.[0]?.url : null;
+
+        const viewer = aiImageUrl ? (
+          <div
+            style={{
+              position: 'fixed',
+              top: 0,
+              left: 0,
+              right: 0,
+              bottom: 0,
+              backgroundColor: 'rgba(0, 0, 0, 0.9)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              zIndex: 99999,
+              animation: 'fadeIn 0.3s ease-out',
+            }}
+            onClick={() => setAiImageOpen(false)}
+            onWheel={(e) => {
+              e.preventDefault();
+              const delta = e.deltaY > 0 ? 0.9 : 1.1;
+              setAiImageZoom(prev => {
+                const newZoom = prev * delta;
+                return Math.max(1, Math.min(5, newZoom));
+              });
+            }}
+            onTouchMove={(e) => {
+              if (e.touches.length === 2) {
+                e.preventDefault();
+                const touch1 = e.touches[0];
+                const touch2 = e.touches[1];
+                const distance = Math.hypot(
+                  touch2.clientX - touch1.clientX,
+                  touch2.clientY - touch1.clientY
+                );
+
+                const key = '_initialDistance';
+                const container = e.currentTarget as any;
+
+                if (!container[key]) {
+                  container[key] = distance;
+                } else {
+                  const delta = distance / container[key];
+                  setAiImageZoom(prev => {
+                    const newZoom = prev * delta;
+                    return Math.max(1, Math.min(5, newZoom));
+                  });
+                  container[key] = distance;
+                }
+              }
+            }}
+          >
+            <style>
+              {`
+                @keyframes fadeIn {
+                  from {
+                    opacity: 0;
+                  }
+                  to {
+                    opacity: 1;
+                  }
+                }
+              `}
+            </style>
+
+            <div
+              style={{
+                position: 'relative',
+                width: '90vw',
+                height: '90vh',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                overflow: 'hidden',
+              }}
+              onClick={(e) => e.stopPropagation()}
+            >
+              <img
+                src={aiImageUrl}
+                alt="AI 서포트 이미지"
+                style={{
+                  width: '100%',
+                  height: '100%',
+                  objectFit: 'contain',
+                  transform: `scale(${aiImageZoom})`,
+                  transition: 'transform 0.1s ease-out',
+                  cursor: aiImageZoom > 1 ? 'grab' : 'pointer',
+                  userSelect: 'none',
+                }}
+                draggable={false}
+              />
+            </div>
+
+            <button
+              style={{
+                position: 'absolute',
+                top: '20px',
+                right: '20px',
+                width: '40px',
+                height: '40px',
+                backgroundColor: 'transparent',
+                border: 'none',
+                color: 'white',
+                fontSize: '28px',
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                transition: 'opacity 0.2s',
+                opacity: 0.8,
+              }}
+              onClick={() => setAiImageOpen(false)}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.opacity = '1';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.opacity = '0.8';
+              }}
+            >
+              ✕
+            </button>
+
+            <div
+              style={{
+                position: 'absolute',
+                bottom: '20px',
+                left: '20px',
+                color: 'white',
+                fontSize: '13px',
+                backgroundColor: 'rgba(0, 0, 0, 0.6)',
+                padding: '8px 12px',
+                borderRadius: '4px',
+                userSelect: 'none',
+              }}
+            >
+              {(aiImageZoom * 100).toFixed(0)}% | 스크롤/핀치로 확대/축소
+            </div>
+          </div>
+        ) : null;
+
+        return createPortal(viewer, document.body);
+      })()}
     </>
   );
 };

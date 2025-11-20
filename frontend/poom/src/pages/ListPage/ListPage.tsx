@@ -36,7 +36,7 @@ const ListPage = () => {
   }, [missingList]);
 
 
-  type TabKey = "all" | "within24" | "over24";
+  type TabKey = "all" | "within48" | "over48";
   const [activeTab, setActiveTab] = useState<TabKey>("all");
   const [selectedPersonId, setSelectedPersonId] = useState<number | null>(null);
   const [inputValue, setInputValue] = useState<string>(""); // 입력값 관리
@@ -72,10 +72,10 @@ const ListPage = () => {
     let filtered = people;
 
     // 탭 필터링
-    if (activeTab === "within24") {
-      filtered = filtered.filter((p) => p.hoursSinceMissing < 24);
-    } else if (activeTab === "over24") {
-      filtered = filtered.filter((p) => p.hoursSinceMissing >= 24);
+    if (activeTab === "within48") {
+      filtered = filtered.filter((p) => p.hoursSinceMissing < 48);
+    } else if (activeTab === "over48") {
+      filtered = filtered.filter((p) => p.hoursSinceMissing >= 48);
     }
 
     // 검색어 필터링
@@ -245,26 +245,26 @@ const ListPage = () => {
             전체
           </button>
           <button
-            className={`${styles['mobile-tab']} ${activeTab === "within24" ? styles['mobile-tab-active'] : ''}`}
-            onClick={() => handleTabChange("within24")}
+            className={`${styles['mobile-tab']} ${activeTab === "within48" ? styles['mobile-tab-active'] : ''}`}
+            onClick={() => handleTabChange("within48")}
             style={{
-              backgroundColor: activeTab === "within24" ? theme.colors.darkMain : theme.colors.white,
-              color: activeTab === "within24" ? theme.colors.white : theme.colors.gray,
+              backgroundColor: activeTab === "within48" ? theme.colors.darkMain : theme.colors.white,
+              color: activeTab === "within48" ? theme.colors.white : theme.colors.gray,
               fontSize: theme.typography.fontSize.sm,
             }}
           >
-            24시간 이내
+            48시간 이내
           </button>
           <button
-            className={`${styles['mobile-tab']} ${activeTab === "over24" ? styles['mobile-tab-active'] : ''}`}
-            onClick={() => handleTabChange("over24")}
+            className={`${styles['mobile-tab']} ${activeTab === "over48" ? styles['mobile-tab-active'] : ''}`}
+            onClick={() => handleTabChange("over48")}
             style={{
-              backgroundColor: activeTab === "over24" ? theme.colors.darkMain : theme.colors.white,
-              color: activeTab === "over24" ? theme.colors.white : theme.colors.gray,
+              backgroundColor: activeTab === "over48" ? theme.colors.darkMain : theme.colors.white,
+              color: activeTab === "over48" ? theme.colors.white : theme.colors.gray,
               fontSize: theme.typography.fontSize.sm,
             }}
           >
-            24시간 이상
+            48시간 이상
           </button>
         </div>
 
@@ -331,16 +331,16 @@ const ListPage = () => {
           전체
         </button>
         <button
-          className={activeTab === "within24" ? "active" : undefined}
-          onClick={() => handleTabChange("within24")}
+          className={activeTab === "within48" ? "active" : undefined}
+          onClick={() => handleTabChange("within48")}
         >
-          24시간 이내
+          48시간 이내
         </button>
         <button
-          className={activeTab === "over24" ? "active" : undefined}
-          onClick={() => handleTabChange("over24")}
+          className={activeTab === "over48" ? "active" : undefined}
+          onClick={() => handleTabChange("over48")}
         >
-          24시간 이상
+          48시간 이상
         </button>
       </div>
       </div>
@@ -348,10 +348,11 @@ const ListPage = () => {
       {/* 카드 리스트 영역 */}
       <div className={styles['list-grid']}>
         {filteredPeople.map((p) => (
-          <ArchiveCard 
-            key={p.id} 
-            person={p} 
+          <ArchiveCard
+            key={p.id}
+            person={p}
             onClick={() => handleCardClick(p.id)}
+            isSelected={selectedPersonId === p.id}
           />
         ))}
       </div>

@@ -66,7 +66,7 @@ const PoliceDetailPage = () => {
 
                 <Text as="div" size="sm" weight="bold" color="white" className={styles.infoLabel}>나이</Text>
                 <Text as="div" size="md" color="white" className={styles.infoValue}>
-                  {missingDetail.ageAtTime}세 {missingDetail.currentAge ? `(현재나이 ${missingDetail.currentAge}세)` : ''}
+                  {missingDetail.ageAtTime}세 {missingDetail.currentAge ? `(현재 ${missingDetail.currentAge}세)` : ''}
                 </Text>
 
                 <Text as="div" size="sm" weight="bold" color="white" className={styles.infoLabel}>발생일</Text>
