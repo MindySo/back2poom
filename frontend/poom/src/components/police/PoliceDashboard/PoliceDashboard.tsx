@@ -26,6 +26,10 @@ const PoliceDashboard: React.FC<PoliceDashboardProps> = ({ isOpen, onClose, miss
   const [aiImageOpen, setAiImageOpen] = React.useState(false);
   const [aiImageZoom, setAiImageZoom] = React.useState(1);
 
+  // 스크롤바 표시 상태 관리
+  const [showScrollbar, setShowScrollbar] = React.useState(false);
+  const scrollbarTimerRef = React.useRef<NodeJS.Timeout | null>(null);
+
   // missingId가 있을 때만 API 호출
   const { data: missingDetail, isLoading } = useMissingDetail(missingId);
 
@@ -90,6 +94,28 @@ const PoliceDashboard: React.FC<PoliceDashboardProps> = ({ isOpen, onClose, miss
     setCarouselOpen(false);
   };
 
+  // 스크롤바 표시 타이머 관리
+  const handleContentMouseMove = React.useCallback(() => {
+    setShowScrollbar(true);
+
+    // 기존 타이머 클리어
+    if (scrollbarTimerRef.current) {
+      clearTimeout(scrollbarTimerRef.current);
+    }
+
+    // 1.5초 후 스크롤바 숨김
+    scrollbarTimerRef.current = setTimeout(() => {
+      setShowScrollbar(false);
+    }, 1500);
+  }, []);
+
+  const handleContentMouseLeave = React.useCallback(() => {
+    setShowScrollbar(false);
+    if (scrollbarTimerRef.current) {
+      clearTimeout(scrollbarTimerRef.current);
+    }
+  }, []);
+
   if (!shouldRender && !carouselOpen) return null;
 
   return (
@@ -131,11 +157,15 @@ const PoliceDashboard: React.FC<PoliceDashboardProps> = ({ isOpen, onClose, miss
 
 
         {/* Content - Two rows layout */}
-        <div className={styles.contentContainer}>
+        <div
+          className={`${styles.contentContainer} ${showScrollbar ? styles.showScrollbar : ''}`}
+          onMouseMove={handleContentMouseMove}
+          onMouseLeave={handleContentMouseLeave}
+        >
           {isLoading ? (
             <div className={styles.loadingContainer}>
               <div className={styles.spinner}></div>
-              <Text as="div" size="sm" color="white" style={{ marginTop: '1rem' }}>로딩 중...</Text>
+              <Text as="div" size="sm" color="policeWhite" style={{ marginTop: '1rem' }}>로딩 중...</Text>
             </div>
           ) : missingDetail ? (
             <>
@@ -185,8 +215,8 @@ const PoliceDashboard: React.FC<PoliceDashboardProps> = ({ isOpen, onClose, miss
                 {(() => {
                   const aiImageDisplayIds = [50000, 50020, 50040, 50041];
                   const hasAIImages = aiImageDisplayIds.includes(missingDetail?.id || 0) &&
-                                     missingDetail?.outputImages &&
-                                     missingDetail.outputImages.length > 0;
+                                    missingDetail?.outputImages &&
+                                    missingDetail.outputImages.length > 0;
                   const aiImageUrl = hasAIImages ? missingDetail?.outputImages?.[0]?.url : null;
 
                   return (
@@ -198,7 +228,7 @@ const PoliceDashboard: React.FC<PoliceDashboardProps> = ({ isOpen, onClose, miss
                       }}
                     >
                       <div className={styles.sectionContentAI}>
-                        <Text as="div" size="sm" weight="bold" color="white" className={styles.aiTitle}>AI 서포트 이미지</Text>
+                        <Text as="div" size="md" weight="bold" color="policeWhite" className={styles.aiTitle}>AI 서포트 이미지</Text>
                         <div className={styles.aiImageWrapper}>
                           {aiImageUrl ? (
                             <img
@@ -211,7 +241,7 @@ const PoliceDashboard: React.FC<PoliceDashboardProps> = ({ isOpen, onClose, miss
                               }}
                             />
                           ) : (
-                            <Text as="div" size="sm" color="white" style={{ textAlign: 'center', padding: '2rem', display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%' }}>
+                            <Text as="div" size="sm" color="policeWhite" style={{ textAlign: 'center', padding: '2rem', display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%' }}>
                               안전한 AI 정보 활용을 위해 개인정보 수집 동의가 필요합니다.
                             </Text>
                           )}
@@ -227,18 +257,18 @@ const PoliceDashboard: React.FC<PoliceDashboardProps> = ({ isOpen, onClose, miss
                 {/* 첫번째 섹션: 기본 인적사항 */}
                 <div className={`${styles.section} ${styles.sectionSmall}`} style={{ backgroundColor: policeColor }}>
                   <div className={styles.infoCard}>
-                    <Text as="div" size="sm" weight="bold" color="white" className={styles.infoLabel}>이름</Text>
-                    <Text as="div" size="md" color="white" className={styles.infoValue}>
+                    <Text as="div" size="sm" weight="bold" color="policeWhite" className={styles.infoLabel}>이름</Text>
+                    <Text as="div" size="md" color="policeWhite" className={styles.infoValue}>
                       {missingDetail.personName}({missingDetail.gender === '남성' ? '남' : missingDetail.gender === '여성' ? '여' : '성별 미상'})
                     </Text>
 
-                    <Text as="div" size="sm" weight="bold" color="white" className={styles.infoLabel}>나이</Text>
-                    <Text as="div" size="md" color="white" className={styles.infoValue}>
+                    <Text as="div" size="sm" weight="bold" color="policeWhite" className={styles.infoLabel}>나이</Text>
+                    <Text as="div" size="md" color="policeWhite" className={styles.infoValue}>
                       {missingDetail.ageAtTime}세 (현재 {calculateCurrentAge(missingDetail.occurredAt, missingDetail.ageAtTime)}세)
                     </Text>
 
-                    <Text as="div" size="sm" weight="bold" color="white" className={styles.infoLabel}>발생일</Text>
-                    <Text as="div" size="md" color="white" className={styles.infoValue}>
+                    <Text as="div" size="sm" weight="bold" color="policeWhite" className={styles.infoLabel}>발생일</Text>
+                    <Text as="div" size="md" color="policeWhite" className={styles.infoValue}>
                       {(() => {
                         const date = new Date(missingDetail.occurredAt);
                         const year = date.getFullYear();
@@ -248,69 +278,68 @@ const PoliceDashboard: React.FC<PoliceDashboardProps> = ({ isOpen, onClose, miss
                       })()}
                     </Text>
 
-                    <Text as="div" size="sm" weight="bold" color="white" className={styles.infoLabel}>발생장소</Text>
-                    <Text as="div" size="md" color="white" className={styles.infoValue}>{missingDetail.occurredLocation}</Text>
+                    <Text as="div" size="sm" weight="bold" color="policeWhite" className={styles.infoLabel}>발생장소</Text>
+                    <Text as="div" size="md" color="policeWhite" className={styles.infoValue}>{missingDetail.occurredLocation}</Text>
                   </div>
                 </div>
 
                 {/* 두번째 섹션: 신체 정보 */}
                 <div className={`${styles.section} ${styles.sectionMedium}`} style={{ backgroundColor: policeColor }}>
                   <div className={styles.infoCard}>
-                    <Text as="div" size="sm" weight="bold" color="white" className={styles.infoLabel}>신체정보</Text>
-                    <Text as="div" size="md" color="white" className={styles.infoValue}>
+                    <Text as="div" size="sm" weight="bold" color="policeWhite" className={styles.infoLabel}>신체정보</Text>
+                    <Text as="div" size="md" color="policeWhite" className={styles.infoValue}>
                       {missingDetail.heightCm ? `${missingDetail.heightCm}cm` : '-'} / {missingDetail.weightKg ? `${missingDetail.weightKg}kg` : '-'}
                     </Text>
 
-                    <Text as="div" size="sm" weight="bold" color="white" className={styles.infoLabel}>체형</Text>
-                    <Text as="div" size="md" color="white" className={styles.infoValue}>{missingDetail.bodyType || '-'}</Text>
+                    <Text as="div" size="sm" weight="bold" color="policeWhite" className={styles.infoLabel}>체형</Text>
+                    <Text as="div" size="md" color="policeWhite" className={styles.infoValue}>{missingDetail.bodyType || '-'}</Text>
 
-                    <Text as="div" size="sm" weight="bold" color="white" className={styles.infoLabel}>얼굴형</Text>
-                    <Text as="div" size="md" color="white" className={styles.infoValue}>{missingDetail.faceShape || '-'}</Text>
+                    <Text as="div" size="sm" weight="bold" color="policeWhite" className={styles.infoLabel}>얼굴형</Text>
+                    <Text as="div" size="md" color="policeWhite" className={styles.infoValue}>{missingDetail.faceShape || '-'}</Text>
 
-                    <Text as="div" size="sm" weight="bold" color="white" className={styles.infoLabel}>두발 형태</Text>
-                    <Text as="div" size="md" color="white" className={styles.infoValue}>
+                    <Text as="div" size="sm" weight="bold" color="policeWhite" className={styles.infoLabel}>두발 형태</Text>
+                    <Text as="div" size="md" color="policeWhite" className={styles.infoValue}>
                       {missingDetail.hairColor || '-'} / {missingDetail.hairStyle || '-'}
                     </Text>
 
-                    <Text as="div" size="sm" weight="bold" color="white" className={styles.infoLabel}>복장</Text>
-                    <Text as="div" size="md" color="white" className={styles.infoValue}>{missingDetail.clothingDesc || '-'}</Text>
+                    <Text as="div" size="sm" weight="bold" color="policeWhite" className={styles.infoLabel}>복장</Text>
+                    <Text as="div" size="md" color="policeWhite" className={styles.infoValue}>{missingDetail.clothingDesc || '-'}</Text>
                   </div>
                 </div>
 
                 {/* 세번째 섹션: AI 서포트 정보 */}
                 <div
-                  className={`${styles.section} ${styles.sectionLarge}`}
+                  className={styles.section}
                   style={{
                     background: `linear-gradient(${policeColor}, ${policeColor}) padding-box, ${theme.colors.rainbow} border-box`,
                     border: '3px solid transparent',
                   }}
                 >
                   <div className={styles.sectionContentAI}>
-                    <Text as="div" size="sm" weight="bold" color="white" className={styles.aiTitle}>AI 서포트 정보</Text>
+                    <Text as="div" size="md" weight="bold" color="policeWhite" className={styles.aiTitle}>AI 서포트 정보</Text>
                     <div className={styles.aiInfoWrapper}>
                       {missingDetail.aiSupport ? (
                         <>
                           {/* 우선순위 */}
                           <div className={styles.aiInfoSection}>
-                            <Text as="div" size="sm" weight="bold" color="white" className={styles.aiSubtitle}>우선순위</Text>
+                            <Text as="div" size="sm" weight="bold" color="policeWhite" className={styles.aiSubtitle}>우선순위</Text>
                             <div className={styles.aiInfoItem}>
-                              <Text as="span" size="xs" color="white">1순위</Text>
-                              <Text as="span" size="sm" color="white">{missingDetail.aiSupport.top1Desc || '-'}</Text>
+                              <Text as="span" size="xs" color="policeGray">1순위</Text>
+                              <Text as="span" size="sm" color="policeWhite">{missingDetail.aiSupport.top1Desc || '-'}</Text>
                             </div>
                             <div className={styles.aiInfoItem}>
-                              <Text as="span" size="xs" color="white">2순위</Text>
-                              <Text as="span" size="sm" color="white">{missingDetail.aiSupport.top2Desc || '-'}</Text>
+                              <Text as="span" size="xs" color="policeGray">2순위</Text>
+                              <Text as="span" size="sm" color="policeWhite">{missingDetail.aiSupport.top2Desc || '-'}</Text>
                             </div>
-                            <Text as="div" size="xs" color="white" style={{ marginTop: '0.2rem', textAlign: 'center', fontSize: '0.7rem' }}>
-                  ① AI 분석을 주요 정보를 우선적으로 정리한 내용으로, 
-                 <br/> 참고용으로 활용해주시기 바랍니다.
-                </Text>
                           </div>
                         </>
                       ) : (
-                        <Text as="div" size="sm" color="white">AI 정보가 없습니다.</Text>
+                        <Text as="div" size="sm" color="policeGray">AI 정보가 없습니다.</Text>
                       )}
                     </div>
+                    <Text as="div" size="xs" color="policeGray" className={styles.aiCaption}>
+                      ① AI 분석을 주요 정보를 우선적으로 정리한 내용으로, 참고용으로 활용해주시기 바랍니다.
+                    </Text>
                   </div>
                 </div>
               </div>
@@ -358,8 +387,8 @@ const PoliceDashboard: React.FC<PoliceDashboardProps> = ({ isOpen, onClose, miss
       {aiImageOpen && (() => {
         const aiImageDisplayIds = [50000, 50020, 50040, 50041];
         const hasAIImages = aiImageDisplayIds.includes(missingDetail?.id || 0) &&
-                           missingDetail?.outputImages &&
-                           missingDetail.outputImages.length > 0;
+                          missingDetail?.outputImages &&
+                          missingDetail.outputImages.length > 0;
         const aiImageUrl = hasAIImages ? missingDetail?.outputImages?.[0]?.url : null;
 
         const viewer = aiImageUrl ? (

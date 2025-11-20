@@ -28,7 +28,8 @@
   top: calc(90px + (100vh - 90px) / 2);
   transform: translateY(-50%);
   width: 40vw;
-  height: calc(100vh - 13vh);
+  height: calc(100vh - 90px - 3vh - 3vh); /* TopBar 높이 - 상단 여백 - 하단 여백 */
+  max-height: calc(100vh - 140px); /* 최대 높이 제한으로 여백 보장 */
   border-radius: 12px;
   display: flex;
   flex-direction: column;
@@ -81,7 +82,7 @@
   align-items: center;
   justify-content: center;
   transition: opacity 0.2s;
-  filter: invert(1); /* 흰색 아이콘으로 변경 */
+  filter: invert(0.9) brightness(0.8); /* policeWhite 색상으로 변경 */
 }
 
 .closeButton:hover {
@@ -113,7 +114,7 @@
 
 .contentContainer {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 0.8vw;
   padding: 1.04vw;
   flex: 1;
@@ -158,30 +159,39 @@
 }
 
 
-/* 스크롤바 스타일 - 동작 시에 thumbs만 보이도록 */
-.contentContainer::-webkit-scrollbar {
-  width: 8px;
+/* 스크롤바 스타일 - 기본 상태 */
+.contentContainer {
+  scrollbar-width: thin; /* Firefox */
+  scrollbar-color: transparent transparent;
+  transition: scrollbar-color 0.6s ease;
 }
+
+.contentContainer::-webkit-scrollbar {
+  width: 8px; /* Chrome/Safari */
+}
+
 .contentContainer::-webkit-scrollbar-track {
   background: transparent;
 }
+
 .contentContainer::-webkit-scrollbar-thumb {
   background: transparent;
   border-radius: 4px;
-}
-.contentContainer:hover::-webkit-scrollbar-thumb {
-  background: rgba(255, 255, 255, 0.3);
-}
-.contentContainer::-webkit-scrollbar-thumb:hover {
-  background: rgba(255, 255, 255, 0.5);
+  transition: background 0.6s ease; /* 부드러운 fade-out 효과 */
 }
 
-/* Firefox 스크롤바 */
-.contentContainer {
-  scrollbar-color: transparent transparent;
+/* 마우스 움직임이 있을 때만 스크롤바 표시 */
+.contentContainer.showScrollbar {
+  scrollbar-color: rgba(255, 255, 255, 0.3) transparent; /* Firefox */
 }
-.contentContainer:hover {
-  scrollbar-color: rgba(255, 255, 255, 0.3) transparent;
+
+.contentContainer.showScrollbar::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.3);
+  transition: background 0.3s ease; /* 나타날 때는 빠르게 */
+}
+
+.contentContainer.showScrollbar::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.5);
 }
 
 
@@ -216,7 +226,7 @@
   flex: none;
 }
 .sectionLarge {
-  height: 30vh;
+  height: 35vh;
   flex: none;
 }
 .sectionXLarge {
@@ -311,7 +321,7 @@
   padding: 0.8vw;
   display: grid;
   grid-template-columns: auto 1fr;
-  gap: 0.3vw 0.6vw;
+  gap: 0.3vw 1.2vw;
   align-items: center;
 }
 
@@ -391,6 +401,16 @@
   border-bottom: 1px solid rgba(255, 255, 255, 0.2);
 }
 
+.aiCaption {
+  margin-top: 1.5rem;
+  padding-top: 0.8vw;
+  border-top: 1px solid rgba(255, 255, 255, 0.2);
+  text-align: center;
+  padding: 0.8vw 0.8vw 0;
+  word-break: keep-all;
+  font-style: italic;
+}
+
 .footer {
   padding: 1.04vw;
   /* border-top: 1px solid rgba(255, 255, 255, 0.1); */
@@ -398,13 +418,16 @@
 
 .reportButton {
   width: 100%;
-  padding: 1.5vh 1.04vw;
+  padding: 0.7vw 1.04vw 1.04vw;
   border: none;
-  border-radius: 12px;
-  font-size: 0.83vw;
-  font-weight: 600;
+  border-radius: 8px;
+  font-size: 16px;
+  font-weight: 500;
   cursor: pointer;
-  transition: opacity 0.2s;
+  transition: all 0.2s ease;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .reportButton:hover {

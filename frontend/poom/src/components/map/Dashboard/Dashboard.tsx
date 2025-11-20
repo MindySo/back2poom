@@ -328,7 +328,7 @@ const Dashboard: React.FC<DashboardProps> = ({ isOpen, onClose, missingId }) => 
 
                 {/* 세번째 섹션: AI 서포트 정보 */}
                 <div
-                  className={`${styles.section} ${styles.sectionLarge}`}
+                  className={styles.section}
                   style={{
                     background: `linear-gradient(white, white) padding-box, ${theme.colors.rainbow} border-box`,
                     border: '3px solid transparent',
