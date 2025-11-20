@@ -108,6 +108,11 @@ ocr:
   server:
     url: ${OCR_SERVER_URL}
 
+gms:
+  api:
+    base-url: https://gms.ssafy.io/gmsapi/api.openai.com/v1
+    key: ${GMS_API_KEY}
+
 server:
   port: 8080
   shutdown: graceful  # Graceful shutdown 활성화
