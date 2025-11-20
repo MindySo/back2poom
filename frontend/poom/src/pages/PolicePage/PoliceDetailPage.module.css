@@ -28,6 +28,9 @@
   flex: 1;
   min-height: 100%;
   overflow-y: auto;
+  scrollbar-width: thin; /* Firefox */
+  scrollbar-color: transparent transparent;
+  transition: scrollbar-color 0.6s ease;
 }
 
 .column1 .section::-webkit-scrollbar {
@@ -35,17 +38,27 @@
 }
 
 .column1 .section::-webkit-scrollbar-track {
-  background: rgba(255, 255, 255, 0.05);
+  background: transparent;
   border-radius: 3px;
 }
 
 .column1 .section::-webkit-scrollbar-thumb {
-  background: rgba(255, 255, 255, 0.2);
+  background: transparent;
   border-radius: 3px;
+  transition: background 0.6s ease;
 }
 
-.column1 .section::-webkit-scrollbar-thumb:hover {
+.column1 .section.showScrollbar {
+  scrollbar-color: rgba(255, 255, 255, 0.3) transparent; /* Firefox */
+}
+
+.column1 .section.showScrollbar::-webkit-scrollbar-thumb {
   background: rgba(255, 255, 255, 0.3);
+  transition: background 0.3s ease;
+}
+
+.column1 .section.showScrollbar::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.5);
 }
 
 /* 두 번째 열: 5 (50%) */
