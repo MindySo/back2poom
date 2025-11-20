@@ -103,7 +103,7 @@ const PoliceMapPage: React.FC = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [map, recentMissingList]);
 
-  const moveMapToVisibleCenter = (lat: number, lng: number) => {
+  const moveMapToVisibleCenter = (lat: number, lng: number, dashboardOpen: boolean = isDashboardOpen) => {
     if (!map) return;
     const mapContainer = mapRef.current;
     if (!mapContainer) return;
@@ -113,7 +113,7 @@ const PoliceMapPage: React.FC = () => {
 
     const topBarHeight = 90;
     const sideBarWidth = 380;
-    const dashboardWidth = isDashboardOpen ? window.innerWidth * 0.4 : 0;
+    const dashboardWidth = dashboardOpen ? window.innerWidth * 0.4 : 0;
 
     const visibleLeft = sideBarWidth + dashboardWidth;
     const visibleTop = topBarHeight;
@@ -160,7 +160,8 @@ const PoliceMapPage: React.FC = () => {
     if (!map || !recentMissingList) return;
     const person = recentMissingList.find((p) => p.id === id);
     if (person && person.latitude && person.longitude) {
-      moveMapToVisibleCenter(person.latitude, person.longitude);
+      // Dashboard가 열릴 것이므로 true로 전달
+      moveMapToVisibleCenter(person.latitude, person.longitude, true);
 
       // 반경 표시 - 경과 시간 기반 초기 반지름 계산
       setSelectedRadiusPosition({ lat: person.latitude, lng: person.longitude });
