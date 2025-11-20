@@ -17,11 +17,11 @@ const API_KEY = import.meta.env.VITE_KAKAO_JAVASCRIPT_KEY;
 
 const MAX_RADIUS = 15000; // 최대 반지름 15km
 
-// 경과 시간 기반 초기 반지름 계산 함수
-const calculateInitialRadius = (occurredAt: string, speed: number): number => {
-  const occurredTime = new Date(occurredAt).getTime();
+// 경과 시간 기반 초기 반지름 계산 함수 (crawledAt 기준)
+const calculateInitialRadius = (crawledAt: string, speed: number): number => {
+  const crawledTime = new Date(crawledAt).getTime();
   const currentTime = Date.now();
-  const elapsedSeconds = (currentTime - occurredTime) / 1000;
+  const elapsedSeconds = (currentTime - crawledTime) / 1000;
 
   // speed는 km/h 단위이므로 m/s로 변환
   const speedInMeterPerSecond = speed / 3.6;
@@ -32,11 +32,11 @@ const calculateInitialRadius = (occurredAt: string, speed: number): number => {
   return Math.min(initialRadius, MAX_RADIUS);
 };
 
-// 최대 범위 초과 여부 확인 함수
-const isMaxRadiusExceeded = (occurredAt: string, speed: number): boolean => {
-  const occurredTime = new Date(occurredAt).getTime();
+// 최대 범위 초과 여부 확인 함수 (crawledAt 기준)
+const isMaxRadiusExceeded = (crawledAt: string, speed: number): boolean => {
+  const crawledTime = new Date(crawledAt).getTime();
   const currentTime = Date.now();
-  const elapsedSeconds = (currentTime - occurredTime) / 1000;
+  const elapsedSeconds = (currentTime - crawledTime) / 1000;
 
   const speedInMeterPerSecond = speed / 3.6;
   const calculatedRadius = speedInMeterPerSecond * elapsedSeconds;
@@ -181,7 +181,7 @@ const MapPage: React.FC = () => {
 
               // 경과 시간 기반 초기 반지름 계산
               const speed = person.aiSupport?.speed ?? 3.14;
-              const initialRadius = calculateInitialRadius(person.occurredAt, speed);
+              const initialRadius = calculateInitialRadius(person.crawledAt, speed);
               setSelectedRadiusValue(initialRadius);
             }
           } else {
@@ -196,7 +196,7 @@ const MapPage: React.FC = () => {
 
               // 경과 시간 기반 초기 반지름 계산
               const speed = person.aiSupport?.speed ?? 3.14;
-              const initialRadius = calculateInitialRadius(person.occurredAt, speed);
+              const initialRadius = calculateInitialRadius(person.crawledAt, speed);
               setSelectedRadiusValue(initialRadius);
             }
           }
@@ -349,7 +349,7 @@ const MapPage: React.FC = () => {
             // 반경 표시 - 경과 시간 기반 초기 반지름 계산
             setSelectedRadiusPosition({ lat: person.latitude, lng: person.longitude });
             const speed = person.aiSupport?.speed ?? 3.14;
-            const initialRadius = calculateInitialRadius(person.occurredAt, speed);
+            const initialRadius = calculateInitialRadius(person.crawledAt, speed);
             setSelectedRadiusValue(initialRadius);
           }
         }
@@ -384,7 +384,7 @@ const MapPage: React.FC = () => {
           // 반경 표시 - 경과 시간 기반 초기 반지름 계산
           setSelectedRadiusPosition({ lat: person.latitude, lng: person.longitude });
           const speed = person.aiSupport?.speed ?? 3.14;
-          const initialRadius = calculateInitialRadius(person.occurredAt, speed);
+          const initialRadius = calculateInitialRadius(person.crawledAt, speed);
           setSelectedRadiusValue(initialRadius);
         }
       }
@@ -563,7 +563,7 @@ const MapPage: React.FC = () => {
           if (person.latitude && person.longitude) {
             // 최대 범위 초과 여부 확인
             const speed = person.aiSupport?.speed ?? 3.14;
-            const maxExceeded = isMaxRadiusExceeded(person.occurredAt, speed);
+            const maxExceeded = isMaxRadiusExceeded(person.crawledAt, speed);
 
             return (
               <Marker
