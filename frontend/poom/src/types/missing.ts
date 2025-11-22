@@ -14,7 +14,7 @@ export interface AISupportInfo {
     label: string;
     value: string;
   }>;
-  
+  speed: number; // 이동 속도 (km/h)
 }
 
 export interface CaseContact {

@@ -14,6 +14,13 @@
   padding-left: 8px; /* 좌측 세로 바로 인해 줄어든 padding 보정 */
 }
 
+/* 선택된 카드 스타일 (Dark 테마) */
+.card.selectedDark {
+  background-color: rgba(255, 255, 255, 0.1); /* 흰색에 투명도 적용 */
+  border-right: 4px solid rgba(255, 255, 255, 0.9); /* 우측 세로 바 */
+  padding-left: 8px; /* 좌측 세로 바로 인해 줄어든 padding 보정 */
+}
+
 /* 왼쪽: 사진 프레임 */
 .imageFrame {
   flex-shrink: 0;

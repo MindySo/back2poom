@@ -3,7 +3,7 @@ import { theme } from '../../../theme';
 
 export interface BadgeProps {
   children: React.ReactNode;
-  variant?: 'time' | 'feature' | 'solved' | 'alert' | 'ai';
+  variant?: 'time' | 'feature' | 'solved' | 'alert' | 'ai' | 'radius_max' | 'radius_info';
   size?: 'xs' | 'small' | 'medium' | 'large';
   className?: string;
   style?: React.CSSProperties;
@@ -49,6 +49,18 @@ const Badge: React.FC<BadgeProps> = ({
           backgroundColor: theme.colors.white + '33',
           color: theme.colors.rainbow,
           border: `2px solid ${theme.colors.rainbow}`,
+        };
+      case 'radius_max':
+        return {
+          backgroundColor: '#E55A5A',
+          color: '#EEF1F6',
+          border: `2px solid #E55A5A`,
+        };
+      case 'radius_info':
+        return {
+          backgroundColor: '#0B72E7',
+          color: '#EEF1F6',
+          border: `2px solid #0B72E7`,
         };
       default:
         return {

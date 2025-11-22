@@ -1,4 +1,6 @@
 import React, { useEffect, useRef } from 'react';
+import ReactDOM from 'react-dom/client';
+import Badge from '../../common/atoms/Badge';
 import styles from './Marker.module.css';
 
 // 못생긴 마커...
@@ -11,6 +13,7 @@ interface MarkerProps {
   onClick?: () => void;   // 마커 클릭 시 실행될 콜백
   alt?: string;
   ringColor?: string;
+  label?: string;  // 마커 위에 표시할 라벨
 }
 
 const Marker: React.FC<MarkerProps> = ({
@@ -21,6 +24,7 @@ const Marker: React.FC<MarkerProps> = ({
   onClick,
   alt = 'Marker image',
   ringColor = '#E55A5A',
+  label,
 }) => {
   const overlayRef = useRef<kakao.maps.CustomOverlay | null>(null);
   const markerElementRef = useRef<HTMLDivElement | null>(null);
@@ -80,6 +84,21 @@ const Marker: React.FC<MarkerProps> = ({
     markerElement.appendChild(markerBody);
     markerElement.appendChild(markerShadow);
 
+    // 라벨이 있으면 Badge 컴포넌트로 추가
+    if (label) {
+      const labelContainer = document.createElement('div');
+      labelContainer.className = styles.markerLabel;
+
+      const root = ReactDOM.createRoot(labelContainer);
+      root.render(
+        <Badge variant="radius_max" size="xs">
+          {label}
+        </Badge>
+      );
+
+      markerElement.appendChild(labelContainer);
+    }
+
     // 클릭 이벤트
     if (onClick) {
       markerElement.addEventListener('click', onClick);
@@ -106,7 +125,7 @@ const Marker: React.FC<MarkerProps> = ({
         overlayRef.current.setMap(null);
       }
     };
-  }, [map, position.lat, position.lng, imageUrl, size, onClick, alt, ringColor]);
+  }, [map, position.lat, position.lng, imageUrl, size, onClick, alt, ringColor, label]);
 
   // 카카오 맵에 직접 렌더링하므로 null 반환
   return null;
