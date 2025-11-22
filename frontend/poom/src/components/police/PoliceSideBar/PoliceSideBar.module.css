@@ -22,14 +22,20 @@
   display: flex;
   flex-direction: column;
   gap: 1.5rem;
-  padding: 0 1rem 1.5rem 1rem;
+  padding: 0 0.5rem 1.5rem 1rem;
   overflow-y: auto;
   flex: 1;
 }
 
-/* 스크롤바 스타일 */
+/* 스크롤바 스타일 - 기본 상태 */
+.recentMissingList {
+  scrollbar-width: thin; /* Firefox */
+  scrollbar-color: transparent transparent;
+  transition: scrollbar-color 0.6s ease;
+}
+
 .recentMissingList::-webkit-scrollbar {
-  width: 0.5rem;
+  width: 0.5rem; /* Chrome/Safari */
 }
 
 .recentMissingList::-webkit-scrollbar-track {
@@ -39,23 +45,21 @@
 .recentMissingList::-webkit-scrollbar-thumb {
   background: transparent;
   border-radius: 0.25rem;
+  transition: background 0.6s ease; /* 부드러운 fade-out 효과 */
 }
 
-.recentMissingList:hover::-webkit-scrollbar-thumb {
+/* 마우스 움직임이 있을 때만 스크롤바 표시 */
+.recentMissingList.showScrollbar {
+  scrollbar-color: rgba(255, 255, 255, 0.3) transparent; /* Firefox */
+}
+
+.recentMissingList.showScrollbar::-webkit-scrollbar-thumb {
   background: rgba(255, 255, 255, 0.3);
+  transition: background 0.3s ease; /* 나타날 때는 빠르게 */
 }
 
-.recentMissingList::-webkit-scrollbar-thumb:hover {
+.recentMissingList.showScrollbar::-webkit-scrollbar-thumb:hover {
   background: rgba(255, 255, 255, 0.5);
-}
-
-/* Firefox 스크롤바 */
-.recentMissingList {
-  scrollbar-color: transparent transparent;
-}
-
-.recentMissingList:hover {
-  scrollbar-color: rgba(255, 255, 255, 0.3) transparent;
 }
 
 /* 빈 상태 메시지 */

@@ -67,7 +67,8 @@ const BottomSheet = forwardRef<BottomSheetRef, BottomSheetProps>(
       } else if (modalState === 'half') {
         expandToFull();
       } else {
-        collapseModalToInitial();
+        // full 상태에서는 half로 이동 (initial로 바로 가지 않고 순환)
+        expandToHalf();
       }
     };
 
