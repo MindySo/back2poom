@@ -5,6 +5,7 @@ import StatusBoard from '../../map/StatusBoard/StatusBoard';
 import RecentMissing from '../../map/RecentMissing/RecentMissing';
 import { useRecentMissing } from '../../../hooks';
 import styles from './PoliceSideBar.module.css';
+import anonymousProfile from '../../../assets/anonymous_profile.svg';
 
 export interface PoliceSideBarProps {
   className?: string;
@@ -106,7 +107,7 @@ const PoliceSideBar: React.FC<PoliceSideBarProps> = ({ className = '', onMissing
           recentList.map((person) => (
             <RecentMissing
               key={person.id}
-              image={person.mainImage?.url || 'https://via.placeholder.com/120'}
+              image={person.mainImage?.url || anonymousProfile}
               badges={[]}
               name={person.personName}
               gender={person.gender || '미상'}

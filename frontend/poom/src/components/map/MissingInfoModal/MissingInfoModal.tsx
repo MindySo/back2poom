@@ -237,7 +237,7 @@ const MissingInfoModal: React.FC<MissingInfoModalProps> = ({ personId, onGoBack,
                             className={cardStyles['m-archive-card__thumbnail']}
                             onClick={() => img.url && handleImageClick(img.url)}
                           >
-                            <img src={img.url || tempImg} alt={`추가 사진 ${index + 1}`} />
+                            <img src={img.url || anonymousProfile} alt={`추가 사진 ${index + 1}`} />
                           </div>
                         ))}
                       </div>

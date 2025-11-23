@@ -10,7 +10,7 @@ import Text from '../../common/atoms/Text';
 import Button from '../../common/atoms/Button';
 import ImageCarousel from '../../common/molecules/ImageCarousel/ImageCarousel';
 import type { ImageFile, MissingPerson } from '../../../types/missing';
-import tempImg from '../../../assets/TempImg.png';
+import anonymousProfile from '../../../assets/anonymous_profile.svg';
 import poomLogo from '../../../assets/poom_logo.png';
 
 export interface ArchiveDetailPopupProps {
@@ -188,8 +188,8 @@ const ArchiveDetailPopup: React.FC<ArchiveDetailPopupProps> = ({ personId, initi
     return `${year}-${month}-${day}`;
   };
   
-  // 이미지 URL 가져오기 (없으면 임시 이미지)
-  const mainImageUrl = mainImage?.url || tempImg;
+  // 이미지 URL 가져오기 (없으면 익명 프로필)
+  const mainImageUrl = mainImage?.url || anonymousProfile;
   const thumbnailImages = inputImages?.slice(0, 4) || [];
 
   // 모든 이미지를 배열로 수집
@@ -273,7 +273,7 @@ const ArchiveDetailPopup: React.FC<ArchiveDetailPopupProps> = ({ personId, initi
                     className={styles['popup-thumbnail']}
                     onClick={() => img.url && handleImageClick(img.url)}
                   >
-                    <img src={img.url || tempImg} alt={`썸네일 ${index + 1}`} />
+                    <img src={img.url || anonymousProfile} alt={`썸네일 ${index + 1}`} />
                   </div>
                 ))}
                 {/* 썸네일이 4개 미만이면 빈 공간 유지 */}

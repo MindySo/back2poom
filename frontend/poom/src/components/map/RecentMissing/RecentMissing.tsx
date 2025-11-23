@@ -3,6 +3,7 @@ import Text from '../../common/atoms/Text';
 import Badge from '../../common/atoms/Badge';
 import { useElapsedTime } from '../../../hooks';
 import styles from './RecentMissing.module.css';
+import anonymousProfile from '../../../assets/anonymous_profile.svg';
 
 export interface Badge {
   text: string;
@@ -63,9 +64,10 @@ const RecentMissing: React.FC<RecentMissingProps> = ({
       {/* 왼쪽: 사진 프레임 */}
       <div className={styles.imageFrame}>
         <img
-          src={image}
+          src={image || anonymousProfile}
           alt={name}
           className={styles.image}
+          style={{ opacity: image ? 1 : 0.5 }}
         />
       </div>
 
