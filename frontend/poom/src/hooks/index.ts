@@ -6,3 +6,4 @@ export { useIsMobile } from './useMediaQuery';
 export { useShareMissingPerson } from './useShareMissingPerson';
 export { useElapsedTime } from './useElapsedTime';
 export { useMapLocationCenter } from './useMapLocationCenter';
+export { useCctvDetection} from './useCctvDetection';

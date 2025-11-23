@@ -9,13 +9,24 @@ const PoliceLoginPage = () => {
   const navigate = useNavigate();
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
+  const [error, setError] = useState('');
 
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
-    // TODO: 로그인 API 호출
-    console.log('Login attempt:', { username, password });
-    // 로그인 성공 시 이동할 페이지로 리다이렉트
-    navigate('/police/map');
+    setError('');
+
+    // 하드코딩된 자격증명 확인
+    if (username === 'admin' && password === 'poom1234') {
+      // 로그인 성공: localStorage에 저장
+      localStorage.setItem('policeAuth', 'true');
+      localStorage.setItem('policeUsername', username);
+      // 로그인 성공 시 이동할 페이지로 리다이렉트
+      navigate('/police/map');
+    } else {
+      // 로그인 실패
+      setError('아이디 또는 비밀번호가 잘못되었습니다.');
+      setPassword('');
+    }
   };
 
   return (
@@ -27,7 +38,7 @@ const PoliceLoginPage = () => {
         <Text as="h1" size="xxl" weight="bold" color="black" className={styles.title}>
           품으로 실종자 관제 시스템
         </Text>
-        
+
         <form onSubmit={handleLogin} className={styles.form}>
           <div className={styles.inputGroup}>
             <label className={styles.label}>
@@ -60,6 +71,14 @@ const PoliceLoginPage = () => {
               required
             />
           </div>
+
+          {error && (
+            <div className={styles.errorMessage}>
+              <Text as="p" size="sm" weight="bold" style={{ margin: 0 }}>
+                {error}
+              </Text>
+            </div>
+          )}
 
           <Button
             type="submit"

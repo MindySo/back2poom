@@ -4,6 +4,7 @@ import com.topoom.missingcase.entity.CaseAiSupport;
 import com.topoom.missingcase.entity.MissingCase;
 import com.topoom.missingcase.repository.CaseAiSupportRepository;
 import com.topoom.missingcase.service.MovementAnalysisService.MovementAnalysisResult;
+import com.topoom.missingcase.service.PriorityAnalysisService.PriorityAnalysisResult;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -13,12 +14,13 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 @RequiredArgsConstructor
 public class CaseAiSupportService {
-    
+
     private final CaseAiSupportRepository caseAiSupportRepository;
     private final MovementAnalysisService movementAnalysisService;
+    private final PriorityAnalysisService priorityAnalysisService;
     
     /**
-     * 새로운 MissingCase에 대한 배회 분석 수행 및 CaseAiSupport 업데이트
+     * 새로운 MissingCase에 대한 배회 분석 및 우선순위 분석 수행
      */
     @Transactional
     public void processNewMissingCase(MissingCase missingCase) {
@@ -26,39 +28,59 @@ public class CaseAiSupportService {
             // 기본값 설정 (CCTV나 GPS 데이터가 없는 경우)
             double defaultSpeedMPerMin = 9.0; // 교차로 배회 기본값
             int defaultElapsedTime = 60; // 1시간 기본값
-            
-            // 배회 분석 수행
-            MovementAnalysisResult analysis = movementAnalysisService.analyzeMovement(
-                missingCase, 
-                defaultElapsedTime, 
+
+            // 1. 배회 분석 수행
+            MovementAnalysisResult movementAnalysis = movementAnalysisService.analyzeMovement(
+                missingCase,
+                defaultElapsedTime,
                 defaultSpeedMPerMin
             );
-            
-            // CaseAiSupport 업데이트 또는 생성
-            updateOrCreateCaseAiSupport(missingCase, analysis);
-            
-            log.info("MissingCase {} 배회 분석 완료", missingCase.getId());
-            
+
+            // 2. 우선순위 분석 수행 (비동기)
+            priorityAnalysisService.analyzePriority(missingCase)
+                .doOnSuccess(priorityResult -> {
+                    // 배회 분석 + 우선순위 분석 결과 모두 저장
+                    updateOrCreateCaseAiSupport(missingCase, movementAnalysis, priorityResult);
+                    log.info("MissingCase {} 전체 AI 분석 완료 (배회 + 우선순위)", missingCase.getId());
+                })
+                .doOnError(error -> {
+                    // 우선순위 분석 실패 시에도 배회 분석 결과는 저장
+                    log.error("MissingCase {} 우선순위 분석 실패, 배회 분석 결과만 저장", missingCase.getId(), error);
+                    updateOrCreateCaseAiSupport(missingCase, movementAnalysis, null);
+                })
+                .subscribe();
+
+            log.info("MissingCase {} AI 분석 시작 (배회 + 우선순위)", missingCase.getId());
+
         } catch (Exception e) {
-            log.error("MissingCase {} 배회 분석 실패: {}", missingCase.getId(), e.getMessage(), e);
+            log.error("MissingCase {} AI 분석 실패: {}", missingCase.getId(), e.getMessage(), e);
         }
     }
-    
+
     /**
-     * CaseAiSupport 업데이트 또는 생성
+     * CaseAiSupport 업데이트 또는 생성 (배회 분석 + 우선순위 분석)
      */
-    private void updateOrCreateCaseAiSupport(MissingCase missingCase, MovementAnalysisResult analysis) {
+    private void updateOrCreateCaseAiSupport(MissingCase missingCase, MovementAnalysisResult movementAnalysis, PriorityAnalysisResult priorityResult) {
         CaseAiSupport aiSupport = caseAiSupportRepository.findByMissingCase(missingCase)
             .orElse(CaseAiSupport.builder()
                 .missingCase(missingCase)
                 .build());
-        
-        // 속도 정보 업데이트
-        aiSupport.setSpeed(analysis.getSpeedKmh());
-        
+
+        // 배회 속도 정보 업데이트
+        aiSupport.setSpeed(movementAnalysis.getSpeedKmh());
+
+        // 우선순위 정보 업데이트 (있을 경우)
+        if (priorityResult != null) {
+            aiSupport.setTop1Desc(priorityResult.getTop1Desc());
+            aiSupport.setTop2Desc(priorityResult.getTop2Desc());
+        }
+
         caseAiSupportRepository.save(aiSupport);
-        
-        log.info("CaseAiSupport 업데이트 완료 - Case: {}, Speed: {}km/h", 
-                missingCase.getId(), analysis.getSpeedKmh());
+
+        log.info("CaseAiSupport 업데이트 완료 - Case: {}, Speed: {}km/h, Top1: {}, Top2: {}",
+                missingCase.getId(),
+                movementAnalysis.getSpeedKmh(),
+                priorityResult != null ? "설정됨" : "없음",
+                priorityResult != null ? "설정됨" : "없음");
     }
 }

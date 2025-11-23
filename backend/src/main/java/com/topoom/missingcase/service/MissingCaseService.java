@@ -27,6 +27,7 @@ public class MissingCaseService {
 
     private final MissingCaseRepository missingCaseRepository;
     private final CaseFileRepository caseFileRepository;
+    private final CaseAiSupportService caseAiSupportService;
     private final ObjectMapper objectMapper;
 
     private String generateFileUrl(String s3Key) {
@@ -220,6 +221,19 @@ public class MissingCaseService {
         }
 
         return updatedCount;
+    }
+
+    /**
+     * 테스트용: 특정 MissingCase에 대해 우선순위 분석 수행
+     */
+    @Transactional
+    public String testPriorityAnalysis(Long caseId) {
+        MissingCase missingCase = missingCaseRepository.findById(caseId)
+                .orElseThrow(() -> new RuntimeException("MissingCase not found: " + caseId));
+
+        caseAiSupportService.processNewMissingCase(missingCase);
+
+        return "우선순위 분석이 비동기로 시작되었습니다. 로그를 확인하세요.";
     }
 
 }
