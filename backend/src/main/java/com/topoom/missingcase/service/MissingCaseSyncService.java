@@ -97,6 +97,8 @@ public class MissingCaseSyncService {
                 missingCase.setHairStyle(item.getHairshpeDscd());
                 missingCase.setClothingDesc(item.getAlldressingDscd());
                 missingCase.setTargetType(mapTargetType(item.getWritngTrgetDscd()));
+                missingCase.setHeightCm(item.getHeight());
+                missingCase.setWeightKg(item.getBdwgh());
 
                 missingCase.setSourceTitle("실종경보 Open Api");
                 missingCase.setSourceUrl("https://www.safe182.go.kr");
