@@ -5,6 +5,7 @@ import { useMissingDetail } from '../../../hooks';
 import styles from './PoliceDashboard.module.css';
 import close from '../../../assets/back_icon_police.svg';
 import logo from '../../../assets/logo_police.png';
+import anonymousProfile from '../../../assets/anonymous_profile.svg';
 import { useNavigate } from 'react-router-dom';
 import Text from '../../common/atoms/Text';
 import Badge from '../../common/atoms/Badge';
@@ -183,13 +184,20 @@ const PoliceDashboard: React.FC<PoliceDashboardProps> = ({ isOpen, onClose, miss
 
                     {/* 메인 이미지 */}
                     <div className={styles.mainImageWrapper}>
-                      {missingDetail.mainImage && (
+                      {missingDetail.mainImage ? (
                         <img
                           src={missingDetail.mainImage.url}
                           alt={missingDetail.personName}
                           className={styles.mainImage}
                           onClick={() => missingDetail.mainImage && handleImageClick(missingDetail.mainImage.url)}
                           style={{ cursor: 'pointer' }}
+                        />
+                      ) : (
+                        <img
+                          src={anonymousProfile}
+                          alt="익명 프로필 이미지"
+                          className={styles.mainImage}
+                          style={{ cursor: 'default', opacity: 0.5 }}
                         />
                       )}
                     </div>
@@ -262,27 +270,27 @@ const PoliceDashboard: React.FC<PoliceDashboardProps> = ({ isOpen, onClose, miss
                   <div className={styles.infoCard}>
                     <Text as="div" size="sm" weight="bold" color="policeWhite" className={styles.infoLabel}>이름</Text>
                     <Text as="div" size="md" color="policeWhite" className={styles.infoValue}>
-                      {missingDetail.personName}({missingDetail.gender === '남성' ? '남' : missingDetail.gender === '여성' ? '여' : '성별 미상'})
+                      {missingDetail.personName || '-'} ({missingDetail.gender === '남성' ? '남' : missingDetail.gender === '여성' ? '여' : '-'})
                     </Text>
 
                     <Text as="div" size="sm" weight="bold" color="policeWhite" className={styles.infoLabel}>나이</Text>
                     <Text as="div" size="md" color="policeWhite" className={styles.infoValue}>
-                      {missingDetail.ageAtTime}세 (현재 {calculateCurrentAge(missingDetail.occurredAt, missingDetail.ageAtTime)}세)
+                      {missingDetail.ageAtTime && missingDetail.occurredAt ? `${missingDetail.ageAtTime}세 (현재 ${calculateCurrentAge(missingDetail.occurredAt, missingDetail.ageAtTime)}세)` : '- 세 (현재 - 세)'}
                     </Text>
 
                     <Text as="div" size="sm" weight="bold" color="policeWhite" className={styles.infoLabel}>발생일</Text>
                     <Text as="div" size="md" color="policeWhite" className={styles.infoValue}>
-                      {(() => {
+                      {missingDetail.occurredAt ? (() => {
                         const date = new Date(missingDetail.occurredAt);
                         const year = date.getFullYear();
                         const month = String(date.getMonth() + 1).padStart(2, '0');
                         const day = String(date.getDate()).padStart(2, '0');
                         return `${year}-${month}-${day}`;
-                      })()}
+                      })() : '-'}
                     </Text>
 
                     <Text as="div" size="sm" weight="bold" color="policeWhite" className={styles.infoLabel}>발생장소</Text>
-                    <Text as="div" size="md" color="policeWhite" className={styles.infoValue}>{missingDetail.occurredLocation}</Text>
+                    <Text as="div" size="md" color="policeWhite" className={styles.infoValue}>{missingDetail.occurredLocation || '-'}</Text>
                   </div>
                 </div>
 
@@ -291,7 +299,7 @@ const PoliceDashboard: React.FC<PoliceDashboardProps> = ({ isOpen, onClose, miss
                   <div className={styles.infoCard}>
                     <Text as="div" size="sm" weight="bold" color="policeWhite" className={styles.infoLabel}>신체정보</Text>
                     <Text as="div" size="md" color="policeWhite" className={styles.infoValue}>
-                      {missingDetail.heightCm ? `${missingDetail.heightCm}cm` : '-'} / {missingDetail.weightKg ? `${missingDetail.weightKg}kg` : '-'}
+                      {missingDetail.heightCm ? `${missingDetail.heightCm}cm` : '- cm'} / {missingDetail.weightKg ? `${missingDetail.weightKg}kg` : '- kg'}
                     </Text>
 
                     <Text as="div" size="sm" weight="bold" color="policeWhite" className={styles.infoLabel}>체형</Text>
@@ -312,7 +320,7 @@ const PoliceDashboard: React.FC<PoliceDashboardProps> = ({ isOpen, onClose, miss
 
                 {/* 세번째 섹션: AI 서포트 정보 */}
                 <div
-                  className={styles.section}
+                  className={`${styles.section} ${styles.sectionLarge}`}
                   style={{
                     background: `linear-gradient(${policeColor}, ${policeColor}) padding-box, ${theme.colors.rainbow} border-box`,
                     border: '3px solid transparent',
