@@ -66,3 +66,28 @@ export type MissingPersonWithTypo = Omit<MissingPerson, 'occurredAt' | 'occurred
   occuredLocation: string;
 };
 
+// 최근 실종자에서 null/undefined/-/미상 값 체크하는 함수
+export const isValidRecentMissing = (person: MissingPerson): boolean => {
+  // 이름이 null이거나 "-"이면 제외
+  if (!person.personName || person.personName.trim() === "" || person.personName === "-") {
+    return false;
+  }
+  
+  // 성별이 "미상"이면 제외
+  if (!person.gender || person.gender === "미상") {
+    return false;
+  }
+  
+  // 실종장소가 null이거나 "-"이면 제외
+  if (!person.occurredLocation || person.occurredLocation.trim() === "" || person.occurredLocation === "-") {
+    return false;
+  }
+  
+  // 나이가 null이거나 0 이하면 제외
+  if (!person.ageAtTime || person.ageAtTime <= 0) {
+    return false;
+  }
+  
+  return true;
+};
+
