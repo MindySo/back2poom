@@ -37,7 +37,7 @@ public interface MissingCaseRepository extends JpaRepository<MissingCase, Long> 
         AND mc.faceShape IS NOT NULL 
         AND mc.hairColor IS NOT NULL 
         AND mc.hairStyle IS NOT NULL 
-        AND mc.clothingDesc IS NOT NULL 
+ 
         AND mc.progressStatus IS NOT NULL
         ORDER BY mc.occurredAt DESC
     """)
@@ -69,7 +69,7 @@ public interface MissingCaseRepository extends JpaRepository<MissingCase, Long> 
         AND mc.faceShape IS NOT NULL 
         AND mc.hairColor IS NOT NULL 
         AND mc.hairStyle IS NOT NULL 
-        AND mc.clothingDesc IS NOT NULL 
+ 
         AND mc.progressStatus IS NOT NULL
     """)
     Optional<MissingCase> findDetailById(@Param("id") Long id);
