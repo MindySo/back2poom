@@ -36,21 +36,23 @@ public class CaseAiSupportService {
                 defaultSpeedMPerMin
             );
 
-            // 2. 우선순위 분석 수행 (비동기)
-            priorityAnalysisService.analyzePriority(missingCase)
-                .doOnSuccess(priorityResult -> {
-                    // 배회 분석 + 우선순위 분석 결과 모두 저장
-                    updateOrCreateCaseAiSupport(missingCase, movementAnalysis, priorityResult);
-                    log.info("MissingCase {} 전체 AI 분석 완료 (배회 + 우선순위)", missingCase.getId());
-                })
-                .doOnError(error -> {
-                    // 우선순위 분석 실패 시에도 배회 분석 결과는 저장
-                    log.error("MissingCase {} 우선순위 분석 실패, 배회 분석 결과만 저장", missingCase.getId(), error);
-                    updateOrCreateCaseAiSupport(missingCase, movementAnalysis, null);
-                })
-                .subscribe();
+            // 2. 먼저 배회 분석 결과만 저장
+            updateOrCreateCaseAiSupport(missingCase, movementAnalysis, null);
+            log.info("MissingCase {} 배회 분석 완료 및 저장", missingCase.getId());
 
-            log.info("MissingCase {} AI 분석 시작 (배회 + 우선순위)", missingCase.getId());
+            // 3. 우선순위 분석 수행 (동기)
+            try {
+                PriorityAnalysisResult priorityResult = priorityAnalysisService.analyzePriority(missingCase).block();
+                if (priorityResult != null) {
+                    // 우선순위 분석 결과 추가 저장
+                    updateOrCreateCaseAiSupport(missingCase, null, priorityResult);
+                    log.info("MissingCase {} 우선순위 분석 완료 및 저장", missingCase.getId());
+                }
+            } catch (Exception error) {
+                log.error("MissingCase {} 우선순위 분석 실패, 배회 분석 결과만 유지", missingCase.getId(), error);
+            }
+
+            log.info("MissingCase {} AI 분석 완료", missingCase.getId());
 
         } catch (Exception e) {
             log.error("MissingCase {} AI 분석 실패: {}", missingCase.getId(), e.getMessage(), e);
@@ -66,8 +68,10 @@ public class CaseAiSupportService {
                 .missingCase(missingCase)
                 .build());
 
-        // 배회 속도 정보 업데이트
-        aiSupport.setSpeed(movementAnalysis.getSpeedKmh());
+        // 배회 속도 정보 업데이트 (movementAnalysis가 있을 경우)
+        if (movementAnalysis != null) {
+            aiSupport.setSpeed(movementAnalysis.getSpeedKmh());
+        }
 
         // 우선순위 정보 업데이트 (있을 경우)
         if (priorityResult != null) {
@@ -79,7 +83,7 @@ public class CaseAiSupportService {
 
         log.info("CaseAiSupport 업데이트 완료 - Case: {}, Speed: {}km/h, Top1: {}, Top2: {}",
                 missingCase.getId(),
-                movementAnalysis.getSpeedKmh(),
+                movementAnalysis != null ? movementAnalysis.getSpeedKmh() : "유지",
                 priorityResult != null ? "설정됨" : "없음",
                 priorityResult != null ? "설정됨" : "없음");
     }
