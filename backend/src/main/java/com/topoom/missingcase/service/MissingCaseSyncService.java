@@ -33,6 +33,7 @@ public class MissingCaseSyncService {
     private final MissingCaseRepository missingCaseRepository;
     private final CaseFileRepository caseFileRepository;
     private final S3ImageUploadService s3ImageUploadService;
+    private final CaseAiSupportService caseAiSupportService;
 
     /**
      * Safe182 API 데이터를 DB로 동기화
@@ -65,6 +66,7 @@ public class MissingCaseSyncService {
             try {
                 Optional<MissingCase> existingCase = missingCaseRepository.findByMissingId(item.getMsspsnIdntfccd());
                 MissingCase missingCase = existingCase.orElseGet(MissingCase::new);
+                boolean isNewCase = !existingCase.isPresent();
 
                 missingCase.setMissingId(item.getMsspsnIdntfccd());
                 missingCase.setPersonName(item.getNm());
@@ -111,6 +113,16 @@ public class MissingCaseSyncService {
 
                     } catch (Exception e) {
                         log.error("이미지 업로드 실패 (missingId={}): {}", savedCase.getMissingId(), e.getMessage());
+                    }
+                }
+
+                // 새로운 케이스인 경우 AI 분석 수행 (배회 분석 + 우선순위 분석)
+                if (isNewCase) {
+                    try {
+                        caseAiSupportService.processNewMissingCase(savedCase);
+                        log.info("새로운 실종 케이스 AI 분석 트리거 완료: {}", savedCase.getId());
+                    } catch (Exception e) {
+                        log.error("AI 분석 트리거 실패 (missingId={}): {}", savedCase.getMissingId(), e.getMessage());
                     }
                 }
 

@@ -14,7 +14,7 @@ export interface AISupportInfo {
     label: string;
     value: string;
   }>;
-  
+  speed: number; // 이동 속도 (km/h)
 }
 
 export interface CaseContact {
@@ -55,8 +55,8 @@ export interface MissingPerson {
 
 // 실종자 통계
 export interface MissingStats {
-  totalReports: number;  // 금일 실종
-  totalTips: number;     // 제보 건수
+  totalCases: number;  // 금일 실종
+  totalReports: number;     // 제보 건수
   totalResolved: number; // 해결 건수
 }
 
@@ -64,5 +64,30 @@ export interface MissingStats {
 export type MissingPersonWithTypo = Omit<MissingPerson, 'occurredAt' | 'occurredLocation'> & {
   occuredAt: string;
   occuredLocation: string;
+};
+
+// 최근 실종자에서 null/undefined/-/미상 값 체크하는 함수
+export const isValidRecentMissing = (person: MissingPerson): boolean => {
+  // 이름이 null이거나 "-"이면 제외
+  if (!person.personName || person.personName.trim() === "" || person.personName === "-") {
+    return false;
+  }
+  
+  // 성별이 "미상"이면 제외
+  if (!person.gender || person.gender === "미상") {
+    return false;
+  }
+  
+  // 실종장소가 null이거나 "-"이면 제외
+  if (!person.occurredLocation || person.occurredLocation.trim() === "" || person.occurredLocation === "-") {
+    return false;
+  }
+  
+  // 나이가 null이거나 0 이하면 제외
+  if (!person.ageAtTime || person.ageAtTime <= 0) {
+    return false;
+  }
+  
+  return true;
 };
 

@@ -10,7 +10,7 @@ import ReportDetailInput from '../../components/report/ReportDetailInput/ReportD
 import HelpCaption from '../../components/common/molecules/HelpCaption/HelpCaption';
 import { useIsMobile } from '../../hooks/useMediaQuery';
 import type { AnswerOption } from '../../components/report/ReportQuestionStep/ReportQuestionStep';
-import backIcon from '../../assets/back_icon.png';
+import backIcon from '../../assets/back_icon.svg';
 import styles from './ReportPage.module.css';
 
 // 각 단계의 context 타입 정의
@@ -102,10 +102,12 @@ const MethodStep: React.FC<{ context: any; history: any; personName: string; pho
 
   return (
     <div className={styles.stepWrapper}>
+      {/* 다른 단계들의 뒤로가기 버튼과 동일한 높이의 spacer */}
+      <div className={styles.backButtonSpacer}></div>
       <div className={styles.stepContent}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
           <Text size="md" color="black" className={styles.context}>
-            {personName}님을 제보하시는 군요
+            {personName} 님을 제보하시는군요
           </Text>
           <HelpCaption 
             showOverlay={isMobile}
@@ -190,7 +192,7 @@ const LevelStep: React.FC<{ context: any; history: any; personName: string }> = 
       </button>
       <div className={styles.stepContent}>
         <Text size="md" color="black" className={styles.context}>
-          {personName}님을 제보하시는 군요
+          {personName} 님을 제보하시는군요
         </Text>
         {/* 현재 단계: level */}
         <ReportQuestionStep
@@ -258,7 +260,7 @@ const LocationStep: React.FC<{ context: any; history: any; personName: string }>
       </button>
       <div className={styles.stepContent}>
         <Text size="md" color="black" className={styles.context}>
-          {personName}님을 제보하시는 군요
+          {personName} 님을 제보하시는군요
         </Text>
         {/* 현재 단계 */}
         <ReportLocationInput 
@@ -334,7 +336,7 @@ const TimeStep: React.FC<{ context: any; history: any; personName: string }> = R
       </button>
       <div className={styles.stepContent}>
         <Text size="md" color="black" className={styles.context}>
-          {personName}님을 제보하시는 군요
+          {personName} 님을 제보하시는군요
         </Text>
         {/* 현재 단계 */}
         <ReportTimeInput 
@@ -431,7 +433,7 @@ const DetailStep: React.FC<{ context: any; history: any; personName: string; pho
       <div className={styles.stepContentWithSpaceBetween}>
         <div>
           <Text size="md" color="black" className={styles.context}>
-            {personName}님을 제보하시는 군요
+            {personName} 님을 제보하시는군요
           </Text>
           {/* 현재 단계 */}
           <ReportDetailInput 

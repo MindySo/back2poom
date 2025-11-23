@@ -58,6 +58,12 @@
   display: block;
 }
 
+.charCounter {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 8px;
+}
+
 .buttonContainer {
   margin-top: 16px;
   display: flex;

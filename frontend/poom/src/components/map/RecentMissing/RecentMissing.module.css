@@ -1,6 +1,24 @@
 .card {
   display: flex;
   gap: 16px;
+  padding: 12px;
+  margin: 0 0 0 -12px; /* 좌측만 -12px, 우측은 0으로 여백 확보 */
+  position: relative;
+  transition: all 0.2s ease-in-out;
+}
+
+/* 선택된 카드 스타일 */
+.card.selected {
+  background-color: rgba(232, 154, 89, 0.1); /* main 컬러에 투명도 적용 */
+  border-right: 4px solid #E89A59; /* 우측 세로 바 */
+  padding-left: 8px; /* 좌측 세로 바로 인해 줄어든 padding 보정 */
+}
+
+/* 선택된 카드 스타일 (Dark 테마) */
+.card.selectedDark {
+  background-color: rgba(255, 255, 255, 0.1); /* 흰색에 투명도 적용 */
+  border-right: 4px solid rgba(255, 255, 255, 0.9); /* 우측 세로 바 */
+  padding-left: 8px; /* 좌측 세로 바로 인해 줄어든 padding 보정 */
 }
 
 /* 왼쪽: 사진 프레임 */
@@ -26,6 +44,7 @@
   gap: 8px;
   flex: 1;
   justify-content: flex-start;
+  min-width: 0; /* flex 아이템이 부모 내에서 축소될 수 있도록 허용 */
 }
 
 /* 라벨 */
@@ -46,11 +65,21 @@
 .locationSection {
   display: flex;
   align-items: baseline;
-  gap: 12px;
+  gap: 4px;
+  min-width: 0; /* flex 아이템이 축소되어 말줄임표가 작동하도록 허용 */
 }
 
 .locationSection > :first-child {
   flex-shrink: 0; /* 레이블이 축소되지 않도록 고정 */
   width: 60px;
   white-space: nowrap;
+}
+
+/* 실종장소 값 - 한 줄 제한 및 말줄임표 */
+.locationValue {
+  display: block;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  overflow: hidden;
+  max-width: 100%;
 }

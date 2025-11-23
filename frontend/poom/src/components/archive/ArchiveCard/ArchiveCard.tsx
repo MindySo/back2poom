@@ -12,9 +12,10 @@ import Button from '../../common/atoms/Button';
 export interface ArchiveCardProps {
   person: MissingPerson;
   onClick?: () => void;
+  isSelected?: boolean;
 }
 
-const ArchiveCard: React.FC<ArchiveCardProps> = ({ person, onClick }) => {
+const ArchiveCard: React.FC<ArchiveCardProps> = ({ person, onClick, isSelected }) => {
   const navigate = useNavigate();
   const { share, isSharing } = useShareMissingPerson();
   const {
@@ -50,10 +51,9 @@ const ArchiveCard: React.FC<ArchiveCardProps> = ({ person, onClick }) => {
   const displayMainImageUrl = mainImage?.url || tempImg;
 
   return (
-    <div 
-      className={styles['archive-card']} 
+    <div
+      className={`${styles['archive-card']} ${isSelected ? styles['selected'] : ''}`}
       onClick={onClick}
-      style={{ cursor: onClick ? 'pointer' : 'default' }}
     >
       <div className={styles['archive-card__content']}>
         <div className={styles['archive-card__imageWrap']}>
@@ -71,26 +71,28 @@ const ArchiveCard: React.FC<ArchiveCardProps> = ({ person, onClick }) => {
               )}
             </div>
 
-            <div className={styles['archive-card__row']}>
-              <Text as="span" size="lg" weight="bold" className={styles['archive-card__name']}>{personName}</Text>
-              <Text as="span" size="sm" color="gray" className={styles['archive-card__meta']}>
-                {gender ?? '성별 미상'}
-              </Text>
-            </div>
-            <div className={styles['archive-card__info']}>
-              <div className={styles['archive-card__info-item']}>
-                <Text as="span" size="sm" color="gray" className={styles['archive-card__label']}>나이</Text>
-                <Text as="span" size="sm" className={styles['archive-card__value']}>
-                  {ageAtTime}세{currentAge ? ` (현재나이 ${currentAge}세)` : ''}
+            <div style={{ paddingLeft: '4px' }}>
+              <div className={styles['archive-card__row']}>
+                <Text as="span" size="lg" weight="bold" color="darkMain" className={styles['archive-card__name']}>{personName}</Text>
+                <Text as="span" size="sm" color="gray" className={styles['archive-card__meta']}>
+                  {gender ?? '성별 미상'}
                 </Text>
               </div>
-              <div className={styles['archive-card__info-item']}>
-                <Text as="span" size="sm" color="gray" className={styles['archive-card__label']}>발생일</Text>
-                <Text as="span" size="sm" className={styles['archive-card__value']}>{formatDate(occurredAt)}</Text>
-              </div>
-              <div className={styles['archive-card__info-item']}>
-                <Text as="span" size="sm" color="gray" className={styles['archive-card__label']}>발생장소</Text>
-                <Text as="span" size="sm" className={`${styles['archive-card__value']} ${styles['archive-card__value--location']}`}>{occurredLocation}</Text>
+              <div className={styles['archive-card__info']}>
+                <div className={styles['archive-card__info-item']}>
+                  <Text as="span" size="sm" color="gray" className={styles['archive-card__label']}>나이</Text>
+                  <Text as="span" size="sm" color="darkMain" className={styles['archive-card__value']}>
+                    {ageAtTime}세{currentAge ? ` (현재 ${currentAge}세)` : ''}
+                  </Text>
+                </div>
+                <div className={styles['archive-card__info-item']}>
+                  <Text as="span" size="sm" color="gray" className={styles['archive-card__label']}>발생일</Text>
+                  <Text as="span" size="sm" color="darkMain" className={styles['archive-card__value']}>{formatDate(occurredAt)}</Text>
+                </div>
+                <div className={styles['archive-card__info-item']}>
+                  <Text as="span" size="sm" color="gray" className={styles['archive-card__label']}>발생장소</Text>
+                  <Text as="span" size="sm" color="darkMain" className={`${styles['archive-card__value']} ${styles['archive-card__value--location']}`}>{occurredLocation}</Text>
+                </div>
               </div>
             </div>
           </div>

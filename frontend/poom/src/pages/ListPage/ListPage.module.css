@@ -173,22 +173,28 @@
   padding: 2px 4px;
   font-size: 14px;
   cursor: pointer;
+  transition: color 0.2s ease;
 }
 
 .list-tabs button:global(.active) {
   color: #333333;
 }
 
-.list-tabs button:global(.active)::after {
+.list-tabs button::after {
   content: "";
   position: absolute;
   left: 50%;
-  transform: translateX(-50%);
+  transform: translateX(-50%) scaleX(0);
   bottom: -10px;
   width: 36px;
   height: 3px;
   background: #E89A59; /* orange underline like screenshot */
   border-radius: 2px;
+  transition: transform 0.3s ease;
+}
+
+.list-tabs button:global(.active)::after {
+  transform: translateX(-50%) scaleX(1);
 }
 
 /* Grid area (cards themselves are external) */

@@ -83,13 +83,37 @@
   width: 24px;
   height: 24px;
   margin-bottom: 16px;
+  transition: transform 0.1s ease, opacity 0.2s ease;
+}
+
+.backButtonSpacer {
+  height: 24px;
+  margin-bottom: 16px;
+}
+
+.backButton:hover {
+  opacity: 0.8;
+}
+
+.backButton:active {
+  transform: scale(0.9);
+  opacity: 0.6;
 }
 
 .backButton img {
   width: 50%;
   height: 100%;
   object-fit: contain;
-  filter: grayscale(100%) brightness(0.6) opacity(0.7);
+  opacity: 1;
+  transition: opacity 0.2s ease;
+}
+
+.backButton:hover img {
+  opacity: 0.8;
+}
+
+.backButton:active img {
+  opacity: 0.6;
 }
 
 @media (max-width: 375px) {
@@ -103,6 +127,11 @@
 
   .backButton {
     width: 20px;
+    height: 20px;
+    margin-bottom: 12px;
+  }
+
+  .backButtonSpacer {
     height: 20px;
     margin-bottom: 12px;
   }

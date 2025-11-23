@@ -34,6 +34,7 @@ export const useShareMissingPerson = () => {
     setIsSharing(true);
 
     const {
+      id,
       personName,
       ageAtTime,
       gender,
@@ -41,7 +42,10 @@ export const useShareMissingPerson = () => {
       occurredLocation,
     } = person;
 
-    const shareUrl = `${window.location.origin}/list`;
+    // missingId가 있으면 지도 페이지로, 없으면 리스트 페이지로
+    const shareUrl = id 
+      ? `${window.location.origin}/?missingId=${id}`
+      : `${window.location.origin}/list`;
     const shareTitle = '실종자 정보 공유';
     
     // 메시지 앱 호환성을 위해 text에 모든 정보 포함 (메시지 앱은 주로 text만 사용)

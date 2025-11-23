@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useRef, useCallback } from 'react';
 import { theme } from '../../../theme';
 import Text from '../../common/atoms/Text';
 import StatusBoard from '../StatusBoard/StatusBoard';
@@ -9,12 +9,41 @@ import styles from './SideBar.module.css';
 export interface SideBarProps {
   className?: string;
   onMissingCardClick?: (id: number) => void;
+  selectedMissingId?: number | null;
+  isDashboardOpen?: boolean;
 }
 
-const SideBar: React.FC<SideBarProps> = ({ className = '', onMissingCardClick }) => {
-  // 최근 72시간 내 실종자 데이터 가져오기
-  const hours = 72;
+const SideBar: React.FC<SideBarProps> = ({ className = '', onMissingCardClick, selectedMissingId, isDashboardOpen }) => {
+
+  // 스크롤바 표시 상태 관리
+  const [showScrollbar, setShowScrollbar] = useState(false);
+  const scrollbarTimerRef = useRef<NodeJS.Timeout | null>(null);
+
+  // 최근 48시간 내 실종자 데이터 가져오기
+  const hours = 48;
   const { data: recentList, isLoading } = useRecentMissing(hours);
+
+  // 스크롤바 표시 타이머 관리
+  const handleMouseMove = useCallback(() => {
+    setShowScrollbar(true);
+
+    // 기존 타이머 클리어
+    if (scrollbarTimerRef.current) {
+      clearTimeout(scrollbarTimerRef.current);
+    }
+
+    // 1.5초 후 스크롤바 숨김
+    scrollbarTimerRef.current = setTimeout(() => {
+      setShowScrollbar(false);
+    }, 1500);
+  }, []);
+
+  const handleMouseLeave = useCallback(() => {
+    setShowScrollbar(false);
+    if (scrollbarTimerRef.current) {
+      clearTimeout(scrollbarTimerRef.current);
+    }
+  }, []);
 
   return (
     <aside
@@ -32,6 +61,25 @@ const SideBar: React.FC<SideBarProps> = ({ className = '', onMissingCardClick })
         helpCaptionTooltipBackgroundColor={theme.colors.white}
         helpCaptionTooltipTextColor={theme.colors.darkMain}
         helpCaptionMargin="0"
+        helpContent={
+          <>
+            <Text size="sm" weight="semiBold" color="darkMain" as="p" style={{ marginBottom: '0.5rem' }}>
+              실종자 현황판 안내
+            </Text>
+            <Text size="xs" weight="regular" color="darkMain" as="p" style={{ marginBottom: '0.25rem' }}>
+              • <strong>금일 실종</strong>: 오늘 신고된 실종자 수
+            </Text>
+            <Text size="xs" weight="regular" color="darkMain" as="p" style={{ marginBottom: '0.25rem' }}>
+              • <strong>제보 건수</strong>: 오늘 접수된 제보 건수
+            </Text>
+            <Text size="xs" weight="regular" color="darkMain" as="p" style={{ marginBottom: '0.25rem' }}>
+              • <strong>해결 건수</strong>: 오늘 해결된 실종 사건 수
+            </Text>
+            <Text size="xs" weight="regular" color="darkMain" as="p" style={{ marginTop: '0.5rem', fontStyle: 'italic' }}>
+              ※ 모든 수치는 금일 기준입니다.          
+            </Text>
+          </>
+        }
       />
 
       {/* 최신 실종자 */}
@@ -47,7 +95,11 @@ const SideBar: React.FC<SideBarProps> = ({ className = '', onMissingCardClick })
       </div>
 
       {/* 최신 실종자 목록 */}
-      <div className={styles.recentMissingList}>
+      <div
+        className={`${styles.recentMissingList} ${showScrollbar ? styles.showScrollbar : ''}`}
+        onMouseMove={handleMouseMove}
+        onMouseLeave={handleMouseLeave}
+      >
         {isLoading ? (
           <div className={styles.emptyMessage}>
             <Text size="md" color="gray">로딩 중...</Text>
@@ -64,12 +116,16 @@ const SideBar: React.FC<SideBarProps> = ({ className = '', onMissingCardClick })
               location={person.occurredLocation}
               occurredAt={person.crawledAt}
               targetType={person.targetType}
-              onClick={() => onMissingCardClick?.(person.id)}
+              isSelected={selectedMissingId === person.id && isDashboardOpen}
+              theme="light"
+              onClick={() => {
+                onMissingCardClick?.(person.id);
+              }}
             />
           ))
         ) : (
           <div className={styles.emptyMessage}>
-            <Text size="md" color="gray">최근 {hours}시간 내 실종자가 없습니다.</Text>
+            <Text size="md" color="gray">최근 48시간 내 실종자가 없습니다.</Text>
           </div>
         )}
       </div>
