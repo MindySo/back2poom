@@ -24,8 +24,14 @@ public class CaseAiSupport extends BaseTimeEntity {
     @JoinColumn(name = "case_id", foreignKey = @ForeignKey(name = "fk_ai_support_case"))
     private MissingCase missingCase;
 
+    @Column(name = "top1_keyword")
+    private String top1Keyword;
+
     @Column(name = "top1_desc")
     private String top1Desc;
+
+    @Column(name = "top2_keyword")
+    private String top2Keyword;
 
     @Column(name = "top2_desc")
     private String top2Desc;

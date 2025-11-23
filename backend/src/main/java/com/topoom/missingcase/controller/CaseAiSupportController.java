@@ -70,7 +70,14 @@ public class CaseAiSupportController {
         try {
             log.info("MissingCase PK {} AI 분석 요청 시작", id);
             
-            // caseAiSupportService.processSingleMissingCaseById(id);
+            var missingCase = missingCaseRepository.findDetailById(id);
+            if (missingCase.isEmpty()) {
+                result.put("success", false);
+                result.put("error", "MissingCase not found with id: " + id);
+                return ResponseEntity.badRequest().body(result);
+            }
+            
+            caseAiSupportService.processNewMissingCase(missingCase.get());
             
             result.put("success", true);
             result.put("message", "MissingCase " + id + "에 대한 우선순위 분석이 완료되었습니다.");
@@ -136,7 +143,9 @@ public class CaseAiSupportController {
             
             result.put("success", true);
             result.put("caseId", id);
+            result.put("top1Keyword", priorityResult.getTop1Keyword());
             result.put("top1Desc", priorityResult.getTop1Desc());
+            result.put("top2Keyword", priorityResult.getTop2Keyword());
             result.put("top2Desc", priorityResult.getTop2Desc());
             result.put("message", "우선순위 분석 테스트 완료");
             
