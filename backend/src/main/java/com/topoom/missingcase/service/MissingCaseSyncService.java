@@ -89,7 +89,8 @@ public class MissingCaseSyncService {
                             missingCase.setLatitude(BigDecimal.valueOf(coords[0]));
                             missingCase.setLongitude(BigDecimal.valueOf(coords[1]));
                         });
-
+                missingCase.setHeightCm(item.getHeight());
+                missingCase.setWeightKg(item.getBdwgh());
                 missingCase.setHairColor(item.getHaircolrDscd());
                 missingCase.setFaceShape(item.getFaceshpeDscd());
                 missingCase.setBodyType(item.getFrmDscd());
