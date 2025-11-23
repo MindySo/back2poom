@@ -12,12 +12,6 @@ spring:
     username: ${MYSQL_USER}
     password: ${MYSQL_PASSWORD}
 
-  data:
-    redis:
-      host: k13a706.p.ssafy.io
-      port: 6379
-      password: ${REDIS_PASSWORD}
-
   # RabbitMQ 설정
   rabbitmq:
     host: ${RABBITMQ_HOST}
