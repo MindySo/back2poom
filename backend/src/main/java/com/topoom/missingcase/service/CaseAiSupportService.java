@@ -45,7 +45,7 @@ public class CaseAiSupportService {
                 PriorityAnalysisResult priorityResult = priorityAnalysisService.analyzePriority(missingCase).block();
                 if (priorityResult != null) {
                     // 우선순위 분석 결과 추가 저장
-                    updatePriorityOnly(missingCase, priorityResult);
+                    updateOrCreateCaseAiSupport(missingCase, null, priorityResult);
                     log.info("MissingCase {} 우선순위 분석 완료 및 저장", missingCase.getId());
                 }
             } catch (Exception error) {
@@ -68,8 +68,10 @@ public class CaseAiSupportService {
                 .missingCase(missingCase)
                 .build());
 
-        // 배회 속도 정보 업데이트
-        aiSupport.setSpeed(movementAnalysis.getSpeedKmh());
+        // 배회 속도 정보 업데이트 (movementAnalysis가 있을 경우)
+        if (movementAnalysis != null) {
+            aiSupport.setSpeed(movementAnalysis.getSpeedKmh());
+        }
 
         // 우선순위 정보 업데이트 (있을 경우)
         if (priorityResult != null) {
@@ -81,7 +83,7 @@ public class CaseAiSupportService {
 
         log.info("CaseAiSupport 업데이트 완료 - Case: {}, Speed: {}km/h, Top1: {}, Top2: {}",
                 missingCase.getId(),
-                movementAnalysis.getSpeedKmh(),
+                movementAnalysis != null ? movementAnalysis.getSpeedKmh() : "유지",
                 priorityResult != null ? "설정됨" : "없음",
                 priorityResult != null ? "설정됨" : "없음");
     }
