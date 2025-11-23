@@ -75,7 +75,9 @@ public class CaseAiSupportService {
 
         // 우선순위 정보 업데이트 (있을 경우)
         if (priorityResult != null) {
+            aiSupport.setTop1Keyword(priorityResult.getTop1Keyword());
             aiSupport.setTop1Desc(priorityResult.getTop1Desc());
+            aiSupport.setTop2Keyword(priorityResult.getTop2Keyword());
             aiSupport.setTop2Desc(priorityResult.getTop2Desc());
         }
 
