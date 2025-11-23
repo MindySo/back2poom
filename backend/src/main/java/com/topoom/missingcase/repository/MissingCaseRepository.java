@@ -39,6 +39,7 @@ public interface MissingCaseRepository extends JpaRepository<MissingCase, Long> 
         AND mc.hairStyle IS NOT NULL 
         AND mc.clothingDesc IS NOT NULL 
         AND mc.progressStatus IS NOT NULL
+        AND mc.personName IS NOT NULL
         ORDER BY mc.occurredAt DESC
     """)
         /* AND mc.aiSupport IS NOT NULL */
@@ -76,7 +77,7 @@ public interface MissingCaseRepository extends JpaRepository<MissingCase, Long> 
 
     Optional<MissingCase> findByMissingId(Integer missingId);
 
-    List<MissingCase> findByIsDeletedFalseAndCrawledAtAfterOrderByCrawledAtDesc(LocalDateTime since);
+    List<MissingCase> findByCrawledAtAfterAndPersonNameIsNotNullOrderByCrawledAtDesc(LocalDateTime since);
 
     List<MissingCase> findByCrawledAtBefore(LocalDateTime cutoffDate);
 
