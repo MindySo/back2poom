@@ -122,17 +122,21 @@ public class MissingCaseService {
         MissingCaseDetailResponse.AiSupport aiSupport = null;
         if (mc.getAiSupport() != null) {
             aiSupport = MissingCaseDetailResponse.AiSupport.builder()
+                    .top1Keyword(mc.getAiSupport().getTop1Keyword())
                     .top1Desc(mc.getAiSupport().getTop1Desc())
+                    .top2Keyword(mc.getAiSupport().getTop2Keyword())
                     .top2Desc(mc.getAiSupport().getTop2Desc())
                     .speed(mc.getAiSupport().getSpeed())
                     .infoItems(parseJson(mc.getAiSupport().getInfoItems()))
                     .build();
         } else {
             aiSupport = MissingCaseDetailResponse.AiSupport.builder()
-                    .top1Desc("임시1")
-                    .top2Desc("임시2")
-                    .speed(new BigDecimal("3.14")) // 임시
-                    .infoItems("임시")
+                    .top1Keyword("분석 대기")
+                    .top1Desc("우선순위 분석이 완료되지 않았습니다.")
+                    .top2Keyword("분석 대기")
+                    .top2Desc("우선순위 분석이 완료되지 않았습니다.")
+                    .speed(new BigDecimal("0.54")) // 기본 배회 속도
+                    .infoItems("분석 대기")
                     .build();
         }
 

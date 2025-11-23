@@ -138,64 +138,143 @@ public class PriorityAnalysisService {
      */
     private PriorityAnalysisResult parsePriorityResponse(String response) {
         try {
-            String[] lines = response.split("\n");
-            StringBuilder top1 = new StringBuilder();
-            StringBuilder top2 = new StringBuilder();
+            // 실제 응답 내용을 로그로 확인
+            log.info("=== GPT-4o 원본 응답 ===");
+            log.info(response);
+            log.info("=== 응답 끝 ===");
+            
+            // JSON 응답 파싱 시도
+            try {
+                // ObjectMapper는 스프링부트에서 자동 제공
+                com.fasterxml.jackson.databind.ObjectMapper objectMapper = new com.fasterxml.jackson.databind.ObjectMapper();
+                com.fasterxml.jackson.databind.JsonNode jsonNode = objectMapper.readTree(response);
+                
+                String top1Keyword = jsonNode.path("top1_keyword").asText("");
+                String top1Desc = jsonNode.path("top1_desc").asText("");
+                String top2Keyword = jsonNode.path("top2_keyword").asText("");
+                String top2Desc = jsonNode.path("top2_desc").asText("");
 
-            boolean isTop1Section = false;
-            boolean isTop2Section = false;
+                log.debug("JSON 파싱 성공 - Top1: '{}'/'{}'", top1Keyword, top1Desc);
+                log.debug("JSON 파싱 성공 - Top2: '{}'/'{}'", top2Keyword, top2Desc);
 
-            for (String line : lines) {
-                line = line.trim();
-                if (line.isEmpty()) continue;
-
-                // "1." 로 시작하는 라인 찾기
-                if (line.matches("^1\\..*")) {
-                    isTop1Section = true;
-                    isTop2Section = false;
-                    // "1. " 제거하고 추가
-                    top1.append(line.replaceFirst("^1\\.\\s*", ""));
-                    continue;
+                // 255자 제한 (DB 컬럼 크기)
+                if (top1Keyword.length() > 255) {
+                    top1Keyword = top1Keyword.substring(0, 252) + "...";
+                }
+                if (top1Desc.length() > 255) {
+                    top1Desc = top1Desc.substring(0, 252) + "...";
+                }
+                if (top2Keyword.length() > 255) {
+                    top2Keyword = top2Keyword.substring(0, 252) + "...";
+                }
+                if (top2Desc.length() > 255) {
+                    top2Desc = top2Desc.substring(0, 252) + "...";
                 }
 
-                // "2." 로 시작하는 라인 찾기
-                if (line.matches("^2\\..*")) {
-                    isTop1Section = false;
-                    isTop2Section = true;
-                    // "2. " 제거하고 추가
-                    top2.append(line.replaceFirst("^2\\.\\s*", ""));
-                    continue;
+                log.info("우선순위 파싱 완료 - Top1 Keyword: '{}', Desc: '{}', Top2 Keyword: '{}', Desc: '{}'", 
+                        top1Keyword, top1Desc, top2Keyword, top2Desc);
+
+                return new PriorityAnalysisResult(top1Keyword, top1Desc, top2Keyword, top2Desc);
+                
+            } catch (Exception jsonError) {
+                log.warn("JSON 파싱 실패, fallback 모드로 시도: {}", jsonError.getMessage());
+                
+                // Fallback: 기존 라인별 파싱
+                String[] lines = response.split("\n");
+                String top1Keyword = "";
+                String top1Desc = "";
+                String top2Keyword = "";
+                String top2Desc = "";
+
+                boolean isTop1Section = false;
+                boolean isTop2Section = false;
+
+                for (String line : lines) {
+                    line = line.trim();
+                    if (line.isEmpty()) continue;
+                    
+                    log.debug("처리 중인 라인: '{}'", line);
+
+                    // "1." 로 시작하는 라인 찾기
+                    if (line.matches("^1\\..*")) {
+                        isTop1Section = true;
+                        isTop2Section = false;
+                        log.debug("TOP1 섹션 시작");
+                        continue;
+                    }
+
+                    // "2." 로 시작하는 라인 찾기
+                    if (line.matches("^2\\..*")) {
+                        isTop1Section = false;
+                        isTop2Section = true;
+                        log.debug("TOP2 섹션 시작");
+                        continue;
+                    }
+
+                    // KEYWORD 파싱
+                    if (line.startsWith("KEYWORD:")) {
+                        String keyword = line.replaceFirst("^KEYWORD:\\s*", "").trim();
+                        if (isTop1Section) {
+                            top1Keyword = keyword;
+                            log.debug("TOP1 키워드: '{}'", keyword);
+                        } else if (isTop2Section) {
+                            top2Keyword = keyword;
+                            log.debug("TOP2 키워드: '{}'", keyword);
+                        }
+                        continue;
+                    }
+
+                    // DESC 파싱
+                    if (line.startsWith("DESC:")) {
+                        String desc = line.replaceFirst("^DESC:\\s*", "").trim();
+                        if (isTop1Section) {
+                            top1Desc = desc;
+                            log.debug("TOP1 설명: '{}'", desc);
+                        } else if (isTop2Section) {
+                            top2Desc = desc;
+                            log.debug("TOP2 설명: '{}'", desc);
+                        }
+                        continue;
+                    }
+
+                    // 기존 형식 호환성을 위한 fallback
+                    if (isTop1Section && top1Keyword.isEmpty() && !line.startsWith("KEYWORD:") && !line.startsWith("DESC:")) {
+                        top1Keyword = line.length() > 20 ? line.substring(0, 20) + "..." : line;
+                        top1Desc = line;
+                        log.debug("TOP1 fallback: '{}'", line);
+                    } else if (isTop2Section && top2Keyword.isEmpty() && !line.startsWith("KEYWORD:") && !line.startsWith("DESC:")) {
+                        top2Keyword = line.length() > 20 ? line.substring(0, 20) + "..." : line;
+                        top2Desc = line;
+                        log.debug("TOP2 fallback: '{}'", line);
+                    }
                 }
 
-                // 섹션에 맞게 텍스트 추가
-                if (isTop1Section) {
-                    if (top1.length() > 0) top1.append(" ");
-                    top1.append(line);
-                } else if (isTop2Section) {
-                    if (top2.length() > 0) top2.append(" ");
-                    top2.append(line);
+                // 255자 제한 (DB 컬럼 크기)
+                if (top1Keyword.length() > 255) {
+                    top1Keyword = top1Keyword.substring(0, 252) + "...";
                 }
+                if (top1Desc.length() > 255) {
+                    top1Desc = top1Desc.substring(0, 252) + "...";
+                }
+                if (top2Keyword.length() > 255) {
+                    top2Keyword = top2Keyword.substring(0, 252) + "...";
+                }
+                if (top2Desc.length() > 255) {
+                    top2Desc = top2Desc.substring(0, 252) + "...";
+                }
+
+                log.info("fallback 파싱 완료 - Top1 Keyword: '{}', Desc: '{}', Top2 Keyword: '{}', Desc: '{}'", 
+                        top1Keyword, top1Desc, top2Keyword, top2Desc);
+
+                return new PriorityAnalysisResult(top1Keyword, top1Desc, top2Keyword, top2Desc);
             }
-
-            String top1Desc = top1.toString().trim();
-            String top2Desc = top2.toString().trim();
-
-            // 255자 제한 (DB 컬럼 크기)
-            if (top1Desc.length() > 255) {
-                top1Desc = top1Desc.substring(0, 252) + "...";
-            }
-            if (top2Desc.length() > 255) {
-                top2Desc = top2Desc.substring(0, 252) + "...";
-            }
-
-            log.info("우선순위 파싱 완료 - Top1: {}, Top2: {}", top1Desc, top2Desc);
-
-            return new PriorityAnalysisResult(top1Desc, top2Desc);
 
         } catch (Exception e) {
             log.error("우선순위 응답 파싱 실패", e);
             return new PriorityAnalysisResult(
+                    "분석 실패",
                     "우선순위 분석 결과를 처리하지 못했습니다.",
+                    "분석 실패", 
                     "우선순위 분석 결과를 처리하지 못했습니다."
             );
         }
@@ -204,7 +283,9 @@ public class PriorityAnalysisService {
     @Data
     @AllArgsConstructor
     public static class PriorityAnalysisResult {
+        private String top1Keyword;
         private String top1Desc;
+        private String top2Keyword;
         private String top2Desc;
     }
 }
