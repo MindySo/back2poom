@@ -3,9 +3,23 @@
   border-radius: 12px;
   border: 1px solid #eef0f3;
   box-shadow: 0 4px 12px rgba(0,0,0,0.06);
-  padding: 16px 20px; /* outer padding */
+  padding: 20px; /* outer padding */
   width: 400px; /* fixed card width */
   overflow: hidden; /* keep everything within the frame */
+  transition: all 0.2s ease;
+  cursor: pointer;
+}
+
+.archive-card:hover {
+  border-color: #d1d5db;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.12);
+  transform: translateY(-2px);
+}
+
+.archive-card.selected {
+  border-color: #E89A59;
+  box-shadow: 0 0 0 3px rgba(232, 154, 89, 0.1), 0 8px 24px rgba(0,0,0,0.12);
+  background: #fffaf5;
 }
 
 /* Prevent padding/border from causing unexpected overflow */
@@ -19,10 +33,9 @@
 
 .archive-card__imageWrap {
   width: 140px;             /* fixed width */
-  height: 170px;            /* fixed height */
-  border-radius: 12px;
+  max-height: 170px;        /* max height */
+  border-radius: 8px;
   overflow: hidden;
-  align-self: start;        /* prevent stretching causing cropping */
   flex: 0 0 160px;          /* prevent grid/flex resizing */
 }
 
@@ -42,7 +55,8 @@
 .archive-card__header {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 4px;
+  padding-top: 4px;
 }
 
 .archive-card__elapsed {

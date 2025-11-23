@@ -6,6 +6,10 @@ networks:
     driver: bridge
     name: topoom-scheduling-network
 
+volumes:
+  rabbitmq-data:
+    driver: local
+
 #############################
 #  SERVICES
 #############################

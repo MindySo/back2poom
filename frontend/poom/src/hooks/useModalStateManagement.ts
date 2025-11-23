@@ -68,7 +68,7 @@ export const useModalStateManagement = ({
   // 닫기 애니메이션 시작
   const startClosing = () => {
     setIsClosing(true);
-    const timer = setTimeout(() => setIsClosing(false), 300);
+    const timer = setTimeout(() => setIsClosing(false), 500);
     return () => clearTimeout(timer);
   };
 

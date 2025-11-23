@@ -104,3 +104,26 @@
   transform: translateY(0);
 }
 
+.errorMessage {
+  background-color: #fee;
+  padding: 0.875rem 1rem;
+  border-radius: 8px;
+  border: 1px solid #d32f2f;
+  font-weight: 500;
+  animation: slideDown 0.3s ease-out;
+}
+
+.errorMessage p {
+  color: #d32f2f !important;
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
