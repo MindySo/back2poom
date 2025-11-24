@@ -262,7 +262,7 @@ const MArchiveCard: React.FC<MArchiveCardProps> = ({ personId }) => {
               
               {/* AI 이미지와 AI 서포트 정보 */}
               {(() => {
-                const aiImageDisplayIds = [50000, 50020, 50040, 50041];
+                const aiImageDisplayIds = [50000, 50020, 50040, 50041, 50114];
                 const hasAIImages = aiImageDisplayIds.includes(displayData?.id || 0) &&
                                    displayData?.outputImages &&
                                    displayData.outputImages.length > 0;
@@ -378,7 +378,7 @@ const MArchiveCard: React.FC<MArchiveCardProps> = ({ personId }) => {
 
       {/* AI 서포트 이미지 Fullscreen 뷰어 - Portal로 렌더링 */}
       {aiImageOpen && (() => {
-        const aiImageDisplayIds = [50000, 50020, 50040, 50041];
+        const aiImageDisplayIds = [50000, 50020, 50040, 50041, 50114];
         const hasAIImages = aiImageDisplayIds.includes(displayData?.id || 0) &&
                            displayData?.outputImages &&
                            displayData.outputImages.length > 0;

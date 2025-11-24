@@ -74,6 +74,8 @@ public class CaseReportService {
                 .latitude(entity.getLatitude())
                 .longitude(entity.getLongitude())
                 .additionalInfo(entity.getAdditionalInfo())
+                .reporterName(entity.getReporterName())
+                .reporterContact(entity.getReporterContact())
                 .build();
     }
 }

@@ -67,4 +67,18 @@ public class FinalizeMessage implements Serializable {
      * MissingCase ID
      */
     private Long caseId;
+
+    /**
+     * Finalize 단계 실패로 인한 재시도 횟수
+     * (OCR → Finalize → 좌표 변환 실패 → OCR 재시도 사이클 카운트)
+     * 최대 3번까지 허용
+     */
+    @Builder.Default
+    private Integer finalizeRetryCount = 0;
+
+    /**
+     * OCR 처리에 사용된 마지막 이미지 S3 키
+     * (Finalize 실패 시 OCR 재시도를 위해 필요)
+     */
+    private String lastImageS3Key;
 }

@@ -20,6 +20,21 @@ public interface MissingCaseRepository extends JpaRepository<MissingCase, Long> 
         FROM MissingCase mc
         LEFT JOIN FETCH mc.mainFile mf
         WHERE mc.isDeleted = false
+        AND mc.mainFile IS NOT NULL
+        AND mc.personName IS NOT NULL 
+        AND mc.targetType IS NOT NULL 
+        AND mc.ageAtTime IS NOT NULL 
+        AND mc.currentAge IS NOT NULL 
+        AND mc.gender IS NOT NULL 
+        AND mc.nationality IS NOT NULL 
+        AND mc.occurredAt IS NOT NULL 
+        AND mc.occurredLocation IS NOT NULL 
+        AND mc.latitude IS NOT NULL 
+        AND mc.longitude IS NOT NULL 
+        AND mc.bodyType IS NOT NULL 
+        AND mc.faceShape IS NOT NULL 
+        AND mc.hairColor IS NOT NULL 
+        AND mc.hairStyle IS NOT NULL 
         ORDER BY mc.occurredAt DESC
     """)
         /* AND mc.aiSupport IS NOT NULL */
@@ -33,6 +48,21 @@ public interface MissingCaseRepository extends JpaRepository<MissingCase, Long> 
         LEFT JOIN FETCH mc.contacts c
         LEFT JOIN FETCH mc.aiSupport ai
         WHERE mc.id = :id AND mc.isDeleted = false
+        AND mc.mainFile IS NOT NULL
+        AND mc.personName IS NOT NULL 
+        AND mc.targetType IS NOT NULL 
+        AND mc.ageAtTime IS NOT NULL 
+        AND mc.currentAge IS NOT NULL 
+        AND mc.gender IS NOT NULL 
+        AND mc.nationality IS NOT NULL 
+        AND mc.occurredAt IS NOT NULL 
+        AND mc.occurredLocation IS NOT NULL 
+        AND mc.latitude IS NOT NULL 
+        AND mc.longitude IS NOT NULL 
+        AND mc.bodyType IS NOT NULL 
+        AND mc.faceShape IS NOT NULL 
+        AND mc.hairColor IS NOT NULL 
+        AND mc.hairStyle IS NOT NULL 
     """)
     Optional<MissingCase> findDetailById(@Param("id") Long id);
 

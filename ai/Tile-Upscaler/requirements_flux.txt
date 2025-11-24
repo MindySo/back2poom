@@ -1,0 +1,31 @@
+# Requirements for FLUX.1-Fill Outpainting Pipeline
+# Use PyTorch 2.4+ for torch.nn.RMSNorm support
+
+# PyTorch with CUDA 12.1
+--index-url https://download.pytorch.org/whl/cu121
+torch>=2.4.0
+torchvision>=0.19.0
+torchaudio>=2.4.0
+
+# Core AI/ML libraries
+diffusers>=0.31.0
+transformers>=4.46.0
+accelerate>=0.34.0
+safetensors>=0.4.5
+huggingface-hub>=0.34.0,<1.0
+
+# Image processing
+Pillow>=10.0.0
+opencv-python>=4.8.0
+numpy>=1.24.0
+
+# AWS S3
+boto3>=1.28.0
+botocore>=1.31.0
+
+# HTTP requests
+requests>=2.31.0
+
+# Optional but recommended
+sentencepiece>=0.2.0
+protobuf>=4.24.0

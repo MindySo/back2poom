@@ -77,6 +77,8 @@ public class OcrConsumer {
                 .ocrResult(ocrResult)
                 .parsedOcrData(parsedData)
                 .caseId(message.getCaseId())
+                .finalizeRetryCount(message.getFinalizeRetryCount()) // Finalize 재시도 횟수 전달
+                .lastImageS3Key(message.getLastImageS3Key()) // OCR 재시도를 위한 S3 키 전달
                 .build();
 
             messageProducer.sendToFinalizeQueue(finalizeMsg);
