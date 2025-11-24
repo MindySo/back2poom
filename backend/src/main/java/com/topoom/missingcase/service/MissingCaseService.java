@@ -202,7 +202,7 @@ public class MissingCaseService {
     public List<MissingCaseListResponse> getRecentCases(int hours) {
         LocalDateTime since = LocalDateTime.now().minusHours(hours);
 
-        return missingCaseRepository.findByCrawledAtAfterAndPersonNameIsNotNullOrderByCrawledAtDesc(since)
+        return missingCaseRepository.findByIsDeletedFalseAndCrawledAtAfterOrderByCrawledAtDesc(since)
                 .stream()
                 .map(this::toDto)
                 .collect(Collectors.toList());
