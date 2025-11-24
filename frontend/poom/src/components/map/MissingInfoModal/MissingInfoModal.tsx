@@ -280,7 +280,7 @@ const MissingInfoModal: React.FC<MissingInfoModalProps> = ({ personId, onGoBack,
 
                     {/* AI 이미지와 AI 서포트 정보 */}
                     {(() => {
-                      const aiImageDisplayIds = [50000, 50020, 50040, 50041];
+                      const aiImageDisplayIds = [50000, 50020, 50040, 50041, 50114];
                       const hasAIImages = aiImageDisplayIds.includes(detailData?.id || 0) &&
                                         detailData?.outputImages &&
                                         detailData.outputImages.length > 0;

@@ -3,10 +3,7 @@ package com.topoom.missingcase.controller;
 import com.topoom.common.ApiResponse;
 import com.topoom.external.openapi.Safe182Client;
 import com.topoom.missingcase.dto.*;
-import com.topoom.missingcase.service.CaseOcrService;
-import com.topoom.missingcase.service.CaseReportService;
-import com.topoom.missingcase.service.MissingCaseService;
-import com.topoom.missingcase.service.MissingCaseSyncService;
+import com.topoom.missingcase.service.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -25,6 +22,7 @@ public class MissingCaseController {
     private final MissingCaseSyncService missingCaseSyncService;
     private final CaseReportService caseReportService;
     private final CaseOcrService caseOcrService;
+    private final CaseDetectionService caseDetectionService;
 
     @GetMapping
     public ResponseEntity<ApiResponse<List<MissingCaseListResponse>>> getAllCases() {
@@ -85,4 +83,32 @@ public class MissingCaseController {
             ));
         }
     }
+
+    /**
+     * 테스트용: 특정 MissingCase에 대해 우선순위 분석 수행
+     */
+    @PostMapping("/test-priority/{caseId}")
+    public ResponseEntity<Map<String, Object>> testPriorityAnalysis(@PathVariable Long caseId) {
+        try {
+            String result = missingCaseService.testPriorityAnalysis(caseId);
+            return ResponseEntity.ok(Map.of(
+                    "success", true,
+                    "message", "우선순위 분석 요청 완료",
+                    "caseId", caseId,
+                    "result", result
+            ));
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(Map.of(
+                    "success", false,
+                    "error", e.getMessage()
+            ));
+        }
+    }
+
+    @GetMapping("/cctv/{id}")
+    public ResponseEntity<ApiResponse<List<CaseDetectionResponse>>> getDetection(@PathVariable Long id) {
+        return ResponseEntity.ok(ApiResponse.success(caseDetectionService.getDetection(id)));
+    }
+
+
 }

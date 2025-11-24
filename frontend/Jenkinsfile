@@ -66,14 +66,24 @@ pipeline {
                 }
             }
             steps {
-                dir('frontend/poom') {
-                    sh '''
-                        # 이전 빌드 결과물 정리 (Docker container 내부 실행)
-                        rm -rf node_modules dist || true
+                // env-fe secret file을 환경 변수로 로드
+                withCredentials([file(credentialsId: 'env-fe', variable: 'ENV_FILE')]) {
+                    dir('frontend/poom') {
+                        sh '''
+                            # env-fe 파일을 .env로 복사
+                            cp $ENV_FILE .env
 
-                        npm ci
-                        npm run build
-                    '''
+                            # 이전 빌드 결과물 정리 (Docker container 내부 실행)
+                            rm -rf node_modules dist || true
+
+                            # 환경 변수 확인 (디버깅용 - API KEY는 마스킹)
+                            echo "=== Building with environment variables ==="
+                            cat .env | grep -v "API_KEY" | grep -v "REST_API" || true
+
+                            npm ci
+                            npm run build
+                        '''
+                    }
                 }
             }
         }
