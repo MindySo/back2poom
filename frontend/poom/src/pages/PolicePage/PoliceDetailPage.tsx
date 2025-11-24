@@ -2,6 +2,7 @@ import { useSearchParams } from 'react-router-dom';
 import { useState, useRef, useCallback } from 'react';
 import { useMissingDetail } from '../../hooks';
 import { useCctvDetection } from '../../hooks/useCctvDetection';
+import { useMissingReport } from '../../hooks/useMissingReport';
 import Text from '../../components/common/atoms/Text';
 import Badge from '../../components/common/atoms/Badge';
 import ReportList from '../../components/police/ReportList/ReportList';
@@ -14,6 +15,7 @@ const PoliceDetailPage = () => {
   const missingId = searchParams.get('id') ? parseInt(searchParams.get('id')!, 10) : null;
   const { data: missingDetail, isLoading } = useMissingDetail(missingId);
   const { data: cctvDetections, isLoading: isCctvLoading } = useCctvDetection(missingId);
+  const { data: reports, isLoading: isReportLoading } = useMissingReport(missingId);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [videoUrl, setVideoUrl] = useState<string | null>(null);
   const [showScrollbar, setShowScrollbar] = useState(false);
@@ -50,6 +52,12 @@ const PoliceDetailPage = () => {
     setVideoUrl(null);
     setIsModalOpen(false);
   };
+
+  const confidenceMap = {
+    HIGH: '확신',
+    MEDIUM: '유력',
+    LOW: '모호',
+  } as const;
 
   return (
     <div className={styles.container}>
@@ -215,7 +223,22 @@ const PoliceDetailPage = () => {
               <Text as="h2" size="lg" weight="bold" color="policeWhite" className={styles.sectionTitle}>
                 제보리스트
               </Text>
-              <ReportList />
+
+              {isReportLoading ? (
+                <div className={styles.loadingMessage}>제보 불러오는 중...</div>
+              ) : (
+                <ReportList
+                  reports={
+                    reports?.map((r) => ({
+                      reporterPhone: r.reporterContact ?? '알 수 없음',
+                      confidence: confidenceMap[r.certaintyLevel],
+                      location: r.sightedLocation,
+                      reportTime: r.sightedAt,
+                      additionalNotes: r.additionalInfo,
+                    })) ?? []
+                  }
+                />
+              )}
             </div>
           </div>
         </div>
