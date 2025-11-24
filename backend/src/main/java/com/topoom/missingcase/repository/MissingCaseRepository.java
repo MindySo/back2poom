@@ -68,7 +68,7 @@ public interface MissingCaseRepository extends JpaRepository<MissingCase, Long> 
 
     Optional<MissingCase> findByMissingId(Integer missingId);
 
-    List<MissingCase> findByCrawledAtAfterAndPersonNameIsNotNullOrderByCrawledAtDesc(LocalDateTime since);
+    List<MissingCase> findByIsDeletedFalseAndCrawledAtAfterOrderByCrawledAtDesc(LocalDateTime since);
 
     List<MissingCase> findByCrawledAtBefore(LocalDateTime cutoffDate);
 
