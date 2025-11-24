@@ -453,7 +453,7 @@ const ArchiveDetailPopup: React.FC<ArchiveDetailPopupProps> = ({ personId, initi
 
       {/* AI 서포트 이미지 Fullscreen 뷰어 - Portal로 렌더링 */}
       {aiImageOpen && (() => {
-        const aiImageDisplayIds = [50000, 50020, 50040, 50041];
+        const aiImageDisplayIds = [50000, 50020, 50040, 50041,50114];
         const hasAIImages = aiImageDisplayIds.includes(person?.id || 0) &&
                            person?.outputImages &&
                            person.outputImages.length > 0;
