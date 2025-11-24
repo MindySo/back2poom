@@ -64,6 +64,16 @@ export type MissingPersonWithTypo = Omit<MissingPerson, 'occurredAt' | 'occurred
   occuredLocation: string;
 };
 
+export interface ReportResponseItem {
+  id: number;
+  certaintyLevel: 'LOW' | 'MEDIUM' | 'HIGH';
+  sightedAt: string;
+  sightedLocation: string;
+  additionalInfo: string;
+  reporterName?: string;
+  reporterContact?: string;
+}
+
 // 최근 실종자에서 null/undefined/-/미상 값 체크하는 함수
 export const isValidRecentMissing = (person: MissingPerson): boolean => {
   // 이름이 null이거나 "-"이면 제외

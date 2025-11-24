@@ -1,5 +1,5 @@
 import { apiClient } from '../common';
-import type { MissingPerson, MissingStats } from '../../types/missing';
+import type { MissingPerson, MissingStats, ReportResponseItem } from '../../types/missing';
 
 // API 응답 타입 정의
 interface ApiResponse<T> {
@@ -34,4 +34,12 @@ export const getMissingStats = async (): Promise<MissingStats> => {
 export const getRecentMissing = async (hours: number): Promise<MissingPerson[]> => {
   const response = await apiClient.get<ApiResponse<MissingPerson[]>>(`/api/v1/missing/recent/${hours}`);
   return response.data.data; // 응답 구조: {success, message, data: [...]}
+};
+
+// GET /api/v1/missing/report/{id}
+export const getMissingReportList = async (missingId: number): Promise<ReportResponseItem[]> => {
+  const response = await apiClient.get<ApiResponse<ReportResponseItem[]>>(
+    `/api/v1/missing/report/${missingId}`
+  );
+  return response.data.data;
 };
