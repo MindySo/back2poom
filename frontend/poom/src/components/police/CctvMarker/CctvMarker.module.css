@@ -1,45 +1,33 @@
 .cctvMarker {
   position: relative;
-  width: 40px;
-  height: 40px;
+  width: 24px;
+  height: 24px;
   display: flex;
   align-items: center;
   justify-content: center;
 }
 
-/* CCTV 마커 (원형) */
-.cctvDot {
-  width: 16px;
-  height: 16px;
-  border-radius: 50%;
-  border: 2px solid rgba(255, 255, 255, 0.9);
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.4);
+/* CCTV 마커 이미지 */
+.cctvIcon {
+  width: 24px;
+  height: 20px;
+  object-fit: contain;
 }
 
-/* 일반 CCTV (검은색) */
-.normal {
-  background-color: #000000;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.4);
-}
-
-/* 실종자 감지된 CCTV (빨간색) */
-.detected {
-  background-color: #FF0000;
-  animation: cctvGlow 1.5s ease-in-out infinite;
-  box-shadow: 0 0 12px rgba(255, 0, 0, 0.8), 0 2px 6px rgba(0, 0, 0, 0.4);
+/* Active CCTV Glow 효과 */
+.cctvIcon[alt="CCTV Active"] {
+  animation: cctvGlow 3s ease-in-out infinite;
+  filter: drop-shadow(0 0 6px rgba(238, 35, 35, 0.8));
 }
 
 @keyframes cctvGlow {
   0% {
-    box-shadow: 0 0 12px rgba(255, 0, 0, 0.8), 0 2px 6px rgba(0, 0, 0, 0.4);
-    filter: brightness(1);
+    filter: drop-shadow(0 0 6px rgba(238, 35, 35, 0.6));
   }
   50% {
-    box-shadow: 0 0 20px rgba(255, 0, 0, 1), 0 0 30px rgba(255, 0, 0, 0.6), 0 2px 6px rgba(0, 0, 0, 0.4);
-    filter: brightness(1.2);
+    filter: drop-shadow(0 0 12px rgba(238, 35, 35, 1)) drop-shadow(0 0 8px rgba(238, 35, 35, 0.5));
   }
   100% {
-    box-shadow: 0 0 12px rgba(255, 0, 0, 0.8), 0 2px 6px rgba(0, 0, 0, 0.4);
-    filter: brightness(1);
+    filter: drop-shadow(0 0 6px rgba(238, 35, 35, 0.6));
   }
 }

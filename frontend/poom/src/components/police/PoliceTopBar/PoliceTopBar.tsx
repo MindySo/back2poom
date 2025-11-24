@@ -2,7 +2,7 @@ import React from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { theme } from '../../../theme';
 import styles from './PoliceTopBar.module.css';
-import logoFull from '../../../assets/poom_logo_full_police.svg';
+import logoFull from '../../../assets/2poom_police_logo.svg';
 
 export interface PoliceTopBarProps {
   className?: string;
@@ -42,7 +42,7 @@ const PoliceTopBar: React.FC<PoliceTopBarProps> = ({ className = '' }) => {
           className={styles.logoBox}
           style={{
             backgroundColor: policeColor,
-            boxShadow: `4px 4px 12px rgba(255, 255, 255, 0.3)`,
+            boxShadow: `4px 4px 12px ${theme.colors.white}4D`,
           }}
           onClick={() => handleNavClick('/police')}
         >
@@ -67,7 +67,7 @@ const PoliceTopBar: React.FC<PoliceTopBarProps> = ({ className = '' }) => {
           {navItems.map((item) => {
             const isActive = location.pathname === item.path || location.pathname.startsWith('/police/map');
             const isHovered = hoveredPath === item.path;
-            const labelColor = (isActive || isHovered) ? '#ffffffff' : 'rgba(255, 255, 255, 0.75)';
+            const labelColor = (isActive || isHovered) ? theme.colors.white : theme.colors.policeLightGray;
             return (
               <button
                 key={item.path}
@@ -83,8 +83,8 @@ const PoliceTopBar: React.FC<PoliceTopBarProps> = ({ className = '' }) => {
                 <span
                   className={`${styles.activeIndicator} ${(isActive || isHovered) ? styles.show : ''}`}
                   style={{
-                    backgroundColor: `rgba(15, 180, 219, 0.5)`,
-                    boxShadow: `4px 4px 12px rgba(15, 180, 219, 0.3)`,
+                    backgroundColor: `${theme.colors.policeMain}80`,
+                    boxShadow: `4px 4px 12px ${theme.colors.policeMain}4D`,
                   }}
                 ></span>
                 <span

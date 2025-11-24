@@ -6,7 +6,7 @@ import Text from '../../components/common/atoms/Text';
 import Badge from '../../components/common/atoms/Badge';
 import ReportList from '../../components/police/ReportList/ReportList';
 import VideoModal from '../../components/police/VideoModal/VideoModal';
-import tempImg from '../../assets/TempImg.png';
+import anonymousProfile from '../../assets/anonymous_profile.svg';
 import styles from './PoliceDetailPage.module.css';
 
 const PoliceDetailPage = () => {
@@ -41,7 +41,7 @@ const PoliceDetailPage = () => {
     }
   }, []);
 
-   const handleOpenModal = (url: string) => {
+  const handleOpenModal = (url: string) => {
     setVideoUrl(url);
     setIsModalOpen(true);
   };
@@ -168,7 +168,7 @@ const PoliceDetailPage = () => {
                         style={{ cursor: 1 ? 'pointer' : 'default' }}
                       >
                         <img
-                          src={det.cctvImageUrl ?? tempImg}
+                          src={det.cctvImageUrl ?? anonymousProfile}
                           alt={`CCTV Detection ${det.id}`}
                           className={styles.detectionImage}
                         />

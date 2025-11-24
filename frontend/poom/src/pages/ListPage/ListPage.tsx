@@ -293,7 +293,7 @@ const ListPage = () => {
 
   // 데스크톱 버전 렌더링 (1024px 초과)
   return (
-    <div ref={pageRef} className={`${styles['list-page']} ${styles['desktop']}`}>
+    <div ref={pageRef} className={`${styles['list-page']} ${styles['desktop']}`} style={{ '--main-color': theme.colors.main } as React.CSSProperties}>
       {/* 히어로 배너 + 탭을 sticky로 감싸는 wrapper */}
       <div className={styles['sticky-wrapper']}>
         {/* 히어로 배너 (배경 이미지 + 검색영역) */}

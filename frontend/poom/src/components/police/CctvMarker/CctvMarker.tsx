@@ -1,10 +1,12 @@
 import React, { useEffect, useRef } from 'react';
 import styles from './CctvMarker.module.css';
+import cctvActiveIcon from '../../../assets/cctv_active.svg';
+import cctvInactiveIcon from '../../../assets/cctv_inactive.svg';
 
 interface CctvMarkerProps {
   map: kakao.maps.Map;
   position: { lat: number; lng: number };
-  isDetected?: boolean; // 실종자 감지 여부 (true: 빨강, false/undefined: 검정)
+  isDetected?: boolean; // 실종자 감지 여부 (true: active, false/undefined: inactive)
 }
 
 const CctvMarker: React.FC<CctvMarkerProps> = ({ map, position, isDetected = false }) => {
@@ -17,12 +19,14 @@ const CctvMarker: React.FC<CctvMarkerProps> = ({ map, position, isDetected = fal
     const markerElement = document.createElement('div');
     markerElement.className = styles.cctvMarker;
 
-    // CCTV 마커 (원형)
-    const dot = document.createElement('div');
-    dot.className = `${styles.cctvDot} ${isDetected ? styles.detected : styles.normal}`;
+    // CCTV 마커 (이미지)
+    const img = document.createElement('img');
+    img.src = isDetected ? cctvActiveIcon : cctvInactiveIcon;
+    img.className = styles.cctvIcon;
+    img.alt = isDetected ? 'CCTV Active' : 'CCTV Inactive';
 
     // DOM 조립
-    markerElement.appendChild(dot);
+    markerElement.appendChild(img);
 
     // CustomOverlay 생성
     const overlay = new kakao.maps.CustomOverlay({

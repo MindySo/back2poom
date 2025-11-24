@@ -8,12 +8,10 @@ export interface ImageFile {
 }
 
 export interface AISupportInfo {
+  top1Keyword: string;
   top1Desc: string;
+  top2Keyword: string;
   top2Desc: string;
-  infoItems: Array<{
-    label: string;
-    value: string;
-  }>;
   speed: number; // 이동 속도 (km/h)
 }
 

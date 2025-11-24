@@ -1,12 +1,13 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
+import { theme } from '../../../theme';
 import { useShareMissingPerson } from '../../../hooks/useShareMissingPerson';
 import { useElapsedTime } from '../../../hooks/useElapsedTime';
 import type { MissingPerson } from '../../../types/missing';
 import styles from './ArchiveCard.module.css';
 import Badge from '../../common/atoms/Badge';
 import Text from '../../common/atoms/Text';
-import tempImg from '../../../assets/TempImg.png';
+import anonymousProfile from '../../../assets/anonymous_profile.svg';
 import Button from '../../common/atoms/Button';
 
 export interface ArchiveCardProps {
@@ -48,11 +49,16 @@ const ArchiveCard: React.FC<ArchiveCardProps> = ({ person, onClick, isSelected }
   };
 
   // 이미지 URL 가져오기
-  const displayMainImageUrl = mainImage?.url || tempImg;
+  const displayMainImageUrl = mainImage?.url || anonymousProfile;
 
   return (
     <div
       className={`${styles['archive-card']} ${isSelected ? styles['selected'] : ''}`}
+      style={isSelected ? {
+        borderColor: theme.colors.main,
+        boxShadow: `0 0 0 3px ${theme.colors.main}1A, 0 8px 24px rgba(0,0,0,0.12)`,
+        backgroundColor: '#fffaf5',
+      } : undefined}
       onClick={onClick}
     >
       <div className={styles['archive-card__content']}>

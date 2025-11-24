@@ -1,6 +1,7 @@
 import React, { useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { useNavigate } from 'react-router-dom';
+import { theme } from '../../../theme';
 import { useMissingDetail } from '../../../hooks/useMissingDetail';
 import { useElapsedTime } from '../../../hooks/useElapsedTime';
 import { useShareMissingPerson } from '../../../hooks/useShareMissingPerson';
@@ -27,6 +28,7 @@ const MissingInfoModal: React.FC<MissingInfoModalProps> = ({ personId, onGoBack,
   const [initialImageIndex, setInitialImageIndex] = useState(0);
   const [aiImageOpen, setAiImageOpen] = useState(false);
   const [aiImageZoom, setAiImageZoom] = useState(1);
+  const [expandedAiInfo, setExpandedAiInfo] = useState<'top1' | 'top2' | null>(null);
 
   // 실종자 상세 정보 가져오기
   const { data: detailData, isLoading: isDetailLoading } = useMissingDetail(personId || null);
@@ -237,7 +239,7 @@ const MissingInfoModal: React.FC<MissingInfoModalProps> = ({ personId, onGoBack,
                             className={cardStyles['m-archive-card__thumbnail']}
                             onClick={() => img.url && handleImageClick(img.url)}
                           >
-                            <img src={img.url || tempImg} alt={`추가 사진 ${index + 1}`} />
+                            <img src={img.url || anonymousProfile} alt={`추가 사진 ${index + 1}`} />
                           </div>
                         ))}
                       </div>
@@ -280,8 +282,8 @@ const MissingInfoModal: React.FC<MissingInfoModalProps> = ({ personId, onGoBack,
                     {(() => {
                       const aiImageDisplayIds = [50000, 50020, 50040, 50041];
                       const hasAIImages = aiImageDisplayIds.includes(detailData?.id || 0) &&
-                                         detailData?.outputImages &&
-                                         detailData.outputImages.length > 0;
+                                        detailData?.outputImages &&
+                                        detailData.outputImages.length > 0;
                       const aiImageUrl = hasAIImages ? detailData?.outputImages?.[0]?.url : null;
 
                       return (
@@ -314,32 +316,58 @@ const MissingInfoModal: React.FC<MissingInfoModalProps> = ({ personId, onGoBack,
                             {/* 오른쪽: 우선순위 */}
                             <div className={cardStyles['m-archive-card__aiInfoWrapper']}>
                               <div className={cardStyles['m-archive-card__aiInfo']}>
-                                {detailData.aiSupport ? (
-                                  <>
-                                    <div className={cardStyles['m-archive-card__aiInfoSection']}>
-                                      <Text as="div" size="sm" weight="bold" color="darkMain" className={cardStyles['m-archive-card__aiInfoLabel']}>
-                                        우선순위
-                                      </Text>
-                                      <div className={cardStyles['m-archive-card__aiInfoItem']}>
-                                        <Text as="span" size="sm" color="gray">1순위</Text>
-                                        <Text as="span" size="sm" color="darkMain">{detailData.aiSupport.top1Desc || '-'}</Text>
-                                      </div>
-                                      <div className={cardStyles['m-archive-card__aiInfoItem']}>
-                                        <Text as="span" size="sm" color="gray">2순위</Text>
-                                        <Text as="span" size="sm" color="darkMain">{detailData.aiSupport.top2Desc || '-'}</Text>
-                                      </div>
-                                    </div>
-                                  </>
-                                ) : (
+                                {detailData.aiSupport && (detailData.aiSupport.top1Keyword || detailData.aiSupport.top1Desc || detailData.aiSupport.top2Keyword || detailData.aiSupport.top2Desc) ? (
                                   <div className={cardStyles['m-archive-card__aiInfoSection']}>
-                                    <Text as="div" size="sm" color="gray">AI 정보가 없습니다.</Text>
+                                    <Text as="div" size="sm" weight="bold" color="darkMain" className={cardStyles['m-archive-card__aiInfoLabel']}>
+                                      우선순위
+                                    </Text>
+
+                                    {/* 1순위 */}
+                                    {(detailData.aiSupport.top1Keyword || detailData.aiSupport.top1Desc) && (
+                                      <div className={cardStyles['m-archive-card__aiInfoItem']}>
+                                        <button
+                                          className={cardStyles['m-archive-card__aiKeywordButton']}
+                                          onClick={() => setExpandedAiInfo(expandedAiInfo === 'top1' ? null : 'top1')}
+                                        >
+                                          <Text as="span" size="sm" color="gray">1순위</Text>
+                                          <Text as="span" size="sm" weight="bold" color="darkMain">{detailData.aiSupport.top1Keyword || detailData.aiSupport.top1Desc || '-'}</Text>
+                                        </button>
+                                        {expandedAiInfo === 'top1' && detailData.aiSupport.top1Desc && (
+                                          <Text as="div" size="sm" color="darkMain" className={cardStyles['m-archive-card__aiDescText']}>
+                                            {detailData.aiSupport.top1Desc}
+                                          </Text>
+                                        )}
+                                      </div>
+                                    )}
+
+                                    {/* 2순위 */}
+                                    {(detailData.aiSupport.top2Keyword || detailData.aiSupport.top2Desc) && (
+                                      <div className={cardStyles['m-archive-card__aiInfoItem']}>
+                                        <button
+                                          className={cardStyles['m-archive-card__aiKeywordButton']}
+                                          onClick={() => setExpandedAiInfo(expandedAiInfo === 'top2' ? null : 'top2')}
+                                        >
+                                          <Text as="span" size="sm" color="gray">2순위</Text>
+                                          <Text as="span" size="sm" weight="bold" color="darkMain">{detailData.aiSupport.top2Keyword || detailData.aiSupport.top2Desc || '-'}</Text>
+                                        </button>
+                                        {expandedAiInfo === 'top2' && detailData.aiSupport.top2Desc && (
+                                          <Text as="div" size="sm" color="darkMain" className={cardStyles['m-archive-card__aiDescText']}>
+                                            {detailData.aiSupport.top2Desc}
+                                          </Text>
+                                        )}
+                                      </div>
+                                    )}
                                   </div>
+                                ) : (
+                                  <Text as="div" size="sm" color="gray" style={{ textAlign: 'center', padding: '1rem', display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%' }}>
+                                    안전한 AI 정보 활용을 위해 개인정보 수집 동의가 필요합니다.
+                                  </Text>
                                 )}
                               </div>
                             </div>
                           </div>
                           <Text as="div" size="sm" color="gray" className={cardStyles['m-archive-card__aiCaption']}>
-                            ① AI 분석을 주요 정보를 우선적으로 정리한 내용으로, 참고용으로 활용해주시기 바랍니다.
+                            ① AI가 분석한 주요 정보를 우선적으로 정리한 내용이니, 참고용으로 활용해주시길 바랍니다.
                           </Text>
                         </div>
                         );
@@ -362,8 +390,8 @@ const MissingInfoModal: React.FC<MissingInfoModalProps> = ({ personId, onGoBack,
             {aiImageOpen && (() => {
               const aiImageDisplayIds = [50000, 50020, 50040, 50041];
               const hasAIImages = aiImageDisplayIds.includes(detailData?.id || 0) &&
-                                 detailData?.outputImages &&
-                                 detailData.outputImages.length > 0;
+                                detailData?.outputImages &&
+                                detailData.outputImages.length > 0;
               const aiImageUrl = hasAIImages ? detailData?.outputImages?.[0]?.url : null;
 
               const viewer = aiImageUrl ? (
@@ -382,6 +410,11 @@ const MissingInfoModal: React.FC<MissingInfoModalProps> = ({ personId, onGoBack,
                     animation: 'fadeIn 0.3s ease-out',
                   }}
                   onClick={() => setAiImageOpen(false)}
+                  onTouchEnd={(e) => {
+                    if (e.target === e.currentTarget) {
+                      setAiImageOpen(false);
+                    }
+                  }}
                   onWheel={(e) => {
                     e.preventDefault();
                     const delta = e.deltaY > 0 ? 0.9 : 1.1;
@@ -439,14 +472,13 @@ const MissingInfoModal: React.FC<MissingInfoModalProps> = ({ personId, onGoBack,
                       justifyContent: 'center',
                       overflow: 'hidden',
                     }}
-                    onClick={(e) => e.stopPropagation()}
                   >
                     <img
                       src={aiImageUrl}
                       alt="AI 서포트 이미지"
                       style={{
-                        width: '100%',
-                        height: '100%',
+                        maxWidth: '100%',
+                        maxHeight: '100%',
                         objectFit: 'contain',
                         transform: `scale(${aiImageZoom})`,
                         transition: 'transform 0.1s ease-out',
@@ -454,6 +486,8 @@ const MissingInfoModal: React.FC<MissingInfoModalProps> = ({ personId, onGoBack,
                         userSelect: 'none',
                       }}
                       draggable={false}
+                      onClick={(e) => e.stopPropagation()}
+                      onTouchEnd={(e) => e.stopPropagation()}
                     />
                   </div>
 
@@ -475,7 +509,11 @@ const MissingInfoModal: React.FC<MissingInfoModalProps> = ({ personId, onGoBack,
                       transition: 'opacity 0.2s',
                       opacity: 0.8,
                     }}
-                    onClick={() => setAiImageOpen(false)}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setAiImageOpen(false);
+                    }}
+                    onTouchEnd={(e) => e.stopPropagation()}
                     onMouseEnter={(e) => {
                       e.currentTarget.style.opacity = '1';
                     }}
@@ -498,6 +536,8 @@ const MissingInfoModal: React.FC<MissingInfoModalProps> = ({ personId, onGoBack,
                       borderRadius: '4px',
                       userSelect: 'none',
                     }}
+                    onClick={(e) => e.stopPropagation()}
+                    onTouchEnd={(e) => e.stopPropagation()}
                   >
                     {(aiImageZoom * 100).toFixed(0)}% | 스크롤/핀치로 확대/축소
                   </div>

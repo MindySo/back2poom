@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { createPortal } from 'react-dom';
 import { useNavigate } from 'react-router-dom';
 import { useQueryClient } from '@tanstack/react-query';
+import { theme } from '../../../theme';
 import { useMissingDetail } from '../../../hooks/useMissingDetail';
 import { useShareMissingPerson } from '../../../hooks/useShareMissingPerson';
 import { useElapsedTime } from '../../../hooks/useElapsedTime';
@@ -26,6 +27,7 @@ const MArchiveCard: React.FC<MArchiveCardProps> = ({ personId }) => {
   const [initialImageIndex, setInitialImageIndex] = useState(0);
   const [aiImageOpen, setAiImageOpen] = useState(false);
   const [aiImageZoom, setAiImageZoom] = useState(1);
+  const [expandedAiInfo, setExpandedAiInfo] = useState<'top1' | 'top2' | null>(null);
   const { share: handleShare, isSharing } = useShareMissingPerson();
   
   // 목록 캐시에서 기본 정보 가져오기
@@ -211,7 +213,7 @@ const MArchiveCard: React.FC<MArchiveCardProps> = ({ personId }) => {
         <div className={styles['m-archive-card__expandedContent']}>
           {isDetailLoading ? (
             <div className={styles['loading-container']}>
-              <div className={styles['spinner']}></div>
+              <div className={styles['spinner']} style={{ borderTopColor: theme.colors.main }}></div>
               <Text as="div" size="xs" color="gray" style={{ marginTop: '1rem' }}>로딩 중...</Text>
             </div>
           ) : detailData ? (
@@ -294,29 +296,56 @@ const MArchiveCard: React.FC<MArchiveCardProps> = ({ personId }) => {
                   {/* 오른쪽: 우선순위 */}
                   <div className={styles['m-archive-card__aiInfoWrapper']}>
                     <div className={styles['m-archive-card__aiInfo']}>
-                      {aiSupport && (
+                      {aiSupport && (aiSupport.top1Keyword || aiSupport.top1Desc || aiSupport.top2Keyword || aiSupport.top2Desc) ? (
                         <div className={styles['m-archive-card__aiInfoSection']}>
                           <Text as="div" size="xs" weight="bold" color="darkMain" className={styles['m-archive-card__aiInfoLabel']}>우선순위</Text>
-                          <div className={styles['m-archive-card__aiInfoItem']}>
-                            <Text as="span" size="xs" color="gray">1순위</Text>
-                            <Text as="span" size="xs" color="darkMain">{aiSupport.top1Desc || '-'}</Text>
-                          </div>
-                          <div className={styles['m-archive-card__aiInfoItem']}>
-                            <Text as="span" size="xs" color="gray">2순위</Text>
-                            <Text as="span" size="xs" color="darkMain">{aiSupport.top2Desc || '-'}</Text>
-                          </div>
+
+                          {/* 1순위 */}
+                          {(aiSupport.top1Keyword || aiSupport.top1Desc) && (
+                            <div className={styles['m-archive-card__aiInfoItem']}>
+                              <button
+                                className={styles['m-archive-card__aiKeywordButton']}
+                                onClick={() => setExpandedAiInfo(expandedAiInfo === 'top1' ? null : 'top1')}
+                              >
+                                <Text as="span" size="xs" color="gray">1순위</Text>
+                                <Text as="span" size="xs" weight="bold" color="darkMain">{aiSupport.top1Keyword || aiSupport.top1Desc || '-'}</Text>
+                              </button>
+                              {expandedAiInfo === 'top1' && aiSupport.top1Desc && (
+                                <Text as="div" size="xs" color="darkMain" className={styles['m-archive-card__aiDescText']}>
+                                  {aiSupport.top1Desc}
+                                </Text>
+                              )}
+                            </div>
+                          )}
+
+                          {/* 2순위 */}
+                          {(aiSupport.top2Keyword || aiSupport.top2Desc) && (
+                            <div className={styles['m-archive-card__aiInfoItem']}>
+                              <button
+                                className={styles['m-archive-card__aiKeywordButton']}
+                                onClick={() => setExpandedAiInfo(expandedAiInfo === 'top2' ? null : 'top2')}
+                              >
+                                <Text as="span" size="xs" color="gray">2순위</Text>
+                                <Text as="span" size="xs" weight="bold" color="darkMain">{aiSupport.top2Keyword || aiSupport.top2Desc || '-'}</Text>
+                              </button>
+                              {expandedAiInfo === 'top2' && aiSupport.top2Desc && (
+                                <Text as="div" size="xs" color="darkMain" className={styles['m-archive-card__aiDescText']}>
+                                  {aiSupport.top2Desc}
+                                </Text>
+                              )}
+                            </div>
+                          )}
                         </div>
-                      )}
-                      {!aiSupport && (
-                        <div className={styles['m-archive-card__aiInfoSection']}>
-                          <Text as="div" size="xs" color="gray">AI 정보가 없습니다.</Text>
-                        </div>
+                      ) : (
+                        <Text as="div" size="xs" color="gray" style={{ textAlign: 'center', padding: '1rem', display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%' }}>
+                          안전한 AI 정보 활용을 위해 개인정보 수집 동의가 필요합니다.
+                        </Text>
                       )}
                     </div>
                   </div>
                 </div>
                     <Text as="div" size="xs" color="gray" className={styles['m-archive-card__aiCaption']}>
-                      ① AI 분석을 주요 정보를 우선적으로 정리한 내용으로, 참고용으로 활용해주시기 바랍니다.
+                      ① AI가 분석한 주요 정보를 우선적으로 정리한 내용이니, 참고용으로 활용해주시길 바랍니다.
                     </Text>
                   </div>
                 );
@@ -371,6 +400,11 @@ const MArchiveCard: React.FC<MArchiveCardProps> = ({ personId }) => {
               animation: 'fadeIn 0.3s ease-out',
             }}
             onClick={() => setAiImageOpen(false)}
+            onTouchEnd={(e) => {
+              if (e.target === e.currentTarget) {
+                setAiImageOpen(false);
+              }
+            }}
             onWheel={(e) => {
               e.preventDefault();
               const delta = e.deltaY > 0 ? 0.9 : 1.1;
@@ -428,14 +462,13 @@ const MArchiveCard: React.FC<MArchiveCardProps> = ({ personId }) => {
                 justifyContent: 'center',
                 overflow: 'hidden',
               }}
-              onClick={(e) => e.stopPropagation()}
             >
               <img
                 src={aiImageUrl}
                 alt="AI 서포트 이미지"
                 style={{
-                  width: '100%',
-                  height: '100%',
+                  maxWidth: '100%',
+                  maxHeight: '100%',
                   objectFit: 'contain',
                   transform: `scale(${aiImageZoom})`,
                   transition: 'transform 0.1s ease-out',
@@ -443,6 +476,8 @@ const MArchiveCard: React.FC<MArchiveCardProps> = ({ personId }) => {
                   userSelect: 'none',
                 }}
                 draggable={false}
+                onClick={(e) => e.stopPropagation()}
+                onTouchEnd={(e) => e.stopPropagation()}
               />
             </div>
 
@@ -464,7 +499,11 @@ const MArchiveCard: React.FC<MArchiveCardProps> = ({ personId }) => {
                 transition: 'opacity 0.2s',
                 opacity: 0.8,
               }}
-              onClick={() => setAiImageOpen(false)}
+              onClick={(e) => {
+                e.stopPropagation();
+                setAiImageOpen(false);
+              }}
+              onTouchEnd={(e) => e.stopPropagation()}
               onMouseEnter={(e) => {
                 e.currentTarget.style.opacity = '1';
               }}
@@ -487,6 +526,8 @@ const MArchiveCard: React.FC<MArchiveCardProps> = ({ personId }) => {
                 borderRadius: '4px',
                 userSelect: 'none',
               }}
+              onClick={(e) => e.stopPropagation()}
+              onTouchEnd={(e) => e.stopPropagation()}
             >
               {(aiImageZoom * 100).toFixed(0)}% | 스크롤/핀치로 확대/축소
             </div>

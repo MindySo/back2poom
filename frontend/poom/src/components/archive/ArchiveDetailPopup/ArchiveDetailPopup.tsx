@@ -1,6 +1,7 @@
 import React from 'react';
 import { createPortal } from 'react-dom';
 import { useNavigate } from 'react-router-dom';
+import { theme } from '../../../theme';
 import { useMissingDetail } from '../../../hooks/useMissingDetail';
 import { useElapsedTime } from '../../../hooks/useElapsedTime';
 import { useShareMissingPerson } from '../../../hooks/useShareMissingPerson';
@@ -10,8 +11,8 @@ import Text from '../../common/atoms/Text';
 import Button from '../../common/atoms/Button';
 import ImageCarousel from '../../common/molecules/ImageCarousel/ImageCarousel';
 import type { ImageFile, MissingPerson } from '../../../types/missing';
-import tempImg from '../../../assets/TempImg.png';
-import poomLogo from '../../../assets/poom_logo.png';
+import anonymousProfile from '../../../assets/anonymous_profile.svg';
+import poomLogo from '../../../assets/2poom_logo.svg';
 
 export interface ArchiveDetailPopupProps {
   personId: number;
@@ -27,6 +28,7 @@ const ArchiveDetailPopup: React.FC<ArchiveDetailPopupProps> = ({ personId, initi
   const [initialImageIndex, setInitialImageIndex] = React.useState(0);
   const [aiImageOpen, setAiImageOpen] = React.useState(false);
   const [aiImageZoom, setAiImageZoom] = React.useState(1);
+  const [expandedAiInfo, setExpandedAiInfo] = React.useState<'top1' | 'top2' | null>(null);
   const [showScrollbar, setShowScrollbar] = React.useState(false);
   const [isClosing, setIsClosing] = React.useState(false);
   const scrollbarTimerRef = React.useRef<NodeJS.Timeout | null>(null);
@@ -80,7 +82,7 @@ const ArchiveDetailPopup: React.FC<ArchiveDetailPopupProps> = ({ personId, initi
       <div className={`${styles['popup-overlay']} ${isClosing ? styles['closing'] : ''}`} onClick={handleCloseWithAnimation}>
         <div className={`${styles['popup-content']} ${isClosing ? styles['closing'] : ''}`} onClick={(e) => e.stopPropagation()}>
           <div className={styles['loading-container']}>
-            <div className={styles['spinner']}></div>
+            <div className={styles['spinner']} style={{ borderTopColor: theme.colors.main }}></div>
             <Text as="div" size="sm" color="gray" style={{ marginTop: '1rem' }}>로딩 중...</Text>
           </div>
         </div>
@@ -188,8 +190,8 @@ const ArchiveDetailPopup: React.FC<ArchiveDetailPopupProps> = ({ personId, initi
     return `${year}-${month}-${day}`;
   };
   
-  // 이미지 URL 가져오기 (없으면 임시 이미지)
-  const mainImageUrl = mainImage?.url || tempImg;
+  // 이미지 URL 가져오기 (없으면 익명 프로필)
+  const mainImageUrl = mainImage?.url || anonymousProfile;
   const thumbnailImages = inputImages?.slice(0, 4) || [];
 
   // 모든 이미지를 배열로 수집
@@ -273,7 +275,7 @@ const ArchiveDetailPopup: React.FC<ArchiveDetailPopupProps> = ({ personId, initi
                     className={styles['popup-thumbnail']}
                     onClick={() => img.url && handleImageClick(img.url)}
                   >
-                    <img src={img.url || tempImg} alt={`썸네일 ${index + 1}`} />
+                    <img src={img.url || anonymousProfile} alt={`썸네일 ${index + 1}`} />
                   </div>
                 ))}
                 {/* 썸네일이 4개 미만이면 빈 공간 유지 */}
@@ -374,22 +376,49 @@ const ArchiveDetailPopup: React.FC<ArchiveDetailPopupProps> = ({ personId, initi
                     <Text as="div" size="md" weight="bold" color="darkMain" className={styles['popup-ai-subtitle']}>AI 서포트 정보</Text>
 
                     <div className={styles['popup-ai-info']}>
-                      {aiSupport && (
+                      {aiSupport && (aiSupport.top1Keyword || aiSupport.top1Desc || aiSupport.top2Keyword || aiSupport.top2Desc) ? (
                         <div className={styles['popup-ai-info-section']}>
                           <Text as="div" size="sm" weight="bold" color="darkMain" className={styles['popup-ai-info-label']}>우선순위</Text>
-                          <div className={styles['popup-ai-info-item']}>
-                            <Text as="span" size="xs" color="gray">1순위</Text>
-                            <Text as="span" size="sm" color="darkMain">{aiSupport.top1Desc || '-'}</Text>
-                          </div>
-                          <div className={styles['popup-ai-info-item']}>
-                            <Text as="span" size="xs" color="gray">2순위</Text>
-                            <Text as="span" size="sm" color="darkMain">{aiSupport.top2Desc || '-'}</Text>
-                          </div>
+
+                          {/* 1순위 */}
+                          {(aiSupport.top1Keyword || aiSupport.top1Desc) && (
+                            <div className={styles['popup-ai-info-item']}>
+                              <button
+                                className={styles['popup-ai-keyword-button']}
+                                onClick={() => setExpandedAiInfo(expandedAiInfo === 'top1' ? null : 'top1')}
+                              >
+                                <Text as="span" size="xs" color="gray">1순위</Text>
+                                <Text as="span" size="sm" weight="bold" color="darkMain">{aiSupport.top1Keyword || aiSupport.top1Desc || '-'}</Text>
+                              </button>
+                              {expandedAiInfo === 'top1' && aiSupport.top1Desc && (
+                                <Text as="div" size="sm" color="darkMain" className={styles['popup-ai-desc-text']}>
+                                  {aiSupport.top1Desc}
+                                </Text>
+                              )}
+                            </div>
+                          )}
+
+                          {/* 2순위 */}
+                          {(aiSupport.top2Keyword || aiSupport.top2Desc) && (
+                            <div className={styles['popup-ai-info-item']}>
+                              <button
+                                className={styles['popup-ai-keyword-button']}
+                                onClick={() => setExpandedAiInfo(expandedAiInfo === 'top2' ? null : 'top2')}
+                              >
+                                <Text as="span" size="xs" color="gray">2순위</Text>
+                                <Text as="span" size="sm" weight="bold" color="darkMain">{aiSupport.top2Keyword || aiSupport.top2Desc || '-'}</Text>
+                              </button>
+                              {expandedAiInfo === 'top2' && aiSupport.top2Desc && (
+                                <Text as="div" size="sm" color="darkMain" className={styles['popup-ai-desc-text']}>
+                                  {aiSupport.top2Desc}
+                                </Text>
+                              )}
+                            </div>
+                          )}
                         </div>
-                      )}
-                      {!aiSupport && (
+                      ) : (
                         <div className={styles['popup-ai-info-section']}>
-                          <Text as="div" size="sm" color="gray">AI 정보가 없습니다.</Text>
+                          <Text as="div" size="sm" color="gray">안전한 AI 정보 활용을 위해 개인정보 수집 동의가 필요합니다.</Text>
                         </div>
                       )}
                     </div>
@@ -411,6 +440,10 @@ const ArchiveDetailPopup: React.FC<ArchiveDetailPopupProps> = ({ personId, initi
               variant="primary"
               size="small"
               className={styles['popup-primaryBtn']}
+              style={{
+                background: theme.colors.main,
+                color: theme.colors.white,
+              }}
               onClick={() => {
                 handleCloseWithAnimation();
                 setTimeout(() => {
@@ -455,8 +488,8 @@ const ArchiveDetailPopup: React.FC<ArchiveDetailPopupProps> = ({ personId, initi
       {aiImageOpen && (() => {
         const aiImageDisplayIds = [50000, 50020, 50040, 50041];
         const hasAIImages = aiImageDisplayIds.includes(person?.id || 0) &&
-                           person?.outputImages &&
-                           person.outputImages.length > 0;
+                          person?.outputImages &&
+                          person.outputImages.length > 0;
         const aiImageUrl = hasAIImages ? person?.outputImages?.[0]?.url : null;
 
         const viewer = aiImageUrl ? (
@@ -475,6 +508,11 @@ const ArchiveDetailPopup: React.FC<ArchiveDetailPopupProps> = ({ personId, initi
               animation: 'fadeIn 0.3s ease-out',
             }}
             onClick={() => setAiImageOpen(false)}
+            onTouchEnd={(e) => {
+              if (e.target === e.currentTarget) {
+                setAiImageOpen(false);
+              }
+            }}
             onWheel={(e) => {
               e.preventDefault();
               const delta = e.deltaY > 0 ? 0.9 : 1.1;
@@ -532,14 +570,13 @@ const ArchiveDetailPopup: React.FC<ArchiveDetailPopupProps> = ({ personId, initi
                 justifyContent: 'center',
                 overflow: 'hidden',
               }}
-              onClick={(e) => e.stopPropagation()}
             >
               <img
                 src={aiImageUrl}
                 alt="AI 서포트 이미지"
                 style={{
-                  width: '100%',
-                  height: '100%',
+                  maxWidth: '100%',
+                  maxHeight: '100%',
                   objectFit: 'contain',
                   transform: `scale(${aiImageZoom})`,
                   transition: 'transform 0.1s ease-out',
@@ -547,6 +584,8 @@ const ArchiveDetailPopup: React.FC<ArchiveDetailPopupProps> = ({ personId, initi
                   userSelect: 'none',
                 }}
                 draggable={false}
+                onClick={(e) => e.stopPropagation()}
+                onTouchEnd={(e) => e.stopPropagation()}
               />
             </div>
 
@@ -568,7 +607,11 @@ const ArchiveDetailPopup: React.FC<ArchiveDetailPopupProps> = ({ personId, initi
                 transition: 'opacity 0.2s',
                 opacity: 0.8,
               }}
-              onClick={() => setAiImageOpen(false)}
+              onClick={(e) => {
+                e.stopPropagation();
+                setAiImageOpen(false);
+              }}
+              onTouchEnd={(e) => e.stopPropagation()}
               onMouseEnter={(e) => {
                 e.currentTarget.style.opacity = '1';
               }}
@@ -591,6 +634,8 @@ const ArchiveDetailPopup: React.FC<ArchiveDetailPopupProps> = ({ personId, initi
                 borderRadius: '4px',
                 userSelect: 'none',
               }}
+              onClick={(e) => e.stopPropagation()}
+              onTouchEnd={(e) => e.stopPropagation()}
             >
               {(aiImageZoom * 100).toFixed(0)}% | 스크롤/핀치로 확대/축소
             </div>

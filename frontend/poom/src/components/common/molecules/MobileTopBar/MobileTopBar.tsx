@@ -2,7 +2,7 @@ import React from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { theme } from '../../../../theme';
 import styles from './MobileTopBar.module.css';
-import logo from '../../../../assets/poom_logo.png';
+import logo from '../../../../assets/2poom_logo.svg';
 
 export interface MobileTopBarProps {
   className?: string;

@@ -322,6 +322,9 @@ const MapPage: React.FC = () => {
         // URL에서 파라미터 제거
         setSearchParams({});
       } else {
+        // full 상태에서 다른 실종자를 선택하면 half로 축소하기 위해 미리 체크
+        const isFullStateToDifferentPerson = mobileModalState === 'full' && selectedMissingId !== id;
+
         // initial 상태거나 다른 마커를 클릭하면 내용 변경하고 half 상태로 확장
         setSelectedMissingId(id);
         setIsInitialModalOpen(false); // 초기 정보 모달 닫기
@@ -333,6 +336,11 @@ const MapPage: React.FC = () => {
 
         // initial 상태에서 마커를 클릭하면 명시적으로 half 상태로 확장
         if (mobileModalState === 'initial') {
+          bottomSheetRef.current?.expandToHalf();
+        }
+
+        // full 상태에서 다른 실종자를 선택하면 half로 축소
+        if (isFullStateToDifferentPerson) {
           bottomSheetRef.current?.expandToHalf();
         }
 

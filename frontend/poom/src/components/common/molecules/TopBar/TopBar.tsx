@@ -2,7 +2,7 @@ import React from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { theme } from '../../../../theme';
 import styles from './TopBar.module.css';
-import logoFull from '../../../../assets/poom_logo_full.png';
+import logoFull from '../../../../assets/2poom_logo.svg';
 
 export interface TopBarProps {
   className?: string;
@@ -40,7 +40,7 @@ const TopBar: React.FC<TopBarProps> = ({ className = '' }) => {
           className={styles.logoBox}
           style={{
             backgroundColor: theme.colors.beige,
-            boxShadow: `4px 4px 12px rgba(232, 154, 89, 0.3)`,
+            boxShadow: `4px 4px 12px ${theme.colors.main}4D`,
           }}
           onClick={() => handleNavClick('/')}
         >
@@ -57,7 +57,7 @@ const TopBar: React.FC<TopBarProps> = ({ className = '' }) => {
         className={styles.rightSection}
         style={{
           backgroundColor: theme.colors.beige,
-          boxShadow: '0 4px 12px rgba(0, 0, 0, 0.2)',
+          boxShadow: `0 4px 12px ${theme.colors.black}33`,
         }}
       >
         {/* 네비게이션 영역 */}
@@ -81,8 +81,8 @@ const TopBar: React.FC<TopBarProps> = ({ className = '' }) => {
                 <span
                   className={`${styles.activeIndicator} ${(isActive || isHovered) ? styles.show : ''}`}
                   style={{
-                    backgroundColor: 'rgba(232, 154, 89, 0.7)',
-                    boxShadow: `4px 4px 12px rgba(232, 154, 89, 0.5)`,
+                    backgroundColor: `${theme.colors.main}B3`,
+                    boxShadow: `4px 4px 12px ${theme.colors.main}80`,
                   }}
                 ></span>
                 <span

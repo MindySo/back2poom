@@ -5,7 +5,8 @@ import { useMissingDetail } from '../../../hooks';
 import { useShareMissingPerson } from '../../../hooks/useShareMissingPerson';
 import styles from './Dashboard.module.css';
 import close from '../../../assets/back_icon.svg';
-import logo from '../../../assets/poom_logo.png';
+import logo from '../../../assets/2poom_logo.svg';
+import anonymousProfile from '../../../assets/anonymous_profile.svg';
 import { useNavigate } from 'react-router-dom';
 import Text from '../../common/atoms/Text';
 import Badge from '../../common/atoms/Badge';
@@ -29,6 +30,7 @@ const Dashboard: React.FC<DashboardProps> = ({ isOpen, onClose, missingId }) => 
   const [initialImageIndex, setInitialImageIndex] = React.useState(0);
   const [aiImageOpen, setAiImageOpen] = React.useState(false);
   const [aiImageZoom, setAiImageZoom] = React.useState(1);
+  const [expandedAiInfo, setExpandedAiInfo] = React.useState<'top1' | 'top2' | null>(null);
 
   // 스크롤바 표시 상태 관리
   const [showScrollbar, setShowScrollbar] = React.useState(false);
@@ -181,7 +183,7 @@ const Dashboard: React.FC<DashboardProps> = ({ isOpen, onClose, missingId }) => 
         >
           {isLoading ? (
             <div className={styles.loadingContainer}>
-              <div className={styles.spinner}></div>
+              <div className={styles.spinner} style={{ borderTopColor: theme.colors.main }}></div>
               <Text as="div" size="sm" color="darkMain" style={{ marginTop: '1rem' }}>로딩 중...</Text>
             </div>
           ) : missingDetail ? (
@@ -209,13 +211,20 @@ const Dashboard: React.FC<DashboardProps> = ({ isOpen, onClose, missingId }) => 
 
                     {/* 메인 이미지 */}
                     <div className={styles.mainImageWrapper}>
-                      {missingDetail.mainImage && (
+                      {missingDetail.mainImage ? (
                         <img
                           src={missingDetail.mainImage.url}
                           alt={missingDetail.personName}
                           className={styles.mainImage}
                           onClick={() => missingDetail.mainImage && handleImageClick(missingDetail.mainImage.url)}
                           style={{ cursor: 'pointer' }}
+                        />
+                      ) : (
+                        <img
+                          src={anonymousProfile}
+                          alt="익명 프로필 이미지"
+                          className={styles.mainImage}
+                          style={{ cursor: 'default', opacity: 0.5 }}
                         />
                       )}
                     </div>
@@ -278,27 +287,27 @@ const Dashboard: React.FC<DashboardProps> = ({ isOpen, onClose, missingId }) => 
                   <div className={styles.infoCard}>
                     <Text as="div" size="sm" weight="bold" color="darkMain" className={styles.infoLabel}>이름</Text>
                     <Text as="div" size="md" color="darkMain" className={styles.infoValue}>
-                      {missingDetail.personName} ({missingDetail.gender === '남성' ? '남' : missingDetail.gender === '여성' ? '여' : '성별 미상'})
+                      {missingDetail.personName || '-'} ({missingDetail.gender === '남성' ? '남' : missingDetail.gender === '여성' ? '여' : '-'})
                     </Text>
 
                     <Text as="div" size="sm" weight="bold" color="darkMain" className={styles.infoLabel}>나이</Text>
                     <Text as="div" size="md" color="darkMain" className={styles.infoValue}>
-                      {missingDetail.ageAtTime}세 (현재 {calculateCurrentAge(missingDetail.occurredAt, missingDetail.ageAtTime)}세)
+                      {missingDetail.ageAtTime && missingDetail.occurredAt ? `${missingDetail.ageAtTime}세 (현재 ${calculateCurrentAge(missingDetail.occurredAt, missingDetail.ageAtTime)}세)` : '- 세 (현재 - 세)'}
                     </Text>
 
                     <Text as="div" size="sm" weight="bold" color="darkMain" className={styles.infoLabel}>발생일</Text>
                     <Text as="div" size="md" color="darkMain" className={styles.infoValue}>
-                      {(() => {
+                      {missingDetail.occurredAt ? (() => {
                         const date = new Date(missingDetail.occurredAt);
                         const year = date.getFullYear();
                         const month = String(date.getMonth() + 1).padStart(2, '0');
                         const day = String(date.getDate()).padStart(2, '0');
                         return `${year}-${month}-${day}`;
-                      })()}
+                      })() : '-'}
                     </Text>
 
                     <Text as="div" size="sm" weight="bold" color="darkMain" className={styles.infoLabel}>발생장소</Text>
-                    <Text as="div" size="md" color="darkMain" className={styles.infoValue}>{missingDetail.occurredLocation}</Text>
+                    <Text as="div" size="md" color="darkMain" className={styles.infoValue}>{missingDetail.occurredLocation || '-'}</Text>
                   </div>
                 </div>
 
@@ -307,7 +316,7 @@ const Dashboard: React.FC<DashboardProps> = ({ isOpen, onClose, missingId }) => 
                   <div className={styles.infoCard}>
                     <Text as="div" size="sm" weight="bold" color="darkMain" className={styles.infoLabel}>신체정보</Text>
                     <Text as="div" size="md" color="darkMain" className={styles.infoValue}>
-                      {missingDetail.heightCm ? `${missingDetail.heightCm}cm` : '-'} / {missingDetail.weightKg ? `${missingDetail.weightKg}kg` : '-'}
+                      {missingDetail.heightCm ? `${missingDetail.heightCm}cm` : '- cm'} / {missingDetail.weightKg ? `${missingDetail.weightKg}kg` : '- kg'}
                     </Text>
 
                     <Text as="div" size="sm" weight="bold" color="darkMain" className={styles.infoLabel}>체형</Text>
@@ -328,7 +337,7 @@ const Dashboard: React.FC<DashboardProps> = ({ isOpen, onClose, missingId }) => 
 
                 {/* 세번째 섹션: AI 서포트 정보 */}
                 <div
-                  className={styles.section}
+                  className={`${styles.section} ${styles.sectionLarge}`}
                   style={{
                     background: `linear-gradient(white, white) padding-box, ${theme.colors.rainbow} border-box`,
                     border: '3px solid transparent',
@@ -337,26 +346,54 @@ const Dashboard: React.FC<DashboardProps> = ({ isOpen, onClose, missingId }) => 
                   <div className={styles.sectionContentAI}>
                     <Text as="div" size="md" weight="bold" color="darkMain" className={styles.aiTitle}>AI 서포트 정보</Text>
                     <div className={styles.aiInfoWrapper}>
-                      {missingDetail.aiSupport ? (
+                      {missingDetail.aiSupport && (missingDetail.aiSupport.top1Keyword || missingDetail.aiSupport.top1Desc || missingDetail.aiSupport.top2Keyword || missingDetail.aiSupport.top2Desc) ? (
                         <div className={styles.aiInfoSection}>
-                          <Text as="div" size="sm" weight="bold" color="darkMain" className={styles.aiSubtitle}>우선순위</Text>
-                          <div className={styles.aiInfoItem}>
-                            <Text as="span" size="xs" color="gray">1순위</Text>
-                            <Text as="span" size="sm" color="darkMain">{missingDetail.aiSupport.top1Desc || '-'}</Text>
-                          </div>
-                          <div className={styles.aiInfoItem}>
-                            <Text as="span" size="xs" color="gray">2순위</Text>
-                            <Text as="span" size="sm" color="darkMain">{missingDetail.aiSupport.top2Desc || '-'}</Text>
-                          </div>
+                          <Text as="div" size="sm" weight="bold" color="darkMain" className={styles.aiSubtitle}>AI 기반 예상 인상착의 우선순위</Text>
+
+                          {/* 1순위 */}
+                          {(missingDetail.aiSupport.top1Keyword || missingDetail.aiSupport.top1Desc) && (
+                            <div className={styles.aiInfoItem}>
+                              <button
+                                className={styles.aiKeywordButton}
+                                onClick={() => setExpandedAiInfo(expandedAiInfo === 'top1' ? null : 'top1')}
+                              >
+                                <Text as="span" size="xs" color="gray">1순위</Text>
+                                <Text as="span" size="sm" weight="bold" color="darkMain">{missingDetail.aiSupport.top1Keyword || missingDetail.aiSupport.top1Desc || '-'}</Text>
+                              </button>
+                              {expandedAiInfo === 'top1' && missingDetail.aiSupport.top1Desc && (
+                                <Text as="div" size="sm" color="darkMain" className={styles.aiDescText}>
+                                  {missingDetail.aiSupport.top1Desc}
+                                </Text>
+                              )}
+                            </div>
+                          )}
+
+                          {/* 2순위 */}
+                          {(missingDetail.aiSupport.top2Keyword || missingDetail.aiSupport.top2Desc) && (
+                            <div className={styles.aiInfoItem}>
+                              <button
+                                className={styles.aiKeywordButton}
+                                onClick={() => setExpandedAiInfo(expandedAiInfo === 'top2' ? null : 'top2')}
+                              >
+                                <Text as="span" size="xs" color="gray">2순위</Text>
+                                <Text as="span" size="sm" weight="bold" color="darkMain">{missingDetail.aiSupport.top2Keyword || missingDetail.aiSupport.top2Desc || '-'}</Text>
+                              </button>
+                              {expandedAiInfo === 'top2' && missingDetail.aiSupport.top2Desc && (
+                                <Text as="div" size="sm" color="darkMain" className={styles.aiDescText}>
+                                  {missingDetail.aiSupport.top2Desc}
+                                </Text>
+                              )}
+                            </div>
+                          )}
                         </div>
                       ) : (
-                        <div className={styles.aiInfoSection}>
-                          <Text as="div" size="sm" color="gray">AI 정보가 없습니다.</Text>
-                        </div>
+                        <Text as="div" size="sm" color="gray" style={{ textAlign: 'center', padding: '2rem', display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%' }}>
+                          안전한 AI 정보 활용을 위해 개인정보 수집 동의가 필요합니다.
+                        </Text>
                       )}
                     </div>
                     <Text as="div" size="xs" color="gray" className={styles.aiCaption}>
-                      ① AI 분석을 주요 정보를 우선적으로 정리한 내용으로, 참고용으로 활용해주시기 바랍니다.
+                      ① AI가 분석한 주요 정보를 우선적으로 정리한 내용이니, 참고용으로 활용해주시길 바랍니다.
                     </Text>
                   </div>
                 </div>
@@ -541,14 +578,13 @@ const Dashboard: React.FC<DashboardProps> = ({ isOpen, onClose, missingId }) => 
                 justifyContent: 'center',
                 overflow: 'hidden',
               }}
-              onClick={(e) => e.stopPropagation()}
             >
               <img
                 src={aiImageUrl}
                 alt="AI 서포트 이미지"
                 style={{
-                  width: '100%',
-                  height: '100%',
+                  maxWidth: '100%',
+                  maxHeight: '100%',
                   objectFit: 'contain',
                   transform: `scale(${aiImageZoom})`,
                   transition: 'transform 0.1s ease-out',
@@ -556,6 +592,8 @@ const Dashboard: React.FC<DashboardProps> = ({ isOpen, onClose, missingId }) => 
                   userSelect: 'none',
                 }}
                 draggable={false}
+                onClick={(e) => e.stopPropagation()}
+                onTouchEnd={(e) => e.stopPropagation()}
               />
             </div>
 
@@ -577,7 +615,11 @@ const Dashboard: React.FC<DashboardProps> = ({ isOpen, onClose, missingId }) => 
                 transition: 'opacity 0.2s',
                 opacity: 0.8,
               }}
-              onClick={() => setAiImageOpen(false)}
+              onClick={(e) => {
+                e.stopPropagation();
+                setAiImageOpen(false);
+              }}
+              onTouchEnd={(e) => e.stopPropagation()}
               onMouseEnter={(e) => {
                 e.currentTarget.style.opacity = '1';
               }}
@@ -600,6 +642,8 @@ const Dashboard: React.FC<DashboardProps> = ({ isOpen, onClose, missingId }) => 
                 borderRadius: '4px',
                 userSelect: 'none',
               }}
+              onClick={(e) => e.stopPropagation()}
+              onTouchEnd={(e) => e.stopPropagation()}
             >
               {(aiImageZoom * 100).toFixed(0)}% | 스크롤/핀치로 확대/축소
             </div>
