@@ -74,6 +74,11 @@ const ImageCarousel: React.FC<ImageCarouselProps> = ({ images, initialIndex, onC
         animation: isClosing ? 'carouselFadeOut 0.3s ease-out forwards' : 'carouselFadeIn 0.3s ease-out forwards',
       }}
       onClick={handleCloseWithAnimation}
+      onTouchEnd={(e) => {
+        if (e.target === e.currentTarget) {
+          handleCloseWithAnimation();
+        }
+      }}
     >
       <style>
         {`
@@ -142,19 +147,20 @@ const ImageCarousel: React.FC<ImageCarouselProps> = ({ images, initialIndex, onC
           justifyContent: 'center',
           overflow: 'hidden',
         }}
-        onClick={(e) => e.stopPropagation()}
       >
         {/* 이미지 */}
         <img
           src={currentImage.url}
           alt={`이미지 ${currentIndex + 1}`}
           style={{
-            width: '100%',
-            height: '100%',
+            maxWidth: '100%',
+            maxHeight: '100%',
             objectFit: 'contain',
             userSelect: 'none',
           }}
           draggable={false}
+          onClick={(e) => e.stopPropagation()}
+          onTouchEnd={(e) => e.stopPropagation()}
         />
 
         {/* 이전 버튼 */}
@@ -253,6 +259,7 @@ const ImageCarousel: React.FC<ImageCarouselProps> = ({ images, initialIndex, onC
               gap: '8px',
             }}
             onClick={(e) => e.stopPropagation()}
+            onTouchEnd={(e) => e.stopPropagation()}
           >
             {images.map((_, index) => (
               <button
@@ -270,6 +277,7 @@ const ImageCarousel: React.FC<ImageCarouselProps> = ({ images, initialIndex, onC
                   e.stopPropagation();
                   handleIndicatorClick(index);
                 }}
+                onTouchEnd={(e) => e.stopPropagation()}
                 aria-label={`이미지 ${index + 1}로 이동`}
               />
             ))}
@@ -329,6 +337,7 @@ const ImageCarousel: React.FC<ImageCarouselProps> = ({ images, initialIndex, onC
           userSelect: 'none',
         }}
         onClick={(e) => e.stopPropagation()}
+        onTouchEnd={(e) => e.stopPropagation()}
       >
         {currentIndex + 1} / {images.length}
       </div>

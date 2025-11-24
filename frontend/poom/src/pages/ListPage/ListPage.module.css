@@ -188,7 +188,7 @@
   bottom: -10px;
   width: 36px;
   height: 3px;
-  background: #E89A59; /* orange underline like screenshot */
+  background: var(--main-color); /* orange underline like screenshot */
   border-radius: 2px;
   transition: transform 0.3s ease;
 }

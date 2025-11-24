@@ -7,19 +7,6 @@
   transition: all 0.2s ease-in-out;
 }
 
-/* 선택된 카드 스타일 */
-.card.selected {
-  background-color: rgba(232, 154, 89, 0.1); /* main 컬러에 투명도 적용 */
-  border-right: 4px solid #E89A59; /* 우측 세로 바 */
-  padding-left: 8px; /* 좌측 세로 바로 인해 줄어든 padding 보정 */
-}
-
-/* 선택된 카드 스타일 (Dark 테마) */
-.card.selectedDark {
-  background-color: rgba(255, 255, 255, 0.1); /* 흰색에 투명도 적용 */
-  border-right: 4px solid rgba(255, 255, 255, 0.9); /* 우측 세로 바 */
-  padding-left: 8px; /* 좌측 세로 바로 인해 줄어든 padding 보정 */
-}
 
 /* 왼쪽: 사진 프레임 */
 .imageFrame {
@@ -35,6 +22,7 @@
   width: 100%;
   height: 100%;
   object-fit: cover;
+  object-position: top;
 }
 
 /* 오른쪽: 정보 영역 */

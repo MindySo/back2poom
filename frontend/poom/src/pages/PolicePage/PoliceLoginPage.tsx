@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Text from '../../components/common/atoms/Text';
 import Button from '../../components/common/atoms/Button';
-import logoPolice from '../../assets/logo_police.png';
+import logoPolice from '../../assets/2poom_police_logo.svg';
 import styles from './PoliceLoginPage.module.css';
 
 const PoliceLoginPage = () => {

@@ -4,7 +4,8 @@ import { theme } from '../../../theme';
 import { useMissingDetail } from '../../../hooks';
 import styles from './PoliceDashboard.module.css';
 import close from '../../../assets/back_icon_police.svg';
-import logo from '../../../assets/logo_police.png';
+import logo from '../../../assets/2poom_police_logo.svg';
+import anonymousProfile from '../../../assets/anonymous_profile.svg';
 import { useNavigate } from 'react-router-dom';
 import Text from '../../common/atoms/Text';
 import Badge from '../../common/atoms/Badge';
@@ -25,6 +26,7 @@ const PoliceDashboard: React.FC<PoliceDashboardProps> = ({ isOpen, onClose, miss
   const [initialImageIndex, setInitialImageIndex] = React.useState(0);
   const [aiImageOpen, setAiImageOpen] = React.useState(false);
   const [aiImageZoom, setAiImageZoom] = React.useState(1);
+  const [expandedAiInfo, setExpandedAiInfo] = React.useState<'top1' | 'top2' | null>(null);
 
   // 스크롤바 표시 상태 관리
   const [showScrollbar, setShowScrollbar] = React.useState(false);
@@ -33,9 +35,6 @@ const PoliceDashboard: React.FC<PoliceDashboardProps> = ({ isOpen, onClose, miss
   // missingId가 있을 때만 API 호출
   const { data: missingDetail, isLoading } = useMissingDetail(missingId);
 
-  // 경찰서 페이지용 색상
-  const policeColor = '#2B3A55'; // darkMain 색상
-  const activeColor = '#0FB4DB'; // active 네비게이션 색상
 
   // 현재 나이 계산 함수
   const calculateCurrentAge = (occurredAt: string, ageAtTime: number): number => {
@@ -125,7 +124,7 @@ const PoliceDashboard: React.FC<PoliceDashboardProps> = ({ isOpen, onClose, miss
           <div
             className={`${styles.dashboard} ${isClosing ? styles.slideOut : ''}`}
             style={{
-              backgroundColor: `${policeColor}CC`, // policeColor + 투명
+              backgroundColor: `${theme.colors.darkMain}CC`, // darkMain + 투명
               boxShadow: '0 4px 12px rgba(0, 0, 0, 0.2)',
             }}
           >
@@ -172,7 +171,7 @@ const PoliceDashboard: React.FC<PoliceDashboardProps> = ({ isOpen, onClose, miss
               {/* 왼쪽 줄 */}
               <div className={styles.leftColumn}>
                 {/* 첫번째 섹션: 썸네일 */}
-                <div className={`${styles.section} ${styles.sectionXLarge}`} style={{ backgroundColor: policeColor }}>
+                <div className={`${styles.section} ${styles.sectionXLarge}`} style={{ backgroundColor: theme.colors.darkMain }}>
                   <div className={styles.imageSection}>
                     {/* 라벨 */}
                     <div className={styles.badgeContainer}>
@@ -183,13 +182,20 @@ const PoliceDashboard: React.FC<PoliceDashboardProps> = ({ isOpen, onClose, miss
 
                     {/* 메인 이미지 */}
                     <div className={styles.mainImageWrapper}>
-                      {missingDetail.mainImage && (
+                      {missingDetail.mainImage ? (
                         <img
                           src={missingDetail.mainImage.url}
                           alt={missingDetail.personName}
                           className={styles.mainImage}
                           onClick={() => missingDetail.mainImage && handleImageClick(missingDetail.mainImage.url)}
                           style={{ cursor: 'pointer' }}
+                        />
+                      ) : (
+                        <img
+                          src={anonymousProfile}
+                          alt="익명 프로필 이미지"
+                          className={styles.mainImage}
+                          style={{ cursor: 'default', opacity: 0.5 }}
                         />
                       )}
                     </div>
@@ -223,7 +229,7 @@ const PoliceDashboard: React.FC<PoliceDashboardProps> = ({ isOpen, onClose, miss
                     <div
                       className={`${styles.section} ${styles.sectionLarge}`}
                       style={{
-                        background: `linear-gradient(${policeColor}, ${policeColor}) padding-box, ${theme.colors.rainbow} border-box`,
+                        background: `linear-gradient(${theme.colors.darkMain}, ${theme.colors.darkMain}) padding-box, ${theme.colors.rainbow} border-box`,
                         border: '3px solid transparent',
                       }}
                     >
@@ -247,7 +253,7 @@ const PoliceDashboard: React.FC<PoliceDashboardProps> = ({ isOpen, onClose, miss
                           )}
                         </div>
                         <Text as="div" size="xs" color="policeGray" className={styles.aiCaption}>
-                          ① AI 분석을 주요 정보를 우선적으로 정리한 내용으로, 참고용으로 활용해주시기 바랍니다.
+                          ① CCTV 이미지 및 실종자 데이터 기반으로 AI가 예측한 이미지입니다.
                         </Text>
                       </div>
                     </div>
@@ -258,40 +264,40 @@ const PoliceDashboard: React.FC<PoliceDashboardProps> = ({ isOpen, onClose, miss
               {/* 오른쪽 줄 */}
               <div className={styles.rightColumn}>
                 {/* 첫번째 섹션: 기본 인적사항 */}
-                <div className={`${styles.section} ${styles.sectionSmall}`} style={{ backgroundColor: policeColor }}>
+                <div className={`${styles.section} ${styles.sectionSmall}`} style={{ backgroundColor: theme.colors.darkMain }}>
                   <div className={styles.infoCard}>
                     <Text as="div" size="sm" weight="bold" color="policeWhite" className={styles.infoLabel}>이름</Text>
                     <Text as="div" size="md" color="policeWhite" className={styles.infoValue}>
-                      {missingDetail.personName}({missingDetail.gender === '남성' ? '남' : missingDetail.gender === '여성' ? '여' : '성별 미상'})
+                      {missingDetail.personName || '-'} ({missingDetail.gender === '남성' ? '남' : missingDetail.gender === '여성' ? '여' : '-'})
                     </Text>
 
                     <Text as="div" size="sm" weight="bold" color="policeWhite" className={styles.infoLabel}>나이</Text>
                     <Text as="div" size="md" color="policeWhite" className={styles.infoValue}>
-                      {missingDetail.ageAtTime}세 (현재 {calculateCurrentAge(missingDetail.occurredAt, missingDetail.ageAtTime)}세)
+                      {missingDetail.ageAtTime && missingDetail.occurredAt ? `${missingDetail.ageAtTime}세 (현재 ${calculateCurrentAge(missingDetail.occurredAt, missingDetail.ageAtTime)}세)` : '- 세 (현재 - 세)'}
                     </Text>
 
                     <Text as="div" size="sm" weight="bold" color="policeWhite" className={styles.infoLabel}>발생일</Text>
                     <Text as="div" size="md" color="policeWhite" className={styles.infoValue}>
-                      {(() => {
+                      {missingDetail.occurredAt ? (() => {
                         const date = new Date(missingDetail.occurredAt);
                         const year = date.getFullYear();
                         const month = String(date.getMonth() + 1).padStart(2, '0');
                         const day = String(date.getDate()).padStart(2, '0');
                         return `${year}-${month}-${day}`;
-                      })()}
+                      })() : '-'}
                     </Text>
 
                     <Text as="div" size="sm" weight="bold" color="policeWhite" className={styles.infoLabel}>발생장소</Text>
-                    <Text as="div" size="md" color="policeWhite" className={styles.infoValue}>{missingDetail.occurredLocation}</Text>
+                    <Text as="div" size="md" color="policeWhite" className={styles.infoValue}>{missingDetail.occurredLocation || '-'}</Text>
                   </div>
                 </div>
 
                 {/* 두번째 섹션: 신체 정보 */}
-                <div className={`${styles.section} ${styles.sectionMedium}`} style={{ backgroundColor: policeColor }}>
+                <div className={`${styles.section} ${styles.sectionMedium}`} style={{ backgroundColor: theme.colors.darkMain }}>
                   <div className={styles.infoCard}>
                     <Text as="div" size="sm" weight="bold" color="policeWhite" className={styles.infoLabel}>신체정보</Text>
                     <Text as="div" size="md" color="policeWhite" className={styles.infoValue}>
-                      {missingDetail.heightCm ? `${missingDetail.heightCm}cm` : '-'} / {missingDetail.weightKg ? `${missingDetail.weightKg}kg` : '-'}
+                      {missingDetail.heightCm ? `${missingDetail.heightCm}cm` : '- cm'} / {missingDetail.weightKg ? `${missingDetail.weightKg}kg` : '- kg'}
                     </Text>
 
                     <Text as="div" size="sm" weight="bold" color="policeWhite" className={styles.infoLabel}>체형</Text>
@@ -312,36 +318,63 @@ const PoliceDashboard: React.FC<PoliceDashboardProps> = ({ isOpen, onClose, miss
 
                 {/* 세번째 섹션: AI 서포트 정보 */}
                 <div
-                  className={styles.section}
+                  className={`${styles.section} ${styles.sectionLarge}`}
                   style={{
-                    background: `linear-gradient(${policeColor}, ${policeColor}) padding-box, ${theme.colors.rainbow} border-box`,
+                    background: `linear-gradient(${theme.colors.darkMain}, ${theme.colors.darkMain}) padding-box, ${theme.colors.rainbow} border-box`,
                     border: '3px solid transparent',
                   }}
                 >
                   <div className={styles.sectionContentAI}>
                     <Text as="div" size="md" weight="bold" color="policeWhite" className={styles.aiTitle}>AI 서포트 정보</Text>
                     <div className={styles.aiInfoWrapper}>
-                      {missingDetail.aiSupport ? (
-                        <>
-                          {/* 우선순위 */}
-                          <div className={styles.aiInfoSection}>
-                            <Text as="div" size="sm" weight="bold" color="policeWhite" className={styles.aiSubtitle}>우선순위</Text>
+                      {missingDetail.aiSupport && (missingDetail.aiSupport.top1Keyword || missingDetail.aiSupport.top1Desc || missingDetail.aiSupport.top2Keyword || missingDetail.aiSupport.top2Desc) ? (
+                        <div className={styles.aiInfoSection}>
+                          <Text as="div" size="sm" weight="bold" color="policeWhite" className={styles.aiSubtitle}>우선순위</Text>
+
+                          {/* 1순위 */}
+                          {(missingDetail.aiSupport.top1Keyword || missingDetail.aiSupport.top1Desc) && (
                             <div className={styles.aiInfoItem}>
-                              <Text as="span" size="xs" color="policeGray">1순위</Text>
-                              <Text as="span" size="sm" color="policeWhite">{missingDetail.aiSupport.top1Desc || '-'}</Text>
+                              <button
+                                className={styles.aiKeywordButton}
+                                onClick={() => setExpandedAiInfo(expandedAiInfo === 'top1' ? null : 'top1')}
+                              >
+                                <Text as="span" size="xs" color="policeGray">1순위</Text>
+                                <Text as="span" size="sm" weight="bold" color="policeWhite">{missingDetail.aiSupport.top1Keyword || missingDetail.aiSupport.top1Desc || '-'}</Text>
+                              </button>
+                              {expandedAiInfo === 'top1' && missingDetail.aiSupport.top1Desc && (
+                                <Text as="div" size="sm" color="policeWhite" className={styles.aiDescText}>
+                                  {missingDetail.aiSupport.top1Desc}
+                                </Text>
+                              )}
                             </div>
+                          )}
+
+                          {/* 2순위 */}
+                          {(missingDetail.aiSupport.top2Keyword || missingDetail.aiSupport.top2Desc) && (
                             <div className={styles.aiInfoItem}>
-                              <Text as="span" size="xs" color="policeGray">2순위</Text>
-                              <Text as="span" size="sm" color="policeWhite">{missingDetail.aiSupport.top2Desc || '-'}</Text>
+                              <button
+                                className={styles.aiKeywordButton}
+                                onClick={() => setExpandedAiInfo(expandedAiInfo === 'top2' ? null : 'top2')}
+                              >
+                                <Text as="span" size="xs" color="policeGray">2순위</Text>
+                                <Text as="span" size="sm" weight="bold" color="policeWhite">{missingDetail.aiSupport.top2Keyword || missingDetail.aiSupport.top2Desc || '-'}</Text>
+                              </button>
+                              {expandedAiInfo === 'top2' && missingDetail.aiSupport.top2Desc && (
+                                <Text as="div" size="sm" color="policeWhite" className={styles.aiDescText}>
+                                  {missingDetail.aiSupport.top2Desc}
+                                </Text>
+                              )}
                             </div>
-                          </div>
-                        </>
+                          )}
+                        </div>
                       ) : (
-                        <Text as="div" size="sm" color="policeGray">AI 정보가 없습니다.</Text>
+                        <Text as="div" size="sm" color="policeGray" style={{ textAlign: 'center', padding: '2rem', display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%' }}>
+                          안전한 AI 정보 활용을 위해 개인정보 수집 동의가 필요합니다.
+                        </Text>
                       )}
                     </div>
                     <Text as="div" size="xs" color="policeGray" className={styles.aiCaption}>
-                      ① AI 분석을 주요 정보를 우선적으로 정리한 내용으로, 참고용으로 활용해주시기 바랍니다.
+                      ① AI가 분석한 주요 정보를 우선적으로 정리한 내용이니, 참고용으로 활용해주시길 바랍니다.
                     </Text>
                   </div>
                 </div>
@@ -359,7 +392,7 @@ const PoliceDashboard: React.FC<PoliceDashboardProps> = ({ isOpen, onClose, miss
             <button
               className={styles.reportButton}
               style={{
-                backgroundColor: activeColor,
+                backgroundColor: theme.colors.policeMain,
                 color: 'white',
               }}
               onClick={(e) => {
@@ -369,7 +402,7 @@ const PoliceDashboard: React.FC<PoliceDashboardProps> = ({ isOpen, onClose, miss
                 }
               }}
             >
-              Detection Result
+              실종자 탐지 결과
             </button>
           </div>
         )}
@@ -467,14 +500,13 @@ const PoliceDashboard: React.FC<PoliceDashboardProps> = ({ isOpen, onClose, miss
                 justifyContent: 'center',
                 overflow: 'hidden',
               }}
-              onClick={(e) => e.stopPropagation()}
             >
               <img
                 src={aiImageUrl}
                 alt="AI 서포트 이미지"
                 style={{
-                  width: '100%',
-                  height: '100%',
+                  maxWidth: '100%',
+                  maxHeight: '100%',
                   objectFit: 'contain',
                   transform: `scale(${aiImageZoom})`,
                   transition: 'transform 0.1s ease-out',
@@ -482,6 +514,8 @@ const PoliceDashboard: React.FC<PoliceDashboardProps> = ({ isOpen, onClose, miss
                   userSelect: 'none',
                 }}
                 draggable={false}
+                onClick={(e) => e.stopPropagation()}
+                onTouchEnd={(e) => e.stopPropagation()}
               />
             </div>
 
@@ -503,7 +537,11 @@ const PoliceDashboard: React.FC<PoliceDashboardProps> = ({ isOpen, onClose, miss
                 transition: 'opacity 0.2s',
                 opacity: 0.8,
               }}
-              onClick={() => setAiImageOpen(false)}
+              onClick={(e) => {
+                e.stopPropagation();
+                setAiImageOpen(false);
+              }}
+              onTouchEnd={(e) => e.stopPropagation()}
               onMouseEnter={(e) => {
                 e.currentTarget.style.opacity = '1';
               }}
@@ -526,6 +564,8 @@ const PoliceDashboard: React.FC<PoliceDashboardProps> = ({ isOpen, onClose, miss
                 borderRadius: '4px',
                 userSelect: 'none',
               }}
+              onClick={(e) => e.stopPropagation()}
+              onTouchEnd={(e) => e.stopPropagation()}
             >
               {(aiImageZoom * 100).toFixed(0)}% | 스크롤/핀치로 확대/축소
             </div>

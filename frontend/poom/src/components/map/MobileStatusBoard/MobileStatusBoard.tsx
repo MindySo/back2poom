@@ -175,6 +175,7 @@ const MobileStatusBoard: React.FC<MobileStatusBoardProps> = ({
       ref={containerRef}
       className={`${styles.container} ${!visible ? styles.hidden : ''}`}
       style={{
+        backgroundColor: `${theme.colors.darkMain}E6`,
         transform: visible ? `scale(${scale})` : `translate(-100%, -100%) scale(${scale * 0.8})`,
         opacity: visible ? (isResizing ? 0.8 : 1) : 0,
         transition: isResizing ? 'opacity 0.3s ease' : 'transform 0.3s ease, opacity 0.3s ease',

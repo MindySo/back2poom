@@ -3,6 +3,8 @@ import Text from '../../common/atoms/Text';
 import Badge from '../../common/atoms/Badge';
 import { useElapsedTime } from '../../../hooks';
 import styles from './RecentMissing.module.css';
+import anonymousProfile from '../../../assets/anonymous_profile.svg';
+import { theme as themeConfig } from '../../../theme';
 
 export interface Badge {
   text: string;
@@ -46,26 +48,38 @@ const RecentMissing: React.FC<RecentMissingProps> = ({
   const elapsedTime = useElapsedTime(occurredAt);
 
   // 선택된 카드의 스타일 결정
-  const selectedStyle = isSelected && activeColor ? {
-    backgroundColor: `${activeColor}1a`, // 16진수로 약 10% 투명도
-    borderRightColor: activeColor,
-  } : undefined;
+  const selectedStyle = isSelected ? (
+    activeColor ? {
+      backgroundColor: `${activeColor}1a`, // 16진수로 약 10% 투명도
+      borderRight: `4px solid ${activeColor}`,
+      paddingLeft: '8px',
+    } : theme === 'dark' ? {
+      backgroundColor: 'rgba(255, 255, 255, 0.1)',
+      borderRight: '4px solid rgba(255, 255, 255, 0.9)',
+      paddingLeft: '8px',
+    } : {
+      backgroundColor: `${themeConfig.colors.main}1a`, // main 컬러에 투명도
+      borderRight: `4px solid ${themeConfig.colors.main}`,
+      paddingLeft: '8px',
+    }
+  ) : undefined;
 
   return (
     <div
-      className={`${styles.card} ${isSelected ? (theme === 'dark' && !activeColor ? styles.selectedDark : styles.selected) : ''} ${className}`}
+      className={`${styles.card} ${className}`}
       onClick={onClick}
       style={{
         ...(onClick ? { cursor: 'pointer' } : {}),
         ...selectedStyle,
-      }}
+      } as React.CSSProperties}
     >
       {/* 왼쪽: 사진 프레임 */}
       <div className={styles.imageFrame}>
         <img
-          src={image}
+          src={image || anonymousProfile}
           alt={name}
           className={styles.image}
+          style={{ opacity: image ? 1 : 0.5 }}
         />
       </div>
 
