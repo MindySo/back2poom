@@ -27,37 +27,51 @@
 .column1 .section {
   flex: 1;
   min-height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.column1 .section > .sectionTitle {
+  flex-shrink: 0;
+  margin-bottom: 0;
+  padding-bottom: 1.25rem;
+  border-bottom: 2px solid rgba(255, 255, 255, 0.15);
+}
+
+.column1 .scrollableContent {
+  flex: 1;
   overflow-y: auto;
   scrollbar-width: thin; /* Firefox */
   scrollbar-color: transparent transparent;
   transition: scrollbar-color 0.6s ease;
+  min-height: 0;
 }
 
-.column1 .section::-webkit-scrollbar {
+.column1 .scrollableContent::-webkit-scrollbar {
   width: 6px;
 }
 
-.column1 .section::-webkit-scrollbar-track {
+.column1 .scrollableContent::-webkit-scrollbar-track {
   background: transparent;
   border-radius: 3px;
 }
 
-.column1 .section::-webkit-scrollbar-thumb {
+.column1 .scrollableContent::-webkit-scrollbar-thumb {
   background: transparent;
   border-radius: 3px;
   transition: background 0.6s ease;
 }
 
-.column1 .section.showScrollbar {
+.column1 .section.showScrollbar .scrollableContent {
   scrollbar-color: rgba(255, 255, 255, 0.3) transparent; /* Firefox */
 }
 
-.column1 .section.showScrollbar::-webkit-scrollbar-thumb {
+.column1 .section.showScrollbar .scrollableContent::-webkit-scrollbar-thumb {
   background: rgba(255, 255, 255, 0.3);
   transition: background 0.3s ease;
 }
 
-.column1 .section.showScrollbar::-webkit-scrollbar-thumb:hover {
+.column1 .section.showScrollbar .scrollableContent::-webkit-scrollbar-thumb:hover {
   background: rgba(255, 255, 255, 0.5);
 }
 
@@ -73,6 +87,9 @@
   flex: 1;
   min-height: 100%;
   overflow-y: auto;
+  scrollbar-width: thin; /* Firefox */
+  scrollbar-color: transparent transparent;
+  transition: scrollbar-color 0.6s ease;
 }
 
 .column2 .section::-webkit-scrollbar {
@@ -80,17 +97,27 @@
 }
 
 .column2 .section::-webkit-scrollbar-track {
-  background: rgba(255, 255, 255, 0.05);
+  background: transparent;
   border-radius: 3px;
 }
 
 .column2 .section::-webkit-scrollbar-thumb {
-  background: rgba(255, 255, 255, 0.2);
+  background: transparent;
   border-radius: 3px;
+  transition: background 0.6s ease;
 }
 
-.column2 .section::-webkit-scrollbar-thumb:hover {
+.column2 .section.showScrollbar {
+  scrollbar-color: rgba(255, 255, 255, 0.3) transparent; /* Firefox */
+}
+
+.column2 .section.showScrollbar::-webkit-scrollbar-thumb {
   background: rgba(255, 255, 255, 0.3);
+  transition: background 0.3s ease;
+}
+
+.column2 .section.showScrollbar::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.5);
 }
 
 /* 세 번째 열: 3 (30%) */
@@ -105,6 +132,9 @@
   flex: 1;
   min-height: 100%;
   overflow-y: auto;
+  scrollbar-width: thin; /* Firefox */
+  scrollbar-color: transparent transparent;
+  transition: scrollbar-color 0.6s ease;
 }
 
 .column3 .section::-webkit-scrollbar {
@@ -112,17 +142,27 @@
 }
 
 .column3 .section::-webkit-scrollbar-track {
-  background: rgba(255, 255, 255, 0.05);
+  background: transparent;
   border-radius: 3px;
 }
 
 .column3 .section::-webkit-scrollbar-thumb {
-  background: rgba(255, 255, 255, 0.2);
+  background: transparent;
   border-radius: 3px;
+  transition: background 0.6s ease;
 }
 
-.column3 .section::-webkit-scrollbar-thumb:hover {
+.column3 .section.showScrollbar {
+  scrollbar-color: rgba(255, 255, 255, 0.3) transparent; /* Firefox */
+}
+
+.column3 .section.showScrollbar::-webkit-scrollbar-thumb {
   background: rgba(255, 255, 255, 0.3);
+  transition: background 0.3s ease;
+}
+
+.column3 .section.showScrollbar::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.5);
 }
 
 .section {

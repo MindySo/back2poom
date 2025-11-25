@@ -228,6 +228,7 @@
   grid-template-columns: 1fr 1fr;
   gap: 20px;
   align-items: stretch;
+  height: 35vh;
 }
 
 .popup-ai-section > div {
@@ -239,6 +240,7 @@
   color: #1f2937;
   margin-bottom: 8px;
   font-weight: 600;
+  flex-shrink: 0;
 }
 
 .popup-ai-card-wrapper {
@@ -248,21 +250,33 @@
   flex: 1;
   display: flex;
   flex-direction: column;
+  height: 100%;
+  min-height: 0;
 }
 
 .popup-ai-card {
-  background: #f9fafb;
-  border-radius: 10px;
-  padding: 16px;
   display: flex;
   flex-direction: column;
   gap: 10px;
   flex: 1;
+  min-height: 0;
+}
+
+.popup-ai-card-wrapper .popup-ai-card {
+  background: #f9fafb;
+  border-radius: 10px;
+  padding: 16px;
+}
+
+.popup-ai-info-wrapper .popup-ai-card {
+  background: #f9fafb;
+  border-radius: 10px;
+  padding: 16px;
 }
 
 .popup-ai-image {
   flex: 1;
-  min-height: 220px;
+  min-height: 0;
   border-radius: 8px;
   overflow: hidden;
   background: #fff;
@@ -275,6 +289,7 @@
   width: 100%;
   height: 100%;
   object-fit: contain;
+  object-position: center;
   transition: transform 0.2s ease, filter 0.2s ease;
   cursor: pointer;
 }
@@ -284,17 +299,56 @@
   filter: brightness(0.9);
 }
 
+.popup-ai-info-wrapper {
+  background: conic-gradient(from 0deg, #FF7C7E, #FFAE7C, #FFE97C, #7CFF80, #7CC4FF, #A37CFF, #D17CF8, #FF7C7E);
+  border-radius: 12px;
+  padding: 2px;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  min-height: 0;
+}
+
 .popup-ai-info {
   display: flex;
   flex-direction: column;
   gap: 20px;
   flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(0, 0, 0, 0.1) transparent;
+}
+
+.popup-ai-info::-webkit-scrollbar {
+  width: 4px;
+}
+
+.popup-ai-info::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.popup-ai-info::-webkit-scrollbar-thumb {
+  background: rgba(0, 0, 0, 0.1);
+  border-radius: 2px;
+}
+
+.popup-ai-info::-webkit-scrollbar-thumb:hover {
+  background: rgba(0, 0, 0, 0.15);
 }
 
 .popup-ai-info-section {
   display: flex;
   flex-direction: column;
   gap: 12px;
+}
+
+.popup-ai-info-section--centered {
+  flex: 1;
+  align-items: center;
+  justify-content: center;
+  min-height: 0;
 }
 
 .popup-ai-info-label {
@@ -339,7 +393,7 @@
 }
 
 .popup-ai-caption {
-  margin-top: auto;
+  flex-shrink: 0;
   padding-top: 8px;
   border-top: 1px solid #e5e7eb;
   font-style: italic;
