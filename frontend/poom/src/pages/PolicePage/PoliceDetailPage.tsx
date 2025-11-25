@@ -255,7 +255,18 @@ const PoliceDetailPage = () => {
                           발견 시간
                         </Text>
                         <Text as="div" size="sm" color="policeWhite" className={styles.detectionValue}>
-                          {new Date(det.detectedAt).toLocaleString('ko-KR')}
+                          {(() => {
+                            const date = new Date(det.detectedAt);
+                            const year = date.getFullYear();
+                            const month = String(date.getMonth() + 1).padStart(2, '0');
+                            const day = String(date.getDate()).padStart(2, '0');
+                            const hours24 = date.getHours();
+                            const period = hours24 >= 12 ? '오후' : '오전';
+                            const hours12 = hours24 % 12 || 12;
+                            const minutes = String(date.getMinutes()).padStart(2, '0');
+                            const seconds = String(date.getSeconds()).padStart(2, '0');
+                            return `${year}-${month}-${day} ${period} ${hours12}:${minutes}:${seconds}`;
+                          })()}
                         </Text>
                       </div>
                     </div>
@@ -281,13 +292,26 @@ const PoliceDetailPage = () => {
               ) : (
                 <ReportList
                   reports={
-                    reports?.map((r) => ({
-                      reporterPhone: r.reporterContact ?? '알 수 없음',
-                      confidence: confidenceMap[r.certaintyLevel],
-                      location: r.sightedLocation,
-                      reportTime: r.sightedAt,
-                      additionalNotes: r.additionalInfo,
-                    })) ?? []
+                    reports?.map((r) => {
+                      const date = new Date(r.sightedAt);
+                      const year = date.getFullYear();
+                      const month = String(date.getMonth() + 1).padStart(2, '0');
+                      const day = String(date.getDate()).padStart(2, '0');
+                      const hours24 = date.getHours();
+                      const period = hours24 >= 12 ? '오후' : '오전';
+                      const hours12 = hours24 % 12 || 12;
+                      const minutes = String(date.getMinutes()).padStart(2, '0');
+                      const seconds = String(date.getSeconds()).padStart(2, '0');
+                      const formattedTime = `${year}-${month}-${day} ${period} ${hours12}:${minutes}:${seconds}`;
+
+                      return {
+                        reporterPhone: r.reporterContact ?? '알 수 없음',
+                        confidence: confidenceMap[r.certaintyLevel],
+                        location: r.sightedLocation,
+                        reportTime: formattedTime,
+                        additionalNotes: r.additionalInfo,
+                      };
+                    }) ?? []
                   }
                 />
               )}
