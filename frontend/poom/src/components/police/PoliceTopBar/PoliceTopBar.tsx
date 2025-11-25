@@ -14,7 +14,7 @@ type NavItem = {
 };
 
 const navItems: NavItem[] = [
-  { label: '실종자 지도페이지 (경찰청 전용)', path: '/police' },
+  { label: '실종자 지도페이지 (경찰청 전용)', path: '/police/map' },
 ];
 
 const PoliceTopBar: React.FC<PoliceTopBarProps> = ({ className = '' }) => {
@@ -44,7 +44,7 @@ const PoliceTopBar: React.FC<PoliceTopBarProps> = ({ className = '' }) => {
             backgroundColor: policeColor,
             boxShadow: `4px 4px 12px ${theme.colors.white}4D`,
           }}
-          onClick={() => handleNavClick('/police')}
+          onClick={() => handleNavClick('/police/map')}
         >
           <img
             src={logoFull}

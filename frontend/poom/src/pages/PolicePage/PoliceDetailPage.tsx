@@ -210,7 +210,7 @@ const PoliceDetailPage = () => {
           
               {!isCctvLoading && (!cctvDetections || cctvDetections.length === 0) && (
                 <div className={styles.noDetectionMessage}>
-                  CCTV 탐지 결과가 없습니다.
+                  <Text size="sm" color="white">CCTV 탐지 결과가 없습니다.</Text>
                 </div>
               )}
           
