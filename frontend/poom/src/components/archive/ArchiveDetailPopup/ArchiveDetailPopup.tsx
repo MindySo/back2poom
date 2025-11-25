@@ -352,14 +352,14 @@ const ArchiveDetailPopup: React.FC<ArchiveDetailPopupProps> = ({ personId, initi
                         <img
                           src={aiImageUrl}
                           alt="AI 서포트 이미지"
-                          style={{ width: '100%', height: '100%', objectFit: 'cover', cursor: 'pointer' }}
+                          style={{ width: '100%', height: '100%', objectFit: 'contain', cursor: 'pointer' }}
                           onClick={() => {
                             setAiImageOpen(true);
                             setAiImageZoom(1);
                           }}
                         />
                       ) : (
-                        <Text as="div" size="sm" color="gray" style={{ textAlign: 'center', padding: '2rem', display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%' }}>
+                        <Text as="div" size="sm" color="gray" style={{ textAlign: 'center', padding: '1rem', display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%' }}>
                           안전한 AI 정보 활용을 위해 개인정보 수집 동의가 필요합니다.
                         </Text>
                       )}
@@ -371,7 +371,7 @@ const ArchiveDetailPopup: React.FC<ArchiveDetailPopupProps> = ({ personId, initi
                 </div>
 
                 {/* AI 정보 카드 */}
-                <div className={styles['popup-ai-card-wrapper']}>
+                <div className={styles['popup-ai-info-wrapper']}>
                   <div className={styles['popup-ai-card']}>
                     <Text as="div" size="md" weight="bold" color="darkMain" className={styles['popup-ai-subtitle']}>AI 서포트 정보</Text>
 
@@ -417,8 +417,8 @@ const ArchiveDetailPopup: React.FC<ArchiveDetailPopupProps> = ({ personId, initi
                           )}
                         </div>
                       ) : (
-                        <div className={styles['popup-ai-info-section']}>
-                          <Text as="div" size="sm" color="gray">안전한 AI 정보 활용을 위해 개인정보 수집 동의가 필요합니다.</Text>
+                        <div className={`${styles['popup-ai-info-section']} ${styles['popup-ai-info-section--centered']}`}>
+                          <Text as="div" size="sm" color="gray" style={{ textAlign: 'center' }}>안전한 AI 정보 활용을 위해 개인정보 수집 동의가 필요합니다.</Text>
                         </div>
                       )}
                     </div>

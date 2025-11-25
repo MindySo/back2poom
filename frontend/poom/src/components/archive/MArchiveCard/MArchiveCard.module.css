@@ -280,7 +280,7 @@
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 10px;
-  align-items: start;
+  align-items: stretch;
 }
 
 /* 왼쪽: AI 이미지 */
@@ -289,11 +289,12 @@
   border-radius: 8px;
   padding: 2px;
   width: 100%;
+  height: 22vh;
 }
 
 .m-archive-card__aiImageWrapper {
   flex: 1;
-  min-height: 120px;
+  height: 100%;
   border-radius: 8px;
   overflow: hidden;
   background: #fff;
@@ -321,8 +322,7 @@
   border-radius: 8px;
   padding: 2px;
   width: 100%;
-  height: 100%;
-  min-height: 120px;
+  height: 22vh;
 }
 
 .m-archive-card__aiInfo {
@@ -334,6 +334,26 @@
   border-radius: 6px;
   padding: 10px;
   height: 100%;
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(0, 0, 0, 0.1) transparent;
+}
+
+.m-archive-card__aiInfo::-webkit-scrollbar {
+  width: 4px;
+}
+
+.m-archive-card__aiInfo::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.m-archive-card__aiInfo::-webkit-scrollbar-thumb {
+  background: rgba(0, 0, 0, 0.1);
+  border-radius: 2px;
+}
+
+.m-archive-card__aiInfo::-webkit-scrollbar-thumb:hover {
+  background: rgba(0, 0, 0, 0.15);
 }
 
 .m-archive-card__aiInfoSection {
