@@ -60,7 +60,7 @@ public class CaseReportService {
 
     @Transactional(readOnly = true)
     public List<CaseReportResponse> getReportsByCaseId(Long caseId) {
-        return caseReportRepository.findByMissingCaseId(caseId)
+        return caseReportRepository.findByMissingCaseIdOrderBySightedAtDesc(caseId)
                 .stream()
                 .map(this::toDto)
                 .collect(Collectors.toList());
