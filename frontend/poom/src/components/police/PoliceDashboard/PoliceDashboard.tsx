@@ -567,7 +567,7 @@ const PoliceDashboard: React.FC<PoliceDashboardProps> = ({ isOpen, onClose, miss
               onClick={(e) => e.stopPropagation()}
               onTouchEnd={(e) => e.stopPropagation()}
             >
-              {(aiImageZoom * 100).toFixed(0)}% | 스크롤/핀치로 확대/축소
+              {(aiImageZoom * 100).toFixed(0)}%
             </div>
           </div>
         ) : null;
