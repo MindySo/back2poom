@@ -14,6 +14,7 @@ interface MarkerProps {
   alt?: string;
   ringColor?: string;
   label?: string;  // 마커 위에 표시할 라벨
+  zIndex?: number;
 }
 
 const Marker: React.FC<MarkerProps> = ({
@@ -25,6 +26,7 @@ const Marker: React.FC<MarkerProps> = ({
   alt = 'Marker image',
   ringColor = '#E55A5A',
   label,
+  zIndex,
 }) => {
   const overlayRef = useRef<kakao.maps.CustomOverlay | null>(null);
   const markerElementRef = useRef<HTMLDivElement | null>(null);
@@ -111,6 +113,7 @@ const Marker: React.FC<MarkerProps> = ({
       position: new kakao.maps.LatLng(position.lat, position.lng),
       content: markerElement,
       yAnchor: 1.3, // 마커의 아래쪽 끝이 좌표에 위치하도록
+      zIndex: zIndex,
     });
 
     overlay.setMap(map);
@@ -125,7 +128,7 @@ const Marker: React.FC<MarkerProps> = ({
         overlayRef.current.setMap(null);
       }
     };
-  }, [map, position.lat, position.lng, imageUrl, size, onClick, alt, ringColor, label]);
+  }, [map, position.lat, position.lng, imageUrl, size, onClick, alt, ringColor, label, zIndex]);
 
   // 카카오 맵에 직접 렌더링하므로 null 반환
   return null;

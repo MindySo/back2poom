@@ -59,6 +59,48 @@ const PoliceMapPage: React.FC = () => {
   // 최근 72시간 내 실종자 데이터 가져오기 (마커용)
   const { data: recentMissingList } = useRecentMissing(72);
 
+  // ID 50000 실종자에 대한 가상 비활성 CCTV 데이터 추가
+  let allCctvDetections = cctvDetections;
+  if (selectedMissingId === 50000 && recentMissingList) {
+    const person50000 = recentMissingList.find(p => p.id === 50000);
+    if (person50000 && person50000.latitude && person50000.longitude) {
+      const { latitude, longitude } = person50000;
+      const mockInactiveCctvs = [
+        // 이동방향: 상 lat+ | 하 lat- | 좌 long- | 우 long+
+        { id: 999901, latitude: latitude + 0.003, longitude: longitude + 0.005, similarityScore: 0, videoUrl: '', occurredAt: '' },
+        { id: 999902, latitude: latitude - 0.001, longitude: longitude - 0.002, similarityScore: 0, videoUrl: '', occurredAt: '' },
+        { id: 999903, latitude: latitude + 0.002, longitude: longitude - 0.0015, similarityScore: 0, videoUrl: '', occurredAt: '' },
+        { id: 999904, latitude: latitude - 0.0025, longitude: longitude + 0.01, similarityScore: 0, videoUrl: '', occurredAt: '' },
+        { id: 999905, latitude: latitude - 0.0005, longitude: longitude + 0.002, similarityScore: 0, videoUrl: '', occurredAt: '' },
+        { id: 999906, latitude: latitude + 0.001, longitude: longitude - 0.007, similarityScore: 0, videoUrl: '', occurredAt: '' },
+
+        { id: 999907, latitude: latitude + 0.013, longitude: longitude + 0.005, similarityScore: 0, videoUrl: '', occurredAt: '' },
+        { id: 999908, latitude: latitude - 0.015, longitude: longitude + 0.01, similarityScore: 0, videoUrl: '', occurredAt: '' },
+        { id: 999909, latitude: latitude - 0.0015, longitude: longitude + 0.03, similarityScore: 0, videoUrl: '', occurredAt: '' },
+        { id: 999910, latitude: latitude - 0.01, longitude: longitude - 0.002, similarityScore: 0, videoUrl: '', occurredAt: '' },
+        { id: 999911, latitude: latitude + 0.02, longitude: longitude - 0.0015, similarityScore: 0, videoUrl: '', occurredAt: '' },
+        { id: 999912, latitude: latitude - 0.018, longitude: longitude - 0.005, similarityScore: 0, videoUrl: '', occurredAt: '' },
+
+        { id: 999913, latitude: latitude - 0.025, longitude: longitude + 0.001, similarityScore: 0, videoUrl: '', occurredAt: '' },
+        { id: 999914, latitude: latitude + 0.005, longitude: longitude - 0.002, similarityScore: 0, videoUrl: '', occurredAt: '' },
+        { id: 999915, latitude: latitude - 0.005, longitude: longitude + 0.002, similarityScore: 0, videoUrl: '', occurredAt: '' },
+        { id: 999916, latitude: latitude + 0.003, longitude: longitude + 0.02, similarityScore: 0, videoUrl: '', occurredAt: '' },
+        { id: 999917, latitude: latitude - 0.003, longitude: longitude - 0.02, similarityScore: 0, videoUrl: '', occurredAt: '' },
+        { id: 999918, latitude: latitude + 0.01, longitude: longitude + 0.025, similarityScore: 0, videoUrl: '', occurredAt: '' },
+        { id: 999919, latitude: latitude + 0.01, longitude: longitude - 0.03, similarityScore: 0, videoUrl: '', occurredAt: '' },
+        { id: 999920, latitude: latitude - 0.01, longitude: longitude + 0.03, similarityScore: 0, videoUrl: '', occurredAt: '' },
+
+        { id: 999921, latitude: latitude + 0.02, longitude: longitude + 0.02, similarityScore: 0, videoUrl: '', occurredAt: '' },
+        { id: 999922, latitude: latitude + 0.02, longitude: longitude - 0.02, similarityScore: 0, videoUrl: '', occurredAt: '' },
+        { id: 999923, latitude: latitude - 0.02, longitude: longitude - 0.02, similarityScore: 0, videoUrl: '', occurredAt: '' },
+        { id: 999924, latitude: latitude - 0.02, longitude: longitude + 0.02, similarityScore: 0, videoUrl: '', occurredAt: '' },
+        { id: 999925, latitude: latitude + 0.03, longitude: longitude - 0.005, similarityScore: 0, videoUrl: '', occurredAt: '' },
+        { id: 999926, latitude: latitude - 0.013, longitude: longitude - 0.035, similarityScore: 0, videoUrl: '', occurredAt: '' },
+      ];
+      allCctvDetections = [...cctvDetections, ...mockInactiveCctvs];
+    }
+  }
+
   useEffect(() => {
     if (!isLoaded || !mapRef.current) return;
 
@@ -209,6 +251,7 @@ const PoliceMapPage: React.FC = () => {
                 size="medium"
                 onClick={() => handleMissingCardClick(person.id)}
                 label={maxExceeded ? '예측 반경 초과' : undefined}
+                zIndex={10}
               />
             );
           }
@@ -216,12 +259,13 @@ const PoliceMapPage: React.FC = () => {
         })}
 
         {/* CCTV 마커 */}
-        {map && isDashboardOpen && cctvDetections.map((cctv) => (
+        {map && isDashboardOpen && allCctvDetections.map((cctv) => (
           <CctvMarker
             key={cctv.id}
             map={map}
             position={{ lat: cctv.latitude, lng: cctv.longitude }}
             isDetected={cctv.similarityScore >= 70} // 유사도 70점 이상이면 감지된 것으로 표시
+            zIndex={cctv.similarityScore >= 70 ? 5 : 4}
           />
         ))}
 

@@ -332,34 +332,17 @@
   min-width: 0;
   background: #f9fafb;
   border-radius: 6px;
-  padding: 10px;
   height: 100%;
   overflow-y: auto;
   scrollbar-width: thin;
   scrollbar-color: rgba(0, 0, 0, 0.1) transparent;
 }
 
-.m-archive-card__aiInfo::-webkit-scrollbar {
-  width: 4px;
-}
-
-.m-archive-card__aiInfo::-webkit-scrollbar-track {
-  background: transparent;
-}
-
-.m-archive-card__aiInfo::-webkit-scrollbar-thumb {
-  background: rgba(0, 0, 0, 0.1);
-  border-radius: 2px;
-}
-
-.m-archive-card__aiInfo::-webkit-scrollbar-thumb:hover {
-  background: rgba(0, 0, 0, 0.15);
-}
-
 .m-archive-card__aiInfoSection {
   display: flex;
   flex-direction: column;
   gap: 6px;
+  padding: 10px; /* .m-archive-card__aiInfo에서 제거된 패딩을 여기로 이동 */
 }
 
 .m-archive-card__aiInfoLabel {

@@ -418,7 +418,7 @@ const ArchiveDetailPopup: React.FC<ArchiveDetailPopupProps> = ({ personId, initi
                         </div>
                       ) : (
                         <div className={`${styles['popup-ai-info-section']} ${styles['popup-ai-info-section--centered']}`}>
-                          <Text as="div" size="sm" color="gray" style={{ textAlign: 'center' }}>안전한 AI 정보 활용을 위해 개인정보 수집 동의가 필요합니다.</Text>
+                          <Text as="div" size="sm" color="gray" style={{ textAlign: 'center', padding: '1rem' }}>안전한 AI 정보 활용을 위해 개인정보 수집 동의가 필요합니다.</Text>
                         </div>
                       )}
                     </div>
@@ -637,7 +637,7 @@ const ArchiveDetailPopup: React.FC<ArchiveDetailPopupProps> = ({ personId, initi
               onClick={(e) => e.stopPropagation()}
               onTouchEnd={(e) => e.stopPropagation()}
             >
-              {(aiImageZoom * 100).toFixed(0)}% | 스크롤/핀치로 확대/축소
+              {(aiImageZoom * 100).toFixed(0)}%
             </div>
           </div>
         ) : null;

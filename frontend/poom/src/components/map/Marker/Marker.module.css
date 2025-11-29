@@ -151,7 +151,7 @@
 /* 마커 라벨 (Badge 컴포넌트 래퍼) */
 .markerLabel {
   position: absolute;
-  top: -35px;
+  top: -30px;
   left: 50%;
   transform: translateX(-50%);
   pointer-events: none;

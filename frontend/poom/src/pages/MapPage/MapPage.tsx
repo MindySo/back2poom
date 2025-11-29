@@ -581,7 +581,7 @@ const MapPage: React.FC = () => {
                 imageUrl={person.mainImage?.url}
                 size="medium"
                 onClick={() => handleMissingCardClick(person.id)}
-                label={maxExceeded ? '예측 반경 초과' : undefined}
+                label={maxExceeded && selectedMissingId === person.id ? '예측 반경 초과' : undefined}
               />
             );
           }
