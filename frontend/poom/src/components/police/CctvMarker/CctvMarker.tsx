@@ -7,9 +7,10 @@ interface CctvMarkerProps {
   map: kakao.maps.Map;
   position: { lat: number; lng: number };
   isDetected?: boolean; // 실종자 감지 여부 (true: active, false/undefined: inactive)
+  zIndex?: number;
 }
 
-const CctvMarker: React.FC<CctvMarkerProps> = ({ map, position, isDetected = false }) => {
+const CctvMarker: React.FC<CctvMarkerProps> = ({ map, position, isDetected = false, zIndex }) => {
   const overlayRef = useRef<kakao.maps.CustomOverlay | null>(null);
 
   useEffect(() => {
@@ -34,6 +35,7 @@ const CctvMarker: React.FC<CctvMarkerProps> = ({ map, position, isDetected = fal
       content: markerElement,
       yAnchor: 0.5,
       xAnchor: 0.5,
+      zIndex: zIndex,
     });
 
     overlay.setMap(map);
@@ -45,7 +47,7 @@ const CctvMarker: React.FC<CctvMarkerProps> = ({ map, position, isDetected = fal
         overlayRef.current.setMap(null);
       }
     };
-  }, [map, position.lat, position.lng, isDetected]);
+  }, [map, position.lat, position.lng, isDetected, zIndex]);
 
   return null;
 };
