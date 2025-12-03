@@ -1,6 +1,11 @@
 """
-경찰청 실시간 실종자 탐지 시스템 - 최적화 버전
-Korea National Police Agency - Real-Time Missing Person Detection System (Optimized)
+경찰청 실시간 실종자 탐지 시스템 - 캐싱 최적화 버전
+Korea National Police Agency - Real-Time Missing Person Detection System (Cached & Optimized)
+
+최적화 사항:
+1. 모델 캐싱: AI 모델을 한 번만 로드하고 재사용 (2-5초 절약)
+2. 실종자 이미지 변경 감지: 새 이미지가 들어올 때만 재처리
+3. 카메라 재사용: 같은 카메라는 재연결 안 함 (1-2초 절약)
 """
 
 import streamlit as st
@@ -97,7 +102,7 @@ def load_police_css(logo_base64=None):
         position: relative;
         min-height: 60px;
     }}
-    
+
     [data-testid="stHeader"]::before {{
         content: '';
         display: block;
@@ -128,7 +133,7 @@ def load_police_css(logo_base64=None):
         letter-spacing: 0.05em;
     }}
     """.format(logo_base64)
-    
+
     st.markdown("""
     <style>
     /* Google Fonts */
@@ -158,29 +163,29 @@ def load_police_css(logo_base64=None):
         background: radial-gradient(ellipse at top, #0f172a 0%, #000000 50%, #0a0e1a 100%);
         color: var(--text-primary);
     }
-    
+
     /* 메인 콘텐츠 영역 상단 마진 줄이기 */
     [data-testid="stAppViewContainer"] {
         padding-top: 0.25rem !important;
     }
-    
+
     .main .block-container {
         padding-top: 0.5rem !important;
         max-width: 100% !important;
         padding-left: 2rem !important;
         padding-right: 2rem !important;
     }
-    
+
     /* stMainBlockContainer 위쪽 패딩만 줄이기 */
     .stMainBlockContainer {
         padding-top: 0.25rem !important;
     }
-    
+
     /* 컨텐츠를 위에서부터 쌓이도록 */
     [data-testid="stAppViewContainer"] > div {
         width: 100% !important;
     }
-    
+
     /* 중앙 정렬 제거 */
     .element-container {
         text-align: left !important;
@@ -426,15 +431,171 @@ def load_police_css(logo_base64=None):
         border-radius: 16px;
         overflow: hidden;
         box-shadow: 0 20px 50px -10px rgba(0, 0, 0, 0.5);
+        margin-bottom: 6rem !important;
     }
 
     /* Hide Streamlit branding */
     #MainMenu {visibility: hidden;}
     footer {visibility: hidden;}
-    
+
+    /* Hide top right icons and buttons with hover effect */
+    [data-testid="stStatusWidget"] {
+        opacity: 0 !important;
+        transition: opacity 0.3s ease !important;
+    }
+    [data-testid="stToolbar"] {
+        opacity: 0 !important;
+        transition: opacity 0.3s ease !important;
+    }
+    .stDeployButton {
+        opacity: 0 !important;
+        transition: opacity 0.3s ease !important;
+    }
+    button[kind="header"] {
+        opacity: 0 !important;
+        transition: opacity 0.3s ease !important;
+    }
+    header[data-testid="stHeader"] > div:last-child {
+        opacity: 0 !important;
+        transition: opacity 0.3s ease !important;
+    }
+
+    /* Show on hover */
+    [data-testid="stHeader"]:hover [data-testid="stStatusWidget"],
+    [data-testid="stHeader"]:hover [data-testid="stToolbar"],
+    [data-testid="stHeader"]:hover .stDeployButton,
+    [data-testid="stHeader"]:hover button[kind="header"],
+    [data-testid="stHeader"]:hover > div:last-child {
+        opacity: 1 !important;
+    }
+
     """ + logo_style + """
     </style>
     """, unsafe_allow_html=True)
+
+
+def get_cached_detector(similarity_threshold, matching_strategy, frame_skip, resize_factor, use_gpu):
+    """
+    캐시된 detector 가져오기 또는 새로 생성
+
+    Returns:
+        MissingPersonDetectorONNX: 캐시된 또는 새로운 detector
+    """
+    # 현재 설정 해시
+    current_config = {
+        'similarity_threshold': similarity_threshold,
+        'matching_strategy': matching_strategy,
+        'frame_skip': frame_skip,
+        'resize_factor': resize_factor,
+        'use_gpu': use_gpu
+    }
+
+    # 캐시된 detector가 있고 설정이 같으면 재사용
+    if 'detector' in st.session_state and 'detector_config' in st.session_state:
+        if st.session_state.detector_config == current_config:
+            st.success("♻️ 캐시된 AI 모델 사용 중 (0.1초)")
+            return st.session_state.detector
+
+    # 새로운 detector 생성
+    with st.spinner("🔄 AI 모델 초기화 중... (최초 1회만, 2-5초)"):
+        detector = MissingPersonDetectorONNX(
+            yolo_onnx_path='yolov8n.onnx',
+            osnet_onnx_path='osnet_x1_0.onnx',
+            similarity_threshold=similarity_threshold,
+            matching_strategy=matching_strategy,
+            frame_skip=frame_skip,
+            resize_factor=resize_factor,
+            use_gpu=use_gpu
+        )
+
+    # 캐시에 저장
+    st.session_state.detector = detector
+    st.session_state.detector_config = current_config
+
+    return detector
+
+
+def update_missing_person_images(detector, uploaded_images):
+    """
+    실종자 이미지가 변경되었는지 확인하고 필요시 업데이트
+
+    Args:
+        detector: MissingPersonDetectorONNX 인스턴스
+        uploaded_images: 업로드된 이미지 리스트
+
+    Returns:
+        bool: 이미지가 업데이트 되었는지 여부
+    """
+    if not uploaded_images:
+        return False
+
+    # 현재 이미지 파일 이름 리스트
+    current_image_names = [img.name for img in uploaded_images]
+
+    # 이전 이미지와 비교
+    if 'missing_person_image_names' in st.session_state:
+        if st.session_state.missing_person_image_names == current_image_names:
+            st.success("♻️ 캐시된 실종자 이미지 사용 중")
+            return False
+
+    # 새 이미지로 업데이트
+    with st.spinner("🔄 실종자 이미지 처리 중..."):
+        images = []
+        for uploaded_img in uploaded_images:
+            uploaded_img.seek(0)
+            image = Image.open(uploaded_img).convert('RGB')
+            images.append(image)
+
+        if len(images) == 1:
+            detector.set_missing_person(images[0])
+        else:
+            detector.set_missing_persons(images)
+
+        # 캐시에 저장
+        st.session_state.missing_person_image_names = current_image_names
+        st.success("✅ 실종자 이미지 업데이트 완료")
+
+    return True
+
+
+def get_cached_camera(camera_index):
+    """
+    캐시된 카메라 가져오기 또는 새로 연결
+
+    Args:
+        camera_index: 카메라 인덱스 또는 IP 주소
+
+    Returns:
+        cv2.VideoCapture: 카메라 객체
+    """
+    # 같은 카메라면 재사용
+    if 'camera' in st.session_state and 'camera_index' in st.session_state:
+        if st.session_state.camera_index == camera_index:
+            if st.session_state.camera.isOpened():
+                st.success("♻️ 캐시된 카메라 연결 사용 중 (0.1초)")
+                return st.session_state.camera
+            else:
+                # 카메라가 닫혔으면 재연결
+                st.session_state.camera.release()
+
+    # 기존 카메라가 있으면 해제
+    if 'camera' in st.session_state:
+        st.session_state.camera.release()
+
+    # 새 카메라 연결
+    with st.spinner("📷 카메라 연결 중... (1-2초)"):
+        camera = cv2.VideoCapture(camera_index)
+
+    if not camera.isOpened():
+        st.error(f"❌ 카메라를 열 수 없습니다: {camera_index}")
+        return None
+
+    # 캐시에 저장
+    st.session_state.camera = camera
+    st.session_state.camera_index = camera_index
+    st.success("✅ 카메라 연결 완료")
+
+    return camera
 
 
 def main():
@@ -686,27 +847,17 @@ def main():
 
                         output_path = tempfile.mktemp(suffix='.mp4')
 
-                        with st.spinner("🔄 AI 모델 로딩 중..."):
-                            detector = MissingPersonDetectorONNX(
-                                yolo_onnx_path='yolov8n.onnx',
-                                osnet_onnx_path='osnet_x1_0.onnx',
-                                similarity_threshold=similarity_threshold,
-                                matching_strategy=matching_strategy,
-                                frame_skip=frame_skip,
-                                resize_factor=resize_factor,
-                                use_gpu=use_gpu
-                            )
+                        # 🚀 캐시된 detector 사용
+                        detector = get_cached_detector(
+                            similarity_threshold,
+                            matching_strategy,
+                            frame_skip,
+                            resize_factor,
+                            use_gpu
+                        )
 
-                        images = []
-                        for uploaded_img in uploaded_images:
-                            uploaded_img.seek(0)
-                            image = Image.open(uploaded_img).convert('RGB')
-                            images.append(image)
-
-                        if len(images) == 1:
-                            detector.set_missing_person(images[0])
-                        else:
-                            detector.set_missing_persons(images)
+                        # 🚀 실종자 이미지 업데이트 (변경된 경우만)
+                        update_missing_person_images(detector, uploaded_images)
 
                         progress_bar = st.progress(0)
                         status_text = st.empty()
@@ -768,7 +919,7 @@ def main():
                         import traceback
                         st.code(traceback.format_exc())
 
-    # 실시간 카메라 모드 (최적화)
+    # 실시간 카메라 모드 (캐싱 최적화)
     else:
         # 영상 표시 영역 (전체 너비)
         frame_placeholder = st.empty()
@@ -792,31 +943,22 @@ def main():
 
             if start_btn:
                 try:
-                    with st.spinner("🔄 AI 모델 초기화 중..."):
-                        detector = MissingPersonDetectorONNX(
-                            yolo_onnx_path='yolov8n.onnx',
-                            osnet_onnx_path='osnet_x1_0.onnx',
-                            similarity_threshold=similarity_threshold,
-                            matching_strategy=matching_strategy,
-                            frame_skip=frame_skip,
-                            resize_factor=resize_factor,
-                            use_gpu=use_gpu
-                        )
+                    # 🚀 캐시된 detector 사용
+                    detector = get_cached_detector(
+                        similarity_threshold,
+                        matching_strategy,
+                        frame_skip,
+                        resize_factor,
+                        use_gpu
+                    )
 
-                    images = []
-                    for uploaded_img in uploaded_images:
-                        uploaded_img.seek(0)
-                        image = Image.open(uploaded_img).convert('RGB')
-                        images.append(image)
+                    # 🚀 실종자 이미지 업데이트 (변경된 경우만)
+                    update_missing_person_images(detector, uploaded_images)
 
-                    if len(images) == 1:
-                        detector.set_missing_person(images[0])
-                    else:
-                        detector.set_missing_persons(images)
+                    # 🚀 캐시된 카메라 사용
+                    cap = get_cached_camera(camera_index)
 
-                    cap = cv2.VideoCapture(camera_index)
-
-                    if not cap.isOpened():
+                    if cap is None or not cap.isOpened():
                         st.error(f"❌ 카메라를 열 수 없습니다: {camera_index}")
                     else:
                         width = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
@@ -849,6 +991,9 @@ def main():
                             if not ret:
                                 st.error("❌ 카메라 연결 오류")
                                 break
+
+                            # 좌우반전 (거울 모드)
+                            frame = cv2.flip(frame, 1)
 
                             frame_count += 1
                             elapsed = time.time() - start_time
@@ -929,7 +1074,7 @@ def main():
                                 col_m3.metric("FPS", f"{fps_current:.1f}")
                                 col_m4.metric("상태", "🔴 경고" if detection_count > 0 else "🟢 정상")
 
-                        cap.release()
+                        # 종료 시 카메라는 세션에 유지 (재사용 위해)
                         st.session_state.webcam_running = False
 
                         elapsed_time = time.time() - start_time
