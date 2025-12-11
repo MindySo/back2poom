@@ -11,6 +11,9 @@ volumes:
     name: topoom-mysql-data
   jenkins-home:
     name: topoom-jenkins-home
+  rabbitmq-data:
+    name: topoom-rabbitmq-data
+    driver: local
 
 #############################
 #  SERVICES
@@ -39,6 +42,28 @@ services:
     networks:
       - topoom-network
 
+  # RabbitMQ Message Broker
+  rabbitmq:
+    image: rabbitmq:3.12-management
+    container_name: topoom-rabbitmq
+    restart: always
+    environment:
+      - TZ=Asia/Seoul
+      - RABBITMQ_DEFAULT_USER=${RABBITMQ_USERNAME}
+      - RABBITMQ_DEFAULT_PASS=${RABBITMQ_PASSWORD}
+    volumes:
+      - rabbitmq-data:/var/lib/rabbitmq
+    ports:
+      - "5672:5672"   # AMQP 프로토콜
+      - "15672:15672" # Management UI
+    networks:
+      - topoom-network
+    healthcheck:
+      test: rabbitmq-diagnostics -q ping
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
   # Spring Boot
   # Backend-main
   spring:
@@ -55,7 +80,10 @@ services:
     env_file:
       - .env
     depends_on:
-      - mysql
+      mysql:
+          condition: service_started
+      rabbitmq:
+          condition: service_healthy
     expose:
       - "8080"
     networks:
