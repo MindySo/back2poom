@@ -104,6 +104,7 @@ services:
 
   # Jenkins
   jenkins:
+    image: jenkins/jenkins:lts
     build:
       context: ./jenkins
       dockerfile: Dockerfile
