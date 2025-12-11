@@ -27,6 +27,7 @@ public class MissingCaseService {
 
     private final MissingCaseRepository missingCaseRepository;
     private final CaseFileRepository caseFileRepository;
+    private final CaseAiSupportService caseAiSupportService;
     private final ObjectMapper objectMapper;
 
     private String generateFileUrl(String s3Key) {
@@ -89,11 +90,15 @@ public class MissingCaseService {
                 .map(this::toImageItem)
                 .collect(Collectors.toList());
 
-        List<MissingCaseDetailResponse.ImageItem> outputImages = caseFileRepository
-                .findByMissingCaseIdAndIoRole(mc.getId(), CaseFile.IoRole.OUTPUT)
-                .stream()
-                .map(this::toImageItem)
-                .collect(Collectors.toList());
+        // AI로 처리된 enhanced 이미지 경로 생성
+        List<MissingCaseDetailResponse.ImageItem> outputImages = List.of(
+                MissingCaseDetailResponse.ImageItem.builder()
+                        .fileId(null)
+                        .purpose("ENHANCED")
+                        .contentType("image/jpeg")
+                        .url(generateFileUrl("output/missing-person-" + mc.getId() + "/enhanced_image.jpg"))
+                        .build()
+        );
 
         List<MissingCaseDetailResponse.CaseContact> caseContacts;
 
@@ -117,17 +122,21 @@ public class MissingCaseService {
         MissingCaseDetailResponse.AiSupport aiSupport = null;
         if (mc.getAiSupport() != null) {
             aiSupport = MissingCaseDetailResponse.AiSupport.builder()
+                    .top1Keyword(mc.getAiSupport().getTop1Keyword())
                     .top1Desc(mc.getAiSupport().getTop1Desc())
+                    .top2Keyword(mc.getAiSupport().getTop2Keyword())
                     .top2Desc(mc.getAiSupport().getTop2Desc())
                     .speed(mc.getAiSupport().getSpeed())
                     .infoItems(parseJson(mc.getAiSupport().getInfoItems()))
                     .build();
         } else {
             aiSupport = MissingCaseDetailResponse.AiSupport.builder()
-                    .top1Desc("임시1")
-                    .top2Desc("임시2")
-                    .speed(new BigDecimal("3.14")) // 임시
-                    .infoItems("임시")
+                    .top1Keyword("분석 대기")
+                    .top1Desc("우선순위 분석이 완료되지 않았습니다.")
+                    .top2Keyword("분석 대기")
+                    .top2Desc("우선순위 분석이 완료되지 않았습니다.")
+                    .speed(new BigDecimal("0.54")) // 기본 배회 속도
+                    .infoItems("분석 대기")
                     .build();
         }
 
@@ -217,4 +226,18 @@ public class MissingCaseService {
 
         return updatedCount;
     }
+
+    /**
+     * 테스트용: 특정 MissingCase에 대해 우선순위 분석 수행
+     */
+    @Transactional
+    public String testPriorityAnalysis(Long caseId) {
+        MissingCase missingCase = missingCaseRepository.findById(caseId)
+                .orElseThrow(() -> new RuntimeException("MissingCase not found: " + caseId));
+
+        caseAiSupportService.processNewMissingCase(missingCase);
+
+        return "우선순위 분석이 비동기로 시작되었습니다. 로그를 확인하세요.";
+    }
+
 }

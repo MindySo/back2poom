@@ -9,9 +9,11 @@
   background-color: rgba(43, 58, 85, 0.9);
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
   transform-origin: top left;
-  transition: transform 0.3s ease, opacity 0.3s ease;
   user-select: none;
   pointer-events: auto;
+  max-width: calc(100vw - 2rem);
+  max-height: calc(100vh - 2rem);
+  box-sizing: border-box;
 }
 
 .container.hidden {
@@ -20,6 +22,7 @@
 
 .content {
   position: relative;
+  overflow: hidden;
 }
 
 .backButton {

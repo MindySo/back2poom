@@ -1,20 +1,22 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
+import { theme } from '../../../theme';
 import { useShareMissingPerson } from '../../../hooks/useShareMissingPerson';
 import { useElapsedTime } from '../../../hooks/useElapsedTime';
 import type { MissingPerson } from '../../../types/missing';
 import styles from './ArchiveCard.module.css';
 import Badge from '../../common/atoms/Badge';
 import Text from '../../common/atoms/Text';
-import tempImg from '../../../assets/TempImg.png';
+import anonymousProfile from '../../../assets/anonymous_profile.svg';
 import Button from '../../common/atoms/Button';
 
 export interface ArchiveCardProps {
   person: MissingPerson;
   onClick?: () => void;
+  isSelected?: boolean;
 }
 
-const ArchiveCard: React.FC<ArchiveCardProps> = ({ person, onClick }) => {
+const ArchiveCard: React.FC<ArchiveCardProps> = ({ person, onClick, isSelected }) => {
   const navigate = useNavigate();
   const { share, isSharing } = useShareMissingPerson();
   const {
@@ -47,13 +49,17 @@ const ArchiveCard: React.FC<ArchiveCardProps> = ({ person, onClick }) => {
   };
 
   // 이미지 URL 가져오기
-  const displayMainImageUrl = mainImage?.url || tempImg;
+  const displayMainImageUrl = mainImage?.url || anonymousProfile;
 
   return (
-    <div 
-      className={styles['archive-card']} 
+    <div
+      className={`${styles['archive-card']} ${isSelected ? styles['selected'] : ''}`}
+      style={isSelected ? {
+        borderColor: theme.colors.main,
+        boxShadow: `0 0 0 3px ${theme.colors.main}1A, 0 8px 24px rgba(0,0,0,0.12)`,
+        backgroundColor: '#fffaf5',
+      } : undefined}
       onClick={onClick}
-      style={{ cursor: onClick ? 'pointer' : 'default' }}
     >
       <div className={styles['archive-card__content']}>
         <div className={styles['archive-card__imageWrap']}>
@@ -71,26 +77,28 @@ const ArchiveCard: React.FC<ArchiveCardProps> = ({ person, onClick }) => {
               )}
             </div>
 
-            <div className={styles['archive-card__row']}>
-              <Text as="span" size="lg" weight="bold" className={styles['archive-card__name']}>{personName}</Text>
-              <Text as="span" size="sm" color="gray" className={styles['archive-card__meta']}>
-                {gender ?? '성별 미상'}
-              </Text>
-            </div>
-            <div className={styles['archive-card__info']}>
-              <div className={styles['archive-card__info-item']}>
-                <Text as="span" size="sm" color="gray" className={styles['archive-card__label']}>나이</Text>
-                <Text as="span" size="sm" className={styles['archive-card__value']}>
-                  {ageAtTime}세{currentAge ? ` (현재 나이: ${currentAge}세)` : ''}
+            <div style={{ paddingLeft: '4px' }}>
+              <div className={styles['archive-card__row']}>
+                <Text as="span" size="lg" weight="bold" color="darkMain" className={styles['archive-card__name']}>{personName}</Text>
+                <Text as="span" size="sm" color="gray" className={styles['archive-card__meta']}>
+                  {gender ?? '성별 미상'}
                 </Text>
               </div>
-              <div className={styles['archive-card__info-item']}>
-                <Text as="span" size="sm" color="gray" className={styles['archive-card__label']}>발생일</Text>
-                <Text as="span" size="sm" className={styles['archive-card__value']}>{formatDate(occurredAt)}</Text>
-              </div>
-              <div className={styles['archive-card__info-item']}>
-                <Text as="span" size="sm" color="gray" className={styles['archive-card__label']}>발생장소</Text>
-                <Text as="span" size="sm" className={styles['archive-card__value']}>{occurredLocation}</Text>
+              <div className={styles['archive-card__info']}>
+                <div className={styles['archive-card__info-item']}>
+                  <Text as="span" size="sm" color="gray" className={styles['archive-card__label']}>나이</Text>
+                  <Text as="span" size="sm" color="darkMain" className={styles['archive-card__value']}>
+                    {ageAtTime}세{currentAge ? ` (현재 ${currentAge}세)` : ''}
+                  </Text>
+                </div>
+                <div className={styles['archive-card__info-item']}>
+                  <Text as="span" size="sm" color="gray" className={styles['archive-card__label']}>발생일</Text>
+                  <Text as="span" size="sm" color="darkMain" className={styles['archive-card__value']}>{formatDate(occurredAt)}</Text>
+                </div>
+                <div className={styles['archive-card__info-item']}>
+                  <Text as="span" size="sm" color="gray" className={styles['archive-card__label']}>발생장소</Text>
+                  <Text as="span" size="sm" color="darkMain" className={`${styles['archive-card__value']} ${styles['archive-card__value--location']}`}>{occurredLocation}</Text>
+                </div>
               </div>
             </div>
           </div>

@@ -1,0 +1,30 @@
+# SigLIP Person Finder Dependencies
+
+# Core ML Libraries
+torch>=2.0.0
+torchvision>=0.15.0
+transformers>=4.35.0
+pillow>=10.0.0
+sentencepiece>=0.1.99
+protobuf>=3.20.0
+safetensors>=0.3.1
+huggingface_hub>=0.16.4
+
+# Computer Vision
+opencv-python>=4.8.0
+ultralytics>=8.0.0
+
+# Utilities
+numpy>=1.24.0
+scipy>=1.11.0
+tqdm>=4.65.0
+
+# Web UI
+gradio>=4.0.0
+streamlit>=1.28.0
+
+# Optional: For better performance
+# accelerate>=0.20.0  # Faster model loading
+
+# Optional: For text expansion
+# openai>=1.0.0  # GPT API for query expansion

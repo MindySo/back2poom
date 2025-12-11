@@ -82,29 +82,74 @@
 .search-bar {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 12px;
   background: #ffffff;
-  padding: 12px 20px;
-  border-radius: 12px;
-  border: 1px solid #e5e7eb;
+  padding: 13px 20px;
+  border-radius: 16px;
+  border: 1.5px solid #e5e7eb;
   width: 520px;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  transition: all 0.3s ease;
 }
+
+.search-bar:focus-within {
+  border-color: #2B3A55;
+  box-shadow: 0 4px 16px rgba(43, 58, 85, 0.15);
+}
+
 .search-bar input {
   flex: 1;
   border: none;
   outline: none;
   font-size: 16px;
-  padding-left: 0; /* 글자 시작 위치를 오른쪽으로 */
+  padding: 0;
+  background: transparent;
+  color: #1f2937;
+  font-family: 'Pretendard, -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif';
+  text-align: left;
 }
 
-.search-bar button {
-  width: 36px;
-  height: 36px;
-  border-radius: 50%;
+/* 플레이스홀더가 보이고 포커스가 없을 때만 중앙 정렬 */
+.search-bar input:placeholder-shown:not(:focus) {
+  text-align: center;
+}
+
+/* 포커스 시 무조건 왼쪽 정렬 */
+.search-bar input:focus {
+  text-align: left;
+}
+
+.search-bar input::placeholder {
+  color: #9ca3af;
+  text-align: center;
+}
+
+.search-bar button,
+.search-button {
+  padding: 10px 20px;
+  border-radius: 10px;
   border: none;
-  background: #f0f2f5;
+  background: #6b7280;
+  color: #ffffff;
+  font-size: 15px;
+  font-weight: 600;
   cursor: pointer;
+  transition: all 0.2s ease;
+  font-family: 'Pretendard, -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif';
+  white-space: nowrap;
+  box-shadow: 0 2px 4px rgba(107, 114, 128, 0.2);
+}
+
+.search-button:hover {
+  background: #4b5563;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(107, 114, 128, 0.3);
+}
+
+.search-button:active {
+  background: #374151;
+  transform: translateY(0);
+  box-shadow: 0 2px 4px rgba(107, 114, 128, 0.2);
 }
 
 /* Tabs */
@@ -128,22 +173,28 @@
   padding: 2px 4px;
   font-size: 14px;
   cursor: pointer;
+  transition: color 0.2s ease;
 }
 
 .list-tabs button:global(.active) {
   color: #333333;
 }
 
-.list-tabs button:global(.active)::after {
+.list-tabs button::after {
   content: "";
   position: absolute;
   left: 50%;
-  transform: translateX(-50%);
+  transform: translateX(-50%) scaleX(0);
   bottom: -10px;
   width: 36px;
   height: 3px;
-  background: #E89A59; /* orange underline like screenshot */
+  background: var(--main-color); /* orange underline like screenshot */
   border-radius: 2px;
+  transition: transform 0.3s ease;
+}
+
+.list-tabs button:global(.active)::after {
+  transform: translateX(-50%) scaleX(1);
 }
 
 /* Grid area (cards themselves are external) */
@@ -203,7 +254,7 @@
   max-width: 100%;
   grid-template-columns: repeat(2, 1fr); /* 최대 2열로 고정 */
   gap: 16px;
-  margin: 16px auto 0;
+  margin: 0px auto 0;
   justify-items: stretch; /* 그리드 아이템이 셀 전체를 채우도록 */
   align-items: start; /* 카드가 독립적으로 높이를 가지도록 */
   box-sizing: border-box;
@@ -241,27 +292,57 @@
 .search-bar.mobile-search {
   display: flex;
   align-items: center;
-  border-radius: 8px;
-  background: #ffffff; /* 배경 투명 */
-  margin: 0; /* 중앙 정렬 */
-  width: 100%; /* 탭과 동일한 너비 */
+  gap: 10px;
+  border-radius: 12px;
+  background: #ffffff;
+  margin: 0;
+  width: 100%;
   box-sizing: border-box;
-  border: none; /* 외부 테두리 제거 */
-  box-shadow: none; /* 그림자 제거 */
+  padding: 12px 16px;
+  border: 1.5px solid #e5e7eb;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+  transition: all 0.3s ease;
+}
+
+.search-bar.mobile-search:focus-within {
+  border-color: #2B3A55;
+  box-shadow: 0 4px 12px rgba(43, 58, 85, 0.12);
 }
 
 .search-bar.mobile-search input {
   flex: 1;
-  border-radius: 8px;
-  padding: 10px 30px;
-  font-size: 14px;
-  background: #ffffff;
+  border: none;
+  border-radius: 0;
+  padding: 0;
+  font-size: 15px;
+  background: transparent;
   outline: none;
-  padding-left: 16px !important; /* 기본 padding-left: 12px 덮어쓰기 */
+  color: #1f2937;
+  font-family: 'Pretendard, -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif';
+  text-align: left;
+}
+
+/* 플레이스홀더가 보이고 포커스가 없을 때만 중앙 정렬 */
+.search-bar.mobile-search input:placeholder-shown:not(:focus) {
+  text-align: center;
+}
+
+/* 포커스 시 무조건 왼쪽 정렬 */
+.search-bar.mobile-search input:focus {
+  text-align: left;
+}
+
+.search-bar.mobile-search .search-button {
+  padding: 10px 18px;
+  font-size: 14px;
+  font-weight: 600;
+  margin-left: 0;
+  box-shadow: 0 2px 4px rgba(43, 58, 85, 0.2);
 }
 
 .search-bar.mobile-search input::placeholder {
   color: #9ca3af;
+  text-align: center;
 }
 
 .mobile-menu-button {

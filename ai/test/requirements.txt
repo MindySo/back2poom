@@ -1,0 +1,15 @@
+ultralytics>=8.0.0
+opencv-python>=4.8.0
+torch>=2.0.0
+torchvision>=0.15.0
+transformers>=4.30.0
+Pillow>=10.0.0
+numpy>=1.24.0
+streamlit>=1.28.0
+torchreid>=0.2.5
+onnx>=1.14.0
+onnxruntime-gpu>=1.16.0
+onnxslim>=0.1.71
+streamlit-webrtc>=0.47.0
+aiortc>=1.6.0
+av>=10.0.0

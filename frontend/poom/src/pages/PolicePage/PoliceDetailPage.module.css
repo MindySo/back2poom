@@ -27,25 +27,52 @@
 .column1 .section {
   flex: 1;
   min-height: 100%;
-  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
 }
 
-.column1 .section::-webkit-scrollbar {
+.column1 .section > .sectionTitle {
+  flex-shrink: 0;
+  margin-bottom: 0;
+  padding-bottom: 1.25rem;
+  border-bottom: 2px solid rgba(255, 255, 255, 0.15);
+}
+
+.column1 .scrollableContent {
+  flex: 1;
+  overflow-y: auto;
+  scrollbar-width: thin; /* Firefox */
+  scrollbar-color: transparent transparent;
+  transition: scrollbar-color 0.6s ease;
+  min-height: 0;
+}
+
+.column1 .scrollableContent::-webkit-scrollbar {
   width: 6px;
 }
 
-.column1 .section::-webkit-scrollbar-track {
-  background: rgba(255, 255, 255, 0.05);
+.column1 .scrollableContent::-webkit-scrollbar-track {
+  background: transparent;
   border-radius: 3px;
 }
 
-.column1 .section::-webkit-scrollbar-thumb {
-  background: rgba(255, 255, 255, 0.2);
+.column1 .scrollableContent::-webkit-scrollbar-thumb {
+  background: transparent;
   border-radius: 3px;
+  transition: background 0.6s ease;
 }
 
-.column1 .section::-webkit-scrollbar-thumb:hover {
+.column1 .section.showScrollbar .scrollableContent {
+  scrollbar-color: rgba(255, 255, 255, 0.3) transparent; /* Firefox */
+}
+
+.column1 .section.showScrollbar .scrollableContent::-webkit-scrollbar-thumb {
   background: rgba(255, 255, 255, 0.3);
+  transition: background 0.3s ease;
+}
+
+.column1 .section.showScrollbar .scrollableContent::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.5);
 }
 
 /* 두 번째 열: 5 (50%) */
@@ -60,6 +87,9 @@
   flex: 1;
   min-height: 100%;
   overflow-y: auto;
+  scrollbar-width: thin; /* Firefox */
+  scrollbar-color: transparent transparent;
+  transition: scrollbar-color 0.6s ease;
 }
 
 .column2 .section::-webkit-scrollbar {
@@ -67,17 +97,27 @@
 }
 
 .column2 .section::-webkit-scrollbar-track {
-  background: rgba(255, 255, 255, 0.05);
+  background: transparent;
   border-radius: 3px;
 }
 
 .column2 .section::-webkit-scrollbar-thumb {
-  background: rgba(255, 255, 255, 0.2);
+  background: transparent;
   border-radius: 3px;
+  transition: background 0.6s ease;
 }
 
-.column2 .section::-webkit-scrollbar-thumb:hover {
+.column2 .section.showScrollbar {
+  scrollbar-color: rgba(255, 255, 255, 0.3) transparent; /* Firefox */
+}
+
+.column2 .section.showScrollbar::-webkit-scrollbar-thumb {
   background: rgba(255, 255, 255, 0.3);
+  transition: background 0.3s ease;
+}
+
+.column2 .section.showScrollbar::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.5);
 }
 
 /* 세 번째 열: 3 (30%) */
@@ -92,6 +132,9 @@
   flex: 1;
   min-height: 100%;
   overflow-y: auto;
+  scrollbar-width: thin; /* Firefox */
+  scrollbar-color: transparent transparent;
+  transition: scrollbar-color 0.6s ease;
 }
 
 .column3 .section::-webkit-scrollbar {
@@ -99,17 +142,27 @@
 }
 
 .column3 .section::-webkit-scrollbar-track {
-  background: rgba(255, 255, 255, 0.05);
+  background: transparent;
   border-radius: 3px;
 }
 
 .column3 .section::-webkit-scrollbar-thumb {
-  background: rgba(255, 255, 255, 0.2);
+  background: transparent;
   border-radius: 3px;
+  transition: background 0.6s ease;
 }
 
-.column3 .section::-webkit-scrollbar-thumb:hover {
+.column3 .section.showScrollbar {
+  scrollbar-color: rgba(255, 255, 255, 0.3) transparent; /* Firefox */
+}
+
+.column3 .section.showScrollbar::-webkit-scrollbar-thumb {
   background: rgba(255, 255, 255, 0.3);
+  transition: background 0.3s ease;
+}
+
+.column3 .section.showScrollbar::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.5);
 }
 
 .section {
@@ -136,6 +189,7 @@
   display: flex;
   flex-direction: column;
   gap: 0.875rem;
+  margin-bottom: 1.5rem;
 }
 
 .badgeContainer {
@@ -151,23 +205,13 @@
   overflow: hidden;
   background: rgba(255, 255, 255, 0.08);
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4), 0 0 0 1px rgba(255, 255, 255, 0.1);
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
-}
-
-.mainImageWrapper:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(255, 255, 255, 0.15);
 }
 
 .mainImage {
   width: 100%;
   height: 100%;
   object-fit: cover;
-  transition: transform 0.3s ease;
-}
-
-.mainImageWrapper:hover .mainImage {
-  transform: scale(1.02);
+  object-position: top;
 }
 
 .infoCard {
@@ -238,59 +282,49 @@
 .detectionCard {
   display: flex;
   flex-direction: column;
+  min-height: clamp(480px, 55vh, 720px);
+  height: 100%;
   background: rgba(255, 255, 255, 0.06);
   border-radius: 10px;
   overflow: hidden;
   border: 1px solid rgba(255, 255, 255, 0.12);
   box-shadow: 0 2px 12px rgba(0, 0, 0, 0.2);
-  transition: all 0.3s ease;
   cursor: pointer;
-}
-
-.detectionCard:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.35);
-  border-color: rgba(255, 255, 255, 0.2);
-  background: rgba(255, 255, 255, 0.08);
 }
 
 .detectionImageWrapper {
   width: 100%;
-  flex: 1;
-  min-height: 0;
+  flex: 0 0 auto;
+  min-height: clamp(200px, 24vh, 300px);
+  max-height: clamp(240px, 32vh, 340px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+  background: rgba(0, 0, 0, 0.45);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
   overflow: hidden;
-  background: rgba(0, 0, 0, 0.4);
-  position: relative;
-}
-
-.detectionImageWrapper::after {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: linear-gradient(to bottom, transparent 0%, rgba(0, 0, 0, 0.1) 100%);
-  pointer-events: none;
 }
 
 .detectionImage {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  transition: transform 0.4s ease;
-}
-
-.detectionCard:hover .detectionImage {
-  transform: scale(1.05);
+  max-width: 100%;
+  max-height: 100%;
+  width: auto;
+  height: auto;
+  object-fit: contain;
+  border-radius: 12px;
+  box-shadow: 0 8px 18px rgba(0, 0, 0, 0.45);
 }
 
 .detectionInfo {
-  padding: 0.875rem 1rem;
+  padding: 1rem 1.25rem 1.5rem;
   display: flex;
   flex-direction: column;
-  gap: 0.5rem;
-  flex-shrink: 0;
+  gap: 1rem;
+  flex: 0 0 auto;
+  min-height: clamp(320px, 42vh, 520px);
+  max-height: clamp(380px, 48vh, 600px);
+  overflow-y: auto;
   background: rgba(0, 0, 0, 0.2);
 }
 
@@ -311,5 +345,14 @@
   word-break: break-word;
   line-height: 1.4;
   opacity: 0.95;
+}
+
+.noDetectionMessage {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 3rem 2rem;
+  text-align: center;
+  opacity: 0.6;
 }
 

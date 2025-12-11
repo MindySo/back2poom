@@ -2,7 +2,7 @@ import React from 'react';
 import { theme } from '../../../../theme';
 import Text from '../../atoms/Text';
 import styles from './Footer.module.css';
-import logo from '../../../../assets/poom_logo.png';
+import logo from '../../../../assets/2poom_logo.svg';
 
 export interface FooterProps {
   className?: string;

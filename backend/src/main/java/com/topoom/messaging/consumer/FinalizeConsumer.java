@@ -7,6 +7,9 @@ import com.topoom.messaging.dto.OcrRequestMessage;
 import com.topoom.messaging.exception.CoordinateConversionException;
 import com.topoom.messaging.producer.MessageProducer;
 import com.topoom.missingcase.service.MissingCaseUpdateService;
+import com.topoom.missingcase.service.CaseAiSupportService;
+import com.topoom.missingcase.entity.MissingCase;
+import com.topoom.missingcase.repository.MissingCaseRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
@@ -25,6 +28,8 @@ public class FinalizeConsumer {
 
     private final MissingCaseUpdateService missingCaseUpdateService;
     private final MessageProducer messageProducer;
+    private final CaseAiSupportService caseAiSupportService;
+    private final MissingCaseRepository missingCaseRepository;
 
     @RabbitListener(queues = RabbitMQConfig.FINALIZE_QUEUE)
     public void consumeFinalize(FinalizeMessage message,
@@ -47,6 +52,9 @@ public class FinalizeConsumer {
 
             log.info("✅ 최종 업데이트 완료: requestId={}, caseId={}",
                 message.getRequestId(), message.getCaseId());
+
+            // 6. 배회 분석 수행 (위도/경도 확정 후 실행)
+            performMovementAnalysis(message.getCaseId());
 
         } catch (CoordinateConversionException e) {
             // 좌표 변환 실패 시 OCR 큐로 재전송 (최대 3번)
@@ -96,6 +104,38 @@ public class FinalizeConsumer {
             log.error("❌ 좌표 변환 최종 실패 (finalize 재시도 3/3 초과), DLQ로 이동: requestId={}, caseId={}, 원인={}",
                 message.getRequestId(), message.getCaseId(), e.getMessage());
             throw e; // 예외를 던져서 DLQ로 이동
+        }
+    }
+
+    /**
+     * 배회 분석 수행
+     * - 배회 분석 실패해도 메인 플로우(MissingCase 저장)는 영향받지 않음
+     * - 비동기로 실행하여 메인 트랜잭션과 분리
+     */
+    private void performMovementAnalysis(Long caseId) {
+        try {
+            // MissingCase 조회 (위도/경도가 확정된 상태)
+            MissingCase missingCase = missingCaseRepository.findById(caseId).orElse(null);
+            if (missingCase == null) {
+                log.warn("⚠️ 배회 분석 스킵: MissingCase를 찾을 수 없음, caseId={}", caseId);
+                return;
+            }
+
+            // 필수 데이터 검증
+            if (missingCase.getLatitude() == null || missingCase.getLongitude() == null) {
+                log.warn("⚠️ 배회 분석 스킵: 위도/경도 없음, caseId={}", caseId);
+                return;
+            }
+
+            // 배회 분석 수행
+            caseAiSupportService.processNewMissingCase(missingCase);
+            
+            log.info("✅ 배회 분석 완료: caseId={}", caseId);
+
+        } catch (Exception e) {
+            // 배회 분석 실패해도 메인 플로우에 영향주지 않음
+            log.error("❌ 배회 분석 실패 (메인 플로우는 정상 완료): caseId={}, error={}", 
+                     caseId, e.getMessage(), e);
         }
     }
 }

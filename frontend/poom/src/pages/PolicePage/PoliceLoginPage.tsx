@@ -1,0 +1,99 @@
+import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import Text from '../../components/common/atoms/Text';
+import Button from '../../components/common/atoms/Button';
+import logoPolice from '../../assets/2poom_police_logo.svg';
+import styles from './PoliceLoginPage.module.css';
+
+const PoliceLoginPage = () => {
+  const navigate = useNavigate();
+  const [username, setUsername] = useState('');
+  const [password, setPassword] = useState('');
+  const [error, setError] = useState('');
+
+  const handleLogin = (e: React.FormEvent) => {
+    e.preventDefault();
+    setError('');
+
+    // 하드코딩된 자격증명 확인
+    if (username === 'admin' && password === 'poom1234') {
+      // 로그인 성공: localStorage에 저장
+      localStorage.setItem('policeAuth', 'true');
+      localStorage.setItem('policeUsername', username);
+      // 로그인 성공 시 이동할 페이지로 리다이렉트
+      navigate('/police/map');
+    } else {
+      // 로그인 실패
+      setError('아이디 또는 비밀번호가 잘못되었습니다.');
+      setPassword('');
+    }
+  };
+
+  return (
+    <div className={styles.container}>
+      <div className={styles.logoContainer}>
+        <img src={logoPolice} alt="품으로 로고" className={styles.logo} />
+      </div>
+      <div className={styles.loginCard}>
+        <Text as="h1" size="xxl" weight="bold" color="black" className={styles.title}>
+          품으로 실종자 관제 시스템
+        </Text>
+
+        <form onSubmit={handleLogin} className={styles.form}>
+          <div className={styles.inputGroup}>
+            <label className={styles.label}>
+              <Text as="span" size="sm" weight="bold" color="black">
+                아이디
+              </Text>
+            </label>
+            <input
+              type="text"
+              value={username}
+              onChange={(e) => setUsername(e.target.value)}
+              className={styles.input}
+              placeholder="아이디를 입력하세요"
+              required
+            />
+          </div>
+
+          <div className={styles.inputGroup}>
+            <label className={styles.label}>
+              <Text as="span" size="sm" weight="bold" color="black">
+                비밀번호
+              </Text>
+            </label>
+            <input
+              type="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              className={styles.input}
+              placeholder="비밀번호를 입력하세요"
+              required
+            />
+          </div>
+
+          {error && (
+            <div className={styles.errorMessage}>
+              <Text as="p" size="sm" weight="bold" style={{ margin: 0 }}>
+                {error}
+              </Text>
+            </div>
+          )}
+
+          <Button
+            type="submit"
+            variant="darkPrimary"
+            size="large"
+            fullWidth
+            className={styles.loginButton}
+          >
+            로그인
+          </Button>
+        </form>
+      </div>
+    </div>
+  );
+};
+
+export default PoliceLoginPage;
+

@@ -16,4 +16,6 @@ public class CaseReportResponse {
     private BigDecimal latitude;
     private BigDecimal longitude;
     private String additionalInfo;
+    private String reporterName;
+    private String reporterContact;
 }

@@ -87,7 +87,8 @@ export const typography = {
 
 export const colors = {
   darkMain: '#2B3A55',
-  main: '#E89A59',
+  // main: '#E89A59',
+  main: '#FFC562',
   beige: '#F6F4EF',
   lightGray: '#EEF1F6',
   black: '#333333',
@@ -100,6 +101,17 @@ export const colors = {
   pink: '#D9A7A0',
   green: '#8EB69B',
   yellow: '#F6C90E',
+
+  // 경찰페이지 전용
+  policeMain: '#0FB4DB',
+  policeWhite: '#EEF1F6',
+  policeGray: '#bebebeff',
+  policeLightGray: '#FFFFFFBF',
+
+  policeBlue: '#62a1eeff',
+  policePink: '#EBC0BA',
+  policeGreen: '#A8D1B7',
+  policeYellow: '#FFD74A',
 
 } as const;
 

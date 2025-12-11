@@ -2,7 +2,7 @@ import React from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { theme } from '../../../theme';
 import styles from './PoliceTopBar.module.css';
-import logoFull from '../../../assets/poom_logo_full_police.png';
+import logoFull from '../../../assets/2poom_police_logo.svg';
 
 export interface PoliceTopBarProps {
   className?: string;
@@ -14,7 +14,7 @@ type NavItem = {
 };
 
 const navItems: NavItem[] = [
-  { label: '실종자 지도페이지 (경찰청 전용)', path: '/police' },
+  { label: '실종자 지도페이지 (경찰청 전용)', path: '/police/map' },
 ];
 
 const PoliceTopBar: React.FC<PoliceTopBarProps> = ({ className = '' }) => {
@@ -42,9 +42,9 @@ const PoliceTopBar: React.FC<PoliceTopBarProps> = ({ className = '' }) => {
           className={styles.logoBox}
           style={{
             backgroundColor: policeColor,
-            boxShadow: `4px 4px 12px rgba(255, 255, 255, 0.3)`,
+            boxShadow: `4px 4px 12px ${theme.colors.white}4D`,
           }}
-          onClick={() => handleNavClick('/police')}
+          onClick={() => handleNavClick('/police/map')}
         >
           <img
             src={logoFull}
@@ -65,9 +65,9 @@ const PoliceTopBar: React.FC<PoliceTopBarProps> = ({ className = '' }) => {
         {/* 네비게이션 영역 */}
         <nav className={styles.navbar}>
           {navItems.map((item) => {
-            const isActive = location.pathname === item.path;
+            const isActive = location.pathname === item.path || location.pathname.startsWith('/police/map');
             const isHovered = hoveredPath === item.path;
-            const labelColor = (isActive || isHovered) ? '#ffffffff' : 'rgba(255, 255, 255, 0.75)';
+            const labelColor = (isActive || isHovered) ? theme.colors.white : theme.colors.policeLightGray;
             return (
               <button
                 key={item.path}
@@ -83,8 +83,8 @@ const PoliceTopBar: React.FC<PoliceTopBarProps> = ({ className = '' }) => {
                 <span
                   className={`${styles.activeIndicator} ${(isActive || isHovered) ? styles.show : ''}`}
                   style={{
-                    backgroundColor: isActive ? `rgba(15, 180, 219, 0.7)` : `rgba(232, 154, 89, 0.7)`,
-                    boxShadow: isActive ? `4px 4px 12px rgba(15, 180, 219, 0.5)` : `4px 4px 12px rgba(232, 154, 89, 0.5)`,
+                    backgroundColor: `${theme.colors.policeMain}80`,
+                    boxShadow: `4px 4px 12px ${theme.colors.policeMain}4D`,
                   }}
                 ></span>
                 <span

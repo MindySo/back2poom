@@ -1,22 +1,105 @@
+/// <reference path="../../types/kakao.d.ts" />
 import React, { useEffect, useRef, useState } from 'react';
 import PoliceSideBar from '../../components/police/PoliceSideBar/PoliceSideBar';
 import useKakaoMap from '../../hooks/useKakaoMap';
-import { useRecentMissing } from '../../hooks';
+import { useRecentMissing, useCctvDetection } from '../../hooks';
 import Marker from '../../components/map/Marker/Marker';
+import CctvMarker from '../../components/police/CctvMarker/CctvMarker';
+import MovementRadius from '../../components/map/MovementRadius/MovementRadius';
 import PoliceDashboard from '../../components/police/PoliceDashboard/PoliceDashboard';
 import styles from './PoliceMapPage.module.css';
+import { useSearchParams } from 'react-router-dom';
+
+declare const kakao: any;
 
 const API_KEY = import.meta.env.VITE_KAKAO_JAVASCRIPT_KEY;
 
+const MAX_RADIUS = 15000; // 최대 반지름 15km
+
+// 경과 시간 기반 초기 반지름 계산 함수 (crawledAt 기준)
+const calculateInitialRadius = (crawledAt: string, speed: number): number => {
+  const crawledTime = new Date(crawledAt).getTime();
+  const currentTime = Date.now();
+  const elapsedSeconds = (currentTime - crawledTime) / 1000;
+
+  // speed는 km/h 단위이므로 m/s로 변환
+  const speedInMeterPerSecond = speed / 3.6;
+
+  // 초기 반지름 계산 (최대 15km로 제한)
+  const initialRadius = speedInMeterPerSecond * elapsedSeconds;
+
+  return Math.min(initialRadius, MAX_RADIUS);
+};
+
+// 최대 범위 초과 여부 확인 함수 (crawledAt 기준)
+const isMaxRadiusExceeded = (crawledAt: string, speed: number): boolean => {
+  const crawledTime = new Date(crawledAt).getTime();
+  const currentTime = Date.now();
+  const elapsedSeconds = (currentTime - crawledTime) / 1000;
+
+  const speedInMeterPerSecond = speed / 3.6;
+  const calculatedRadius = speedInMeterPerSecond * elapsedSeconds;
+
+  return calculatedRadius >= MAX_RADIUS;
+};
+
 const PoliceMapPage: React.FC = () => {
+  const [searchParams, setSearchParams] = useSearchParams();
   const isLoaded = useKakaoMap(API_KEY);
   const mapRef = useRef<HTMLDivElement | null>(null);
-  const [map, setMap] = useState<kakao.maps.Map | null>(null);
+  const [map, setMap] = useState<any>(null);
   const [isDashboardOpen, setIsDashboardOpen] = useState(false);
   const [selectedMissingId, setSelectedMissingId] = useState<number | null>(null);
+  const [selectedRadiusPosition, setSelectedRadiusPosition] = useState<{ lat: number; lng: number } | null>(null);
+  const [selectedRadiusValue, setSelectedRadiusValue] = useState<number>(0);
+  const { data: cctvDetections = [] } = useCctvDetection(
+    isDashboardOpen ? selectedMissingId : null,
+  );
 
   // 최근 72시간 내 실종자 데이터 가져오기 (마커용)
   const { data: recentMissingList } = useRecentMissing(72);
+
+  // ID 50000 실종자에 대한 가상 비활성 CCTV 데이터 추가
+  let allCctvDetections = cctvDetections;
+  if (selectedMissingId === 50000 && recentMissingList) {
+    const person50000 = recentMissingList.find(p => p.id === 50000);
+    if (person50000 && person50000.latitude && person50000.longitude) {
+      const { latitude, longitude } = person50000;
+      const mockInactiveCctvs = [
+        // 이동방향: 상 lat+ | 하 lat- | 좌 long- | 우 long+
+        { id: 999901, latitude: latitude + 0.003, longitude: longitude + 0.005, similarityScore: 0, videoUrl: '', occurredAt: '' },
+        { id: 999902, latitude: latitude - 0.001, longitude: longitude - 0.002, similarityScore: 0, videoUrl: '', occurredAt: '' },
+        { id: 999903, latitude: latitude + 0.002, longitude: longitude - 0.0015, similarityScore: 0, videoUrl: '', occurredAt: '' },
+        { id: 999904, latitude: latitude - 0.0025, longitude: longitude + 0.01, similarityScore: 0, videoUrl: '', occurredAt: '' },
+        { id: 999905, latitude: latitude - 0.0005, longitude: longitude + 0.002, similarityScore: 0, videoUrl: '', occurredAt: '' },
+        { id: 999906, latitude: latitude + 0.001, longitude: longitude - 0.007, similarityScore: 0, videoUrl: '', occurredAt: '' },
+
+        { id: 999907, latitude: latitude + 0.013, longitude: longitude + 0.005, similarityScore: 0, videoUrl: '', occurredAt: '' },
+        { id: 999908, latitude: latitude - 0.015, longitude: longitude + 0.01, similarityScore: 0, videoUrl: '', occurredAt: '' },
+        { id: 999909, latitude: latitude - 0.0015, longitude: longitude + 0.03, similarityScore: 0, videoUrl: '', occurredAt: '' },
+        { id: 999910, latitude: latitude - 0.01, longitude: longitude - 0.002, similarityScore: 0, videoUrl: '', occurredAt: '' },
+        { id: 999911, latitude: latitude + 0.02, longitude: longitude - 0.0015, similarityScore: 0, videoUrl: '', occurredAt: '' },
+        { id: 999912, latitude: latitude - 0.018, longitude: longitude - 0.005, similarityScore: 0, videoUrl: '', occurredAt: '' },
+
+        { id: 999913, latitude: latitude - 0.025, longitude: longitude + 0.001, similarityScore: 0, videoUrl: '', occurredAt: '' },
+        { id: 999914, latitude: latitude + 0.005, longitude: longitude - 0.002, similarityScore: 0, videoUrl: '', occurredAt: '' },
+        { id: 999915, latitude: latitude - 0.005, longitude: longitude + 0.002, similarityScore: 0, videoUrl: '', occurredAt: '' },
+        { id: 999916, latitude: latitude + 0.003, longitude: longitude + 0.02, similarityScore: 0, videoUrl: '', occurredAt: '' },
+        { id: 999917, latitude: latitude - 0.003, longitude: longitude - 0.02, similarityScore: 0, videoUrl: '', occurredAt: '' },
+        { id: 999918, latitude: latitude + 0.01, longitude: longitude + 0.025, similarityScore: 0, videoUrl: '', occurredAt: '' },
+        { id: 999919, latitude: latitude + 0.01, longitude: longitude - 0.03, similarityScore: 0, videoUrl: '', occurredAt: '' },
+        { id: 999920, latitude: latitude - 0.01, longitude: longitude + 0.03, similarityScore: 0, videoUrl: '', occurredAt: '' },
+
+        { id: 999921, latitude: latitude + 0.02, longitude: longitude + 0.02, similarityScore: 0, videoUrl: '', occurredAt: '' },
+        { id: 999922, latitude: latitude + 0.02, longitude: longitude - 0.02, similarityScore: 0, videoUrl: '', occurredAt: '' },
+        { id: 999923, latitude: latitude - 0.02, longitude: longitude - 0.02, similarityScore: 0, videoUrl: '', occurredAt: '' },
+        { id: 999924, latitude: latitude - 0.02, longitude: longitude + 0.02, similarityScore: 0, videoUrl: '', occurredAt: '' },
+        { id: 999925, latitude: latitude + 0.03, longitude: longitude - 0.005, similarityScore: 0, videoUrl: '', occurredAt: '' },
+        { id: 999926, latitude: latitude - 0.013, longitude: longitude - 0.035, similarityScore: 0, videoUrl: '', occurredAt: '' },
+      ];
+      allCctvDetections = [...cctvDetections, ...mockInactiveCctvs];
+    }
+  }
 
   useEffect(() => {
     if (!isLoaded || !mapRef.current) return;
@@ -31,7 +114,39 @@ const PoliceMapPage: React.FC = () => {
     setMap(mapInstance);
   }, [isLoaded]);
 
-  const moveMapToVisibleCenter = (lat: number, lng: number) => {
+  // URL 파라미터에서 missingId 읽어서 모달 열기 (초기 로드 시에만)
+  const urlProcessedRef = useRef(false);
+  useEffect(() => {
+    if (urlProcessedRef.current) return;
+
+    const missingIdParam = searchParams.get('missingId');
+    if (missingIdParam && map && recentMissingList) {
+      const missingId = parseInt(missingIdParam, 10);
+      if (!isNaN(missingId)) {
+        // 해당 실종자가 마커 리스트에 있는지 확인
+        const person = recentMissingList.find((p) => p.id === missingId);
+        if (person) {
+          urlProcessedRef.current = true;
+          setSelectedMissingId(missingId);
+          setIsDashboardOpen(true);
+
+          // 해당 실종자의 위치로 지도 이동
+          if (person.latitude && person.longitude) {
+            moveMapToVisibleCenter(person.latitude, person.longitude);
+            setSelectedRadiusPosition({ lat: person.latitude, lng: person.longitude });
+
+            // 경과 시간 기반 초기 반지름 계산
+            const speed = person.aiSupport?.speed ?? 3.14;
+            const initialRadius = calculateInitialRadius(person.crawledAt, speed);
+            setSelectedRadiusValue(initialRadius);
+          }
+        }
+      }
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [map, recentMissingList]);
+
+  const moveMapToVisibleCenter = (lat: number, lng: number, dashboardOpen: boolean = isDashboardOpen) => {
     if (!map) return;
     const mapContainer = mapRef.current;
     if (!mapContainer) return;
@@ -41,7 +156,7 @@ const PoliceMapPage: React.FC = () => {
 
     const topBarHeight = 90;
     const sideBarWidth = 380;
-    const dashboardWidth = isDashboardOpen ? window.innerWidth * 0.4 : 0;
+    const dashboardWidth = dashboardOpen ? window.innerWidth * 0.4 : 0;
 
     const visibleLeft = sideBarWidth + dashboardWidth;
     const visibleTop = topBarHeight;
@@ -67,30 +182,54 @@ const PoliceMapPage: React.FC = () => {
   };
 
   const handleMissingCardClick = (id: number) => {
+    // 같은 카드를 클릭하면 토글 (닫기)
     if (selectedMissingId === id && isDashboardOpen) {
       setIsDashboardOpen(false);
       setSelectedMissingId(null);
+      setSelectedRadiusPosition(null);
+      setSelectedRadiusValue(0);
+      // URL에서 파라미터 제거
+      setSearchParams({});
       return;
     }
 
+    // 다른 카드를 클릭하면 해당 ID로 Dashboard 열기
     setSelectedMissingId(id);
     setIsDashboardOpen(true);
+
+    // URL 업데이트
+    setSearchParams({ missingId: id.toString() });
 
     if (!map || !recentMissingList) return;
     const person = recentMissingList.find((p) => p.id === id);
     if (person && person.latitude && person.longitude) {
-      moveMapToVisibleCenter(person.latitude, person.longitude);
+      // Dashboard가 열릴 것이므로 true로 전달
+      moveMapToVisibleCenter(person.latitude, person.longitude, true);
+
+      // 반경 표시 - 경과 시간 기반 초기 반지름 계산
+      setSelectedRadiusPosition({ lat: person.latitude, lng: person.longitude });
+      const speed = person.aiSupport?.speed ?? 3.14;
+      const initialRadius = calculateInitialRadius(person.crawledAt, speed);
+      setSelectedRadiusValue(initialRadius);
     }
   };
 
   const handleCloseDashboard = () => {
     setIsDashboardOpen(false);
     setSelectedMissingId(null);
+    setSelectedRadiusPosition(null);
+    setSelectedRadiusValue(0);
+    // URL에서 파라미터 제거
+    setSearchParams({});
   };
 
   return (
     <>
-      <PoliceSideBar onMissingCardClick={handleMissingCardClick} />
+      <PoliceSideBar
+        onMissingCardClick={handleMissingCardClick}
+        selectedMissingId={selectedMissingId}
+        isDashboardOpen={isDashboardOpen}
+      />
       <div className={styles.mapContainer}>
         {!isLoaded && <p className={styles.loadingText}>지도를 불러오는 중...</p>}
         <div ref={mapRef} className={styles.mapElement} />
@@ -99,6 +238,10 @@ const PoliceMapPage: React.FC = () => {
         {map && recentMissingList && recentMissingList.map((person) => {
           // latitude와 longitude가 있는 경우만 마커 렌더링
           if (person.latitude && person.longitude) {
+            // 최대 범위 초과 여부 확인
+            const speed = person.aiSupport?.speed ?? 3.14;
+            const maxExceeded = isMaxRadiusExceeded(person.crawledAt, speed);
+
             return (
               <Marker
                 key={person.id}
@@ -107,11 +250,34 @@ const PoliceMapPage: React.FC = () => {
                 imageUrl={person.mainImage?.url}
                 size="medium"
                 onClick={() => handleMissingCardClick(person.id)}
+                label={maxExceeded ? '예측 반경 초과' : undefined}
+                zIndex={10}
               />
             );
           }
           return null;
         })}
+
+        {/* CCTV 마커 */}
+        {map && isDashboardOpen && allCctvDetections.map((cctv) => (
+          <CctvMarker
+            key={cctv.id}
+            map={map}
+            position={{ lat: cctv.latitude, lng: cctv.longitude }}
+            isDetected={cctv.similarityScore >= 70} // 유사도 70점 이상이면 감지된 것으로 표시
+            zIndex={cctv.similarityScore >= 70 ? 5 : 4}
+          />
+        ))}
+
+        {/* 선택된 마커의 이동 반경 표시 */}
+        {map && selectedRadiusPosition && selectedRadiusValue > 0 && selectedMissingId && (
+          <MovementRadius
+            map={map}
+            position={selectedRadiusPosition}
+            radius={selectedRadiusValue}
+            missingId={selectedMissingId}
+          />
+        )}
       </div>
       <PoliceDashboard
         isOpen={isDashboardOpen}

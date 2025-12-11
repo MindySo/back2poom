@@ -9,18 +9,17 @@ networks:
 volumes:
   mysql-data:
     name: topoom-mysql-data
-  mysql-dev-data:
-    name: topoom-mysql-dev-data
-  redis-data:
-    name: topoom-redis-data
   jenkins-home:
     name: topoom-jenkins-home
+  rabbitmq-data:
+    name: topoom-rabbitmq-data
+    driver: local
 
 #############################
 #  SERVICES
 #############################
 services:
-  # MySQL (Production)
+  # MySQL
   mysql:
     image: mysql:8.0
     container_name: topoom-mysql
@@ -43,46 +42,27 @@ services:
     networks:
       - topoom-network
 
-  # MySQL Dev (개발용)
-  mysql-dev:
-    image: mysql:8.0
-    container_name: topoom-mysql-dev
-    restart: always
-    environment:
-      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
-      MYSQL_DATABASE: ${MYSQL_DATABASE}
-      MYSQL_USER: ${MYSQL_USER}
-      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
-      TZ: Asia/Seoul
-    volumes:
-      - mysql-dev-data:/var/lib/mysql
-      - ./mysql/init:/docker-entrypoint-initdb.d:ro  # 초기화 SQL
-    command:
-      - --character-set-server=utf8mb4
-      - --collation-server=utf8mb4_unicode_ci
-      - --default-time-zone=+09:00
-    ports:
-      - "3307:3306"
-    networks:
-      - topoom-network
-
-  # Redis  
-  redis:
-    image: redis:7.2
-    container_name: topoom-redis
+  # RabbitMQ Message Broker
+  rabbitmq:
+    image: rabbitmq:3.12-management
+    container_name: topoom-rabbitmq
     restart: always
     environment:
       - TZ=Asia/Seoul
-      - REDIS_PASSWORD=${REDIS_PASSWORD}      
+      - RABBITMQ_DEFAULT_USER=${RABBITMQ_USERNAME}
+      - RABBITMQ_DEFAULT_PASS=${RABBITMQ_PASSWORD}
     volumes:
-      - redis-data:/data
-      - ./redis/redis.conf:/usr/local/etc/redis/redis.conf:ro
-    command: >
-      sh -c "redis-server /usr/local/etc/redis/redis.conf --requirepass $${REDIS_PASSWORD}"
+      - rabbitmq-data:/var/lib/rabbitmq
     ports:
-      - "6379:6379"
+      - "5672:5672"   # AMQP 프로토콜
+      - "15672:15672" # Management UI
     networks:
       - topoom-network
+    healthcheck:
+      test: rabbitmq-diagnostics -q ping
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
   # Spring Boot
   # Backend-main
@@ -100,8 +80,10 @@ services:
     env_file:
       - .env
     depends_on:
-      - mysql
-      - redis
+      mysql:
+          condition: service_started
+      rabbitmq:
+          condition: service_healthy
     expose:
       - "8080"
     networks:

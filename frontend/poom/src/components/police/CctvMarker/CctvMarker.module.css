@@ -1,0 +1,33 @@
+.cctvMarker {
+  position: relative;
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* CCTV 마커 이미지 */
+.cctvIcon {
+  width: 24px;
+  height: 20px;
+  object-fit: contain;
+}
+
+/* Active CCTV Glow 효과 */
+.cctvIcon[alt="CCTV Active"] {
+  animation: cctvGlow 3s ease-in-out infinite;
+  filter: drop-shadow(0 0 6px rgba(238, 35, 35, 0.8));
+}
+
+@keyframes cctvGlow {
+  0% {
+    filter: drop-shadow(0 0 6px rgba(238, 35, 35, 0.6));
+  }
+  50% {
+    filter: drop-shadow(0 0 12px rgba(238, 35, 35, 1)) drop-shadow(0 0 8px rgba(238, 35, 35, 0.5));
+  }
+  100% {
+    filter: drop-shadow(0 0 6px rgba(238, 35, 35, 0.6));
+  }
+}

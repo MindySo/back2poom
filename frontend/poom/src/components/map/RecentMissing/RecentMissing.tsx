@@ -3,6 +3,8 @@ import Text from '../../common/atoms/Text';
 import Badge from '../../common/atoms/Badge';
 import { useElapsedTime } from '../../../hooks';
 import styles from './RecentMissing.module.css';
+import anonymousProfile from '../../../assets/anonymous_profile.svg';
+import { theme as themeConfig } from '../../../theme';
 
 export interface Badge {
   text: string;
@@ -19,7 +21,11 @@ export interface RecentMissingProps {
   occurredAt: string;
   targetType?: string;
   className?: string;
+  textColor?: 'white' | 'black' | 'darkMain' | 'gray' | 'policeWhite' | 'policeLightGray' | 'policeGray';
+  isSelected?: boolean;
   onClick?: () => void;
+  theme?: 'light' | 'dark';
+  activeColor?: string;
 }
 
 const RecentMissing: React.FC<RecentMissingProps> = ({
@@ -32,22 +38,48 @@ const RecentMissing: React.FC<RecentMissingProps> = ({
   occurredAt,
   targetType,
   className = '',
+  textColor,
+  isSelected = false,
   onClick,
+  theme = 'light',
+  activeColor,
 }) => {
   // 실종 경과 시간을 실시간으로 업데이트
   const elapsedTime = useElapsedTime(occurredAt);
+
+  // 선택된 카드의 스타일 결정
+  const selectedStyle = isSelected ? (
+    activeColor ? {
+      backgroundColor: `${activeColor}1a`, // 16진수로 약 10% 투명도
+      borderRight: `4px solid ${activeColor}`,
+      paddingLeft: '8px',
+    } : theme === 'dark' ? {
+      backgroundColor: 'rgba(255, 255, 255, 0.1)',
+      borderRight: '4px solid rgba(255, 255, 255, 0.9)',
+      paddingLeft: '8px',
+    } : {
+      backgroundColor: `${themeConfig.colors.main}1a`, // main 컬러에 투명도
+      borderRight: `4px solid ${themeConfig.colors.main}`,
+      paddingLeft: '8px',
+    }
+  ) : undefined;
+
   return (
     <div
       className={`${styles.card} ${className}`}
       onClick={onClick}
-      style={onClick ? { cursor: 'pointer' } : undefined}
+      style={{
+        ...(onClick ? { cursor: 'pointer' } : {}),
+        ...selectedStyle,
+      } as React.CSSProperties}
     >
       {/* 왼쪽: 사진 프레임 */}
       <div className={styles.imageFrame}>
         <img
-          src={image}
+          src={image || anonymousProfile}
           alt={name}
           className={styles.image}
+          style={{ opacity: image ? 1 : 0.5 }}
         />
       </div>
 
@@ -58,6 +90,7 @@ const RecentMissing: React.FC<RecentMissingProps> = ({
           <Badge
             variant="time"
             size="small"
+            theme={theme}
           >
             {elapsedTime}
           </Badge>
@@ -65,6 +98,7 @@ const RecentMissing: React.FC<RecentMissingProps> = ({
             <Badge
               variant="feature"
               size="small"
+              theme={theme}
             >
               {targetType}
             </Badge>
@@ -74,25 +108,34 @@ const RecentMissing: React.FC<RecentMissingProps> = ({
               key={index}
               variant={badge.variant || 'feature'}
               size="small"
+              theme={theme}
             >
               {badge.text}
             </Badge>
           ))}
         </div>
 
-        {/* 이름/성별/나이 */}
+        {/* 이름 & 성별/나이 */}
         <div className={styles.nameSection}>
+          {/* 1) 이름 */}
           <Text
             size="lg"
             weight="bold"
-            color="darkMain"
+            color={(textColor as any) || 'darkMain'}
           >
             {name || '-'}
           </Text>
+          {/* 2) 성별/나이 */}
           <Text
             size="sm"
             weight="regular"
-            color="gray"
+            color={
+              textColor === 'white'
+                ? 'gray'
+                : textColor === 'policeWhite'
+                ? 'policeGray'
+                : 'gray'
+            }
           >
             {gender} / {age || '- '}세
           </Text>
@@ -103,14 +146,21 @@ const RecentMissing: React.FC<RecentMissingProps> = ({
           <Text
             size="md"
             weight="medium"
-            color="darkMain"
+            color={(textColor as any) || 'darkMain'}
           >
-            실종 장소
+            실종장소
           </Text>
           <Text
             size="md"
             weight="regular"
-            color="gray"
+            color={
+              textColor === 'white'
+                ? 'gray'
+                : textColor === 'policeWhite'
+                ? 'policeGray'
+                : 'gray'
+            }
+            className={styles.locationValue}
           >
             {location || '-'}
           </Text>

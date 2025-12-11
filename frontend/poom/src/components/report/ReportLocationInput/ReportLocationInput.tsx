@@ -42,6 +42,35 @@ const ReportLocationInput: React.FC<ReportLocationInputProps> = React.memo(({ co
 
     setIsLoadingLocation(true);
 
+    // REST API를 사용한 역지오코딩 함수
+    const reverseGeocodeWithRestAPI = async (latitude: number, longitude: number, apiKey: string) => {
+      try {
+        const response = await fetch(
+          `https://dapi.kakao.com/v2/local/geo/coord2address.json?x=${longitude}&y=${latitude}`,
+          {
+            headers: {
+              Authorization: `KakaoAK ${apiKey}`,
+            },
+          }
+        );
+        const data = await response.json();
+        if (data.documents && data.documents.length > 0) {
+          const address = data.documents[0]?.road_address?.address_name || data.documents[0]?.address?.address_name;
+          if (address) {
+            setLocation(address);
+          } else {
+            setLocation(`${latitude.toFixed(6)}, ${longitude.toFixed(6)}`);
+          }
+        } else {
+          setLocation(`${latitude.toFixed(6)}, ${longitude.toFixed(6)}`);
+        }
+        setIsLoadingLocation(false);
+      } catch (restError) {
+        setLocation(`${latitude.toFixed(6)}, ${longitude.toFixed(6)}`);
+        setIsLoadingLocation(false);
+      }
+    };
+
     if ('geolocation' in navigator) {
       navigator.geolocation.getCurrentPosition(
         async (position) => {
@@ -50,46 +79,10 @@ const ReportLocationInput: React.FC<ReportLocationInputProps> = React.memo(({ co
           try {
             // 카카오 맵 REST API를 사용한 역지오코딩
             const REST_API_KEY = import.meta.env.VITE_KAKAO_REST_API_KEY || '';
-            if (REST_API_KEY && window.kakao && window.kakao.maps) {
-              // 카카오 맵 SDK가 로드된 경우
-              const geocoder = new (window.kakao.maps as any).services.Geocoder();
-              geocoder.coord2Address(longitude, latitude, (result: any, status: any) => {
-                if (status === (window.kakao.maps as any).services.Status.OK) {
-                  const address = result[0]?.road_address?.address_name || result[0]?.address?.address_name;
-                  if (address) {
-                    setLocation(address);
-                  } else {
-                    setLocation(`${latitude.toFixed(6)}, ${longitude.toFixed(6)}`);
-                  }
-                  setIsLoadingLocation(false);
-                } else {
-                  // 실패 시 좌표로 표시
-                  setLocation(`${latitude.toFixed(6)}, ${longitude.toFixed(6)}`);
-                  setIsLoadingLocation(false);
-                }
-              });
-            } else if (REST_API_KEY) {
+            
+            if (REST_API_KEY) {
               // REST API 직접 호출
-              const response = await fetch(
-                `https://dapi.kakao.com/v2/local/geo/coord2address.json?x=${longitude}&y=${latitude}`,
-                {
-                  headers: {
-                    Authorization: `KakaoAK ${REST_API_KEY}`,
-                  },
-                }
-              );
-              const data = await response.json();
-              if (data.documents && data.documents.length > 0) {
-                const address = data.documents[0]?.road_address?.address_name || data.documents[0]?.address?.address_name;
-                if (address) {
-                  setLocation(address);
-                } else {
-                  setLocation(`${latitude.toFixed(6)}, ${longitude.toFixed(6)}`);
-                }
-              } else {
-                setLocation(`${latitude.toFixed(6)}, ${longitude.toFixed(6)}`);
-              }
-              setIsLoadingLocation(false);
+              await reverseGeocodeWithRestAPI(latitude, longitude, REST_API_KEY);
             } else {
               // API 키가 없는 경우 좌표로 표시
               setLocation(`${latitude.toFixed(6)}, ${longitude.toFixed(6)}`);
@@ -128,7 +121,7 @@ const ReportLocationInput: React.FC<ReportLocationInputProps> = React.memo(({ co
           <Text size="sm" color="gray" className={styles.readOnlyLabel}>
             목격 위치
           </Text>
-          <Text size="md" weight="bold" color="black" className={styles.readOnlyValue}>
+          <Text size="md" weight="bold" color="darkMain" className={styles.readOnlyValue}>
             {location}
           </Text>
         </div>
