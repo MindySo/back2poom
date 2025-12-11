@@ -13,7 +13,6 @@ volumes:
     name: topoom-jenkins-home
   rabbitmq-data:
     name: topoom-rabbitmq-data
-    driver: local
 
 #############################
 #  SERVICES
