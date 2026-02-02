@@ -1,37 +1,44 @@
-#############################
-#  NETWORKS & VOLUMES
-#############################
-networks:
-  topoom-scheduling-network:
-    driver: bridge
-    name: topoom-scheduling-network
+# #############################
+# 2025-12-12
+# 메인 api-server로 이관하여 실행 중
+# #############################
+#
+#
+# 
+# #############################
+# #  NETWORKS & VOLUMES
+# #############################
+# networks:
+#   topoom-scheduling-network:
+#     driver: bridge
+#     name: topoom-scheduling-network
 
-volumes:
-  rabbitmq-data:
-    driver: local
+# volumes:
+#   rabbitmq-data:
+#     driver: local
 
-#############################
-#  SERVICES
-#############################
-services:
-  # RabbitMQ Message Broker
-  rabbitmq:
-    image: rabbitmq:3.12-management
-    container_name: topoom-scheduling-rabbitmq
-    restart: always
-    environment:
-      - TZ=Asia/Seoul
-      - RABBITMQ_DEFAULT_USER=${RABBITMQ_USERNAME}
-      - RABBITMQ_DEFAULT_PASS=${RABBITMQ_PASSWORD}
-    volumes:
-      - rabbitmq-data:/var/lib/rabbitmq
-    ports:
-      - "5672:5672"   # AMQP 프로토콜
-      - "15672:15672" # Management UI
-    networks:
-      - topoom-scheduling-network
-    healthcheck:
-      test: rabbitmq-diagnostics -q ping
-      interval: 10s
-      timeout: 5s
-      retries: 5
+# #############################
+# #  SERVICES
+# #############################
+# services:
+#   # RabbitMQ Message Broker
+#   rabbitmq:
+#     image: rabbitmq:3.12-management
+#     container_name: topoom-scheduling-rabbitmq
+#     restart: always
+#     environment:
+#       - TZ=Asia/Seoul
+#       - RABBITMQ_DEFAULT_USER=${RABBITMQ_USERNAME}
+#       - RABBITMQ_DEFAULT_PASS=${RABBITMQ_PASSWORD}
+#     volumes:
+#       - rabbitmq-data:/var/lib/rabbitmq
+#     ports:
+#       - "5672:5672"   # AMQP 프로토콜
+#       - "15672:15672" # Management UI
+#     networks:
+#       - topoom-scheduling-network
+#     healthcheck:
+#       test: rabbitmq-diagnostics -q ping
+#       interval: 10s
+#       timeout: 5s
+#       retries: 5
