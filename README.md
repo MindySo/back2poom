@@ -24,7 +24,7 @@
 
 <div align="center">
 
-[![품으로 프로젝트 소개 영상](https://img.youtube.com/vi/SQxzq6tD2v4/0.jpg)](https://www.youtube.com/watch?v=SQxzq6tD2v4)
+[![품으로 프로젝트 소개 영상](https://img.youtube.com/vi/SQxzq6tD2v4/0.jpg)](https://www.youtube.com/watch?v=swav_WcNcA8)
 
 **🎬 영상을 클릭하면 프로젝트 소개 영상을 시청하실 수 있습니다**
 
@@ -153,3 +153,4 @@ LoRA 파인튜닝 기법을 통한 실종자 몽타주 생성 특화
 ---
 
 </div>
+
